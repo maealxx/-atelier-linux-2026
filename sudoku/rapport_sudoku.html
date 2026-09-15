@@ -1,0 +1,537 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr" xml:lang="fr">
+<head>
+<!-- 2026-05-07 jeu. 01:06 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Rapport - Killer Sudoku</title>
+<meta name="author" content="ALEXANDRE Maé - Prep'ISIMA 1" />
+<meta name="generator" content="Org Mode" />
+<link rel="stylesheet" href="../css/org.css">
+<script defer src="../css/nav.js"></script>
+</head>
+<body>
+<div id="content" class="content">
+<h1 class="title">Rapport - Killer Sudoku</h1>
+<div id="table-of-contents" role="doc-toc">
+<h2>Table des matières</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#org4885d7e">1. Introduction</a></li>
+<li><a href="#orgb5b2e36">2. Analyse du problème</a></li>
+<li><a href="#orge63b676">3. Méthode de résolution</a></li>
+<li><a href="#orgdd85450">4. Algorithme</a></li>
+<li><a href="#orgceff7fd">5. Code commenté</a></li>
+<li><a href="#org7ff472b">6. Résultats</a></li>
+<li><a href="#org2f9caba">7. Solution alternative - Carl Wash</a></li>
+<li><a href="#orgb6300ea">8. Bilan</a></li>
+</ul>
+</div>
+</div>
+<ul class="org-ul">
+<li><a href="https://www.codingame.com/training/medium/killer-sudoku-solver">Lien vers le puzzle sur CodingGame</a></li>
+</ul>
+
+
+<div id="org76bdefc" class="figure">
+<p><img src="../images/sudoku.png" alt="sudoku.png" width="50%" />
+</p>
+</div>
+<hr />
+<div id="outline-container-org4885d7e" class="outline-2">
+<h2 id="org4885d7e"><span class="section-number-2">1.</span> Introduction</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+Le Killer Sudoku est une variante du Sudoku classique. La différence principale,
+c&rsquo;est qu&rsquo;il y a des <i>cages</i> qui sont ,des groupes de cases dont les valeurs doivent sommer
+à une cible donnée, sans répéter de chiffre dans la cage.
+</p>
+
+<p>
+Il y a quatres règles à respecter en même temps :
+</p>
+
+<ol class="org-ol">
+<li><b>Ligne</b> : chaque ligne contient les chiffres de 1 à 9 sans répétition.</li>
+<li><b>Colonne</b> : chaque colonne contient les chiffres de 1 à 9 sans répétition.</li>
+<li><b>Région</b> : chaque carré 3×3 contient les chiffres de 1 à 9 sans répétition.</li>
+<li><b>Cage</b> : les cases d&rsquo;une même cage doivent sommer exactement à la valeur cible,
+sans répétition interne.</li>
+</ol>
+
+<p>
+En entrée on a une grille 9×9 pas entièrement remplies, une grille d&rsquo;identifiants de
+cages (lettres <code>a=–=z</code> et <code>A=–=Z</code>), et les sommes cibles de chaque cage. En sortie
+on doit afficher la grille complète et résolue.
+</p>
+
+<p>
+Pour résoudre ce problème j&rsquo;ai utilisé du backtracking.
+</p>
+
+<hr />
+</div>
+</div>
+<div id="outline-container-orgb5b2e36" class="outline-2">
+<h2 id="orgb5b2e36"><span class="section-number-2">2.</span> Analyse du problème</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+En entrée, chaque ligne contient deux mots séparés par un espace : le premier
+représente une ligne de la grille (<code>.</code> pour les cases vides, un chiffre pour les
+cases déjà remplies), et le deuxième donne l&rsquo;identifiant de cage pour chacune des
+9 cases de cette ligne. La dixième et dernière ligne liste les sommes cibles sous
+la forme <code>id=valeur</code>.
+</p>
+
+<pre class="example" id="org793453a">
+56..1..2. aabbccdde
+..72..68. afghhiide
+..2.87.15 jfggklmme
+......3.9 jjgnklopp
+.7....2.. qqgnooorr
+9.634.8.. stuuvwwxx
+2.9..8... stuuvvwyz
+..41.2... sAuuByyyz
+.8.4...3. CADDBEEFF
+a=12 b=17 c=4 d=14 e=15 f=13 g=19 h=7 i=10 j=16 k=10 l=13 m=10 n=15 o=15 p=13 q=11 r=11 s=18 t=3 u=28 v=15 w=20 x=8 y=22 z=12 A=11 B=13 C=6 D=9 E=10 F=5
+</pre>
+
+<p>
+Une cage peut avoir n&rsquo;importe quelle forme et aller sur plusieurs lignes.
+Pour stocker les infos de chaque cage j&rsquo;utilise deux tableaux de taille 256 indexés
+directement par le code ASCII de la lettre, ce qui évite d&rsquo;avoir une fonction de
+conversion.
+</p>
+
+<p>
+Le vrai problème avec ce puzzle c&rsquo;est la performance car il y a énormément de
+combinaisons possibles, et un backtracking qui teste tout bêtement va dépasser
+le temps limite.L&rsquo;idée c&rsquo;est  de détecter des que l&rsquo;on peut  qu&rsquo;une branche ne peut
+pas marcher, pour ne pas aller plus loin inutilement.
+</p>
+
+<hr />
+</div>
+</div>
+<div id="outline-container-orge63b676" class="outline-2">
+<h2 id="orge63b676"><span class="section-number-2">3.</span> Méthode de résolution</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+Pour résoudre la grille j&rsquo;utilise du backtracking récursif : on essaie des valeurs case par case, et si on se retrouve bloqué on revient en arrière pour tenter autre chose.
+ Pour que ça reste suffisamment rapide, on essaie de détecter les mauvaises pistes le plus tôt possible afin de ne pas explorer des branches inutiles.
+Les vérifications classiques du sudoku (ligne, colonne, bloc 3×3) sont faites avec des fonctions dédiées qui parcourent simplement la grille. 
+Pour savoir si <code>val</code> est jouable en <code>(i, j)</code>, on appelle les quatre fonctions et on rejette la valeur dès que l&rsquo;une d&rsquo;elles retourne 1 :
+</p>
+<pre class="example" id="org090d93a">
+si est_dans_ligne(grille, i, val)         // on rejette val
+si est_dans_colonne(grille, j, val)       // on rejette val
+si est_dans_bloc(grille, i, j, val)       // on rejette val
+si est_dans_cage(grille, cages, lettre, val) // on rejette val
+</pre>
+<p>
+On ajoute une vérification supplémentaire via la fonction <code>compatible_avec_cage</code>. À chaque fois qu&rsquo;on essaie une valeur <code>val</code> dans une cage, on recalcule la somme déjà posée et le nombre de cases qu&rsquo;il reste à remplir.
+ Si c&rsquo;est la dernière case de la cage, la somme doit tomber exactement sur la cible. Sinon, on vérifie que ce qu&rsquo;il reste à atteindre est encore possible avec les cases restantes, en encadrant la somme restante entre un minimum et un maximum :
+</p>
+<pre class="example" id="org85f4e4b">
+somme_min = k*(k+1)/2
+somme_max = k*(19-k)/2     avec k = cases_restantes
+</pre>
+<p>
+Si <code>somme_restante</code> sort de cet intervalle, on rejette la valeur immédiatement sans aller plus loin.
+</p>
+
+<hr />
+</div>
+</div>
+<div id="outline-container-orgdd85450" class="outline-2">
+<h2 id="orgdd85450"><span class="section-number-2">4.</span> Algorithme</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+Le diagramme ci-dessous illustre le fonctionnement global du programme (gauche)
+et le détail de la fonction récursive <code>resoudre()</code> (droite).
+</p>
+
+
+<div id="org123c360" class="figure">
+<p><img src="../images/backtracking.png" alt="backtracking.png" />
+</p>
+</div>
+
+<p>
+Le principe : à chaque case vide, on teste les valeurs 1 à 9 en vérifiant d&rsquo;abord
+les contraintes sudoku classiques puis la compatibilité avec la cage. Si la récursion
+échoue, on remet le &rsquo;.&rsquo; et on essaie la valeur suivante. Si aucune valeur ne marche,
+on retourne <code>0</code> pour remonter au niveau au-dessus.
+</p>
+
+<hr />
+</div>
+</div>
+<div id="outline-container-orgceff7fd" class="outline-2">
+<h2 id="orgceff7fd"><span class="section-number-2">5.</span> Code commenté</h2>
+<div class="outline-text-2" id="text-5">
+<div class="org-src-container">
+<pre class="src src-c"><span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdlib.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdio.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;string.h&gt;</span>
+
+<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">N</span> 10
+
+<span style="color: #5B6268;">// </span><span style="color: #5B6268;">Affiche les 9 lignes de la grille
+</span><span style="color: #ECBE7B;">void</span> <span style="color: #c678dd;">afficher_grille</span>(<span style="color: #ECBE7B;">char</span> <span style="color: #dcaeea;">grille</span>[N][N]) {
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span>;
+    <span style="color: #51afef;">for</span> (i = 0; i &lt; N - 1; i++)
+        printf(<span style="color: #98be65;">"%s\n"</span>, grille[i]);
+}
+
+<span style="color: #5B6268;">// </span><span style="color: #5B6268;">Remplit cibles[lettre] = somme cible de la cage
+</span><span style="color: #5B6268;">// </span><span style="color: #5B6268;">ex : "a=14 b=7" &#8594; cibles['a']=14, cibles['b']=7
+</span><span style="color: #ECBE7B;">void</span> <span style="color: #c678dd;">lire_cibles_cages</span>(<span style="color: #ECBE7B;">char</span> <span style="color: #dcaeea;">ligne</span>[251], <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">cibles</span>[256]) {
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 0;
+    <span style="color: #ECBE7B;">char</span> <span style="color: #dcaeea;">lettre</span>;
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">valeur</span>;
+
+    <span style="color: #51afef;">while</span> (ligne[i] != <span style="color: #98be65;">'\0'</span>) {
+        <span style="color: #51afef;">if</span> ((ligne[i] &gt;= <span style="color: #98be65;">'a'</span> &amp;&amp; ligne[i] &lt;= <span style="color: #98be65;">'z'</span>) || (ligne[i] &gt;= <span style="color: #98be65;">'A'</span> &amp;&amp; ligne[i] &lt;= <span style="color: #98be65;">'Z'</span>)) {
+            lettre = ligne[i];
+            i += 2; <span style="color: #5B6268;">// </span><span style="color: #5B6268;">saute le '='
+</span>            valeur = 0;
+            <span style="color: #5B6268;">// </span><span style="color: #5B6268;">lit les chiffres de la valeur un par un
+</span>            <span style="color: #51afef;">while</span> (ligne[i] &gt;= <span style="color: #98be65;">'0'</span> &amp;&amp; ligne[i] &lt;= <span style="color: #98be65;">'9'</span>) {
+                valeur = valeur * 10 + (ligne[i] - <span style="color: #98be65;">'0'</span>);
+                i++;
+            }
+            cibles[(<span style="color: #ECBE7B;">int</span>)lettre] = valeur;
+        } <span style="color: #51afef;">else</span> {
+            i++;
+        }
+    }
+}
+
+<span style="color: #5B6268;">// </span><span style="color: #5B6268;">Renvoie 1 si val est d&#233;j&#224; dans la ligne, 0 sinon
+</span><span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">est_dans_ligne</span>(<span style="color: #ECBE7B;">char</span> <span style="color: #dcaeea;">grille</span>[N][N], <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">ligne</span>, <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">valeur</span>) {
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">j</span>;
+    <span style="color: #51afef;">for</span> (j = 0; j &lt; N - 1; j++)
+        <span style="color: #51afef;">if</span> (grille[ligne][j] == valeur + <span style="color: #98be65;">'0'</span>) <span style="color: #51afef;">return</span> 1;
+    <span style="color: #51afef;">return</span> 0;
+}
+
+<span style="color: #5B6268;">// </span><span style="color: #5B6268;">Renvoie 1 si val est d&#233;j&#224; dans la colonne, 0 sinon
+</span><span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">est_dans_colonne</span>(<span style="color: #ECBE7B;">char</span> <span style="color: #dcaeea;">grille</span>[N][N], <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">colonne</span>, <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">valeur</span>) {
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span>;
+    <span style="color: #51afef;">for</span> (i = 0; i &lt; N - 1; i++)
+        <span style="color: #51afef;">if</span> (grille[i][colonne] == valeur + <span style="color: #98be65;">'0'</span>) <span style="color: #51afef;">return</span> 1;
+    <span style="color: #51afef;">return</span> 0;
+}
+
+<span style="color: #5B6268;">// </span><span style="color: #5B6268;">Renvoie 1 si val est d&#233;j&#224; dans le bloc 3x3, 0 sinon
+</span><span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">est_dans_bloc</span>(<span style="color: #ECBE7B;">char</span> <span style="color: #dcaeea;">grille</span>[N][N], <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">ligne</span>, <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">col</span>, <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">valeur</span>) {
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">debut_ligne</span> = (ligne / 3) * 3;
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">debut_col</span>   = (col / 3) * 3;
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span>, <span style="color: #dcaeea;">j</span>;
+
+    <span style="color: #51afef;">for</span> (i = 0; i &lt; 3; i++)
+        <span style="color: #51afef;">for</span> (j = 0; j &lt; 3; j++)
+            <span style="color: #51afef;">if</span> (grille[debut_ligne + i][debut_col + j] == valeur + <span style="color: #98be65;">'0'</span>) <span style="color: #51afef;">return</span> 1;
+    <span style="color: #51afef;">return</span> 0;
+}
+
+<span style="color: #5B6268;">// </span><span style="color: #5B6268;">Calcule la somme des cases d&#233;j&#224; remplies dans une cage
+</span><span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">somme_remplie_cage</span>(<span style="color: #ECBE7B;">char</span> <span style="color: #dcaeea;">grille</span>[N][N], <span style="color: #ECBE7B;">char</span> <span style="color: #dcaeea;">cages</span>[N][N], <span style="color: #ECBE7B;">char</span> <span style="color: #dcaeea;">lettre</span>) {
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">somme</span> = 0;
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span>, <span style="color: #dcaeea;">j</span>;
+
+    <span style="color: #51afef;">for</span> (i = 0; i &lt; N - 1; i++)
+        <span style="color: #51afef;">for</span> (j = 0; j &lt; N - 1; j++)
+            <span style="color: #51afef;">if</span> (cages[i][j] == lettre &amp;&amp; grille[i][j] != <span style="color: #98be65;">'.'</span>)
+                somme += grille[i][j] - <span style="color: #98be65;">'0'</span>;
+    <span style="color: #51afef;">return</span> somme;
+}
+
+<span style="color: #5B6268;">// </span><span style="color: #5B6268;">Compte le nombre de cases encore vides dans une cage
+</span><span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">cases_vides_cage</span>(<span style="color: #ECBE7B;">char</span> <span style="color: #dcaeea;">grille</span>[N][N], <span style="color: #ECBE7B;">char</span> <span style="color: #dcaeea;">cages</span>[N][N], <span style="color: #ECBE7B;">char</span> <span style="color: #dcaeea;">lettre</span>) {
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">nb</span> = 0;
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span>, <span style="color: #dcaeea;">j</span>;
+
+    <span style="color: #51afef;">for</span> (i = 0; i &lt; N - 1; i++)
+        <span style="color: #51afef;">for</span> (j = 0; j &lt; N - 1; j++)
+            <span style="color: #51afef;">if</span> (cages[i][j] == lettre &amp;&amp; grille[i][j] == <span style="color: #98be65;">'.'</span>) nb++;
+    <span style="color: #51afef;">return</span> nb;
+}
+
+<span style="color: #5B6268;">// </span><span style="color: #5B6268;">Renvoie 1 si val est d&#233;j&#224; utilis&#233;e dans la cage, 0 sinon
+</span><span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">est_dans_cage</span>(<span style="color: #ECBE7B;">char</span> <span style="color: #dcaeea;">grille</span>[N][N], <span style="color: #ECBE7B;">char</span> <span style="color: #dcaeea;">cages</span>[N][N], <span style="color: #ECBE7B;">char</span> <span style="color: #dcaeea;">lettre</span>, <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">valeur</span>) {
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span>, <span style="color: #dcaeea;">j</span>;
+
+    <span style="color: #51afef;">for</span> (i = 0; i &lt; N - 1; i++)
+        <span style="color: #51afef;">for</span> (j = 0; j &lt; N - 1; j++)
+            <span style="color: #51afef;">if</span> (cages[i][j] == lettre &amp;&amp; grille[i][j] == valeur + <span style="color: #98be65;">'0'</span>) <span style="color: #51afef;">return</span> 1;
+    <span style="color: #51afef;">return</span> 0;
+}
+
+<span style="color: #5B6268;">// </span><span style="color: #5B6268;">V&#233;rifie que placer valeur ici ne rend pas la somme cible inatteignable
+</span><span style="color: #5B6268;">//  </span><span style="color: #5B6268;">derni&#232;re case : somme doit &#234;tre exacte
+</span><span style="color: #5B6268;">//  </span><span style="color: #5B6268;">sinon : somme restante doit rester dans [min, max] atteignable
+</span><span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">compatible_avec_cage</span>(<span style="color: #ECBE7B;">char</span> <span style="color: #dcaeea;">grille</span>[N][N], <span style="color: #ECBE7B;">char</span> <span style="color: #dcaeea;">cages</span>[N][N],
+                         <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">cibles</span>[256], <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">ligne</span>, <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">col</span>, <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">valeur</span>) {
+    <span style="color: #ECBE7B;">char</span> <span style="color: #dcaeea;">lettre</span>         = cages[ligne][col];
+    <span style="color: #ECBE7B;">int</span>  <span style="color: #dcaeea;">cible</span>          = cibles[(<span style="color: #ECBE7B;">int</span>)lettre];
+    <span style="color: #ECBE7B;">int</span>  <span style="color: #dcaeea;">nouvelle_somme</span> = somme_remplie_cage(grille, cages, lettre) + valeur;
+    <span style="color: #ECBE7B;">int</span>  <span style="color: #dcaeea;">cases_apres</span>    = cases_vides_cage(grille, cages, lettre) - 1;
+
+    <span style="color: #5B6268;">// </span><span style="color: #5B6268;">Derni&#232;re case : la somme doit tomber exactement sur la cible
+</span>    <span style="color: #51afef;">if</span> (cases_apres == 0)
+        <span style="color: #51afef;">return</span> (nouvelle_somme == cible);
+
+    <span style="color: #5B6268;">// </span><span style="color: #5B6268;">V&#233;rifie que la somme restante est encore atteignable
+</span>    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">somme_restante</span> = cible - nouvelle_somme;
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">somme_min</span> = cases_apres * (cases_apres + 1) / 2;     <span style="color: #5B6268;">// </span><span style="color: #5B6268;">1+2+...+k
+</span>    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">somme_max</span> = cases_apres * (19 - cases_apres) / 2;    <span style="color: #5B6268;">// </span><span style="color: #5B6268;">9+8+...+(9-k+1)
+</span>
+    <span style="color: #51afef;">return</span> (somme_restante &gt;= somme_min &amp;&amp; somme_restante &lt;= somme_max);
+}
+
+<span style="color: #5B6268;">// </span><span style="color: #5B6268;">Renvoie 1 si toutes les cases sont remplies (plus de '.')
+</span><span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">grille_complete</span>(<span style="color: #ECBE7B;">char</span> <span style="color: #dcaeea;">grille</span>[N][N]) {
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span>, <span style="color: #dcaeea;">j</span>;
+    <span style="color: #51afef;">for</span> (i = 0; i &lt; N - 1; i++)
+        <span style="color: #51afef;">for</span> (j = 0; j &lt; N - 1; j++)
+            <span style="color: #51afef;">if</span> (grille[i][j] == <span style="color: #98be65;">'.'</span>) <span style="color: #51afef;">return</span> 0;
+    <span style="color: #51afef;">return</span> 1;
+}
+
+<span style="color: #5B6268;">// </span><span style="color: #5B6268;">Fonction principale de r&#233;solution par backtracking
+</span><span style="color: #5B6268;">//  </span><span style="color: #5B6268;">on prend la premi&#232;re case vide, on teste les valeurs 1-9
+</span><span style="color: #5B6268;">//  </span><span style="color: #5B6268;">si aucune ne marche, on retourne 0 pour remonter
+</span><span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">resoudre</span>(<span style="color: #ECBE7B;">char</span> <span style="color: #dcaeea;">grille</span>[N][N], <span style="color: #ECBE7B;">char</span> <span style="color: #dcaeea;">cages</span>[N][N], <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">cibles</span>[256]) {
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span>, <span style="color: #dcaeea;">j</span>, <span style="color: #dcaeea;">v</span>;
+
+    <span style="color: #51afef;">if</span> (grille_complete(grille)) <span style="color: #51afef;">return</span> 1;
+
+    <span style="color: #5B6268;">// </span><span style="color: #5B6268;">Chercher la premi&#232;re case vide
+</span>    <span style="color: #51afef;">for</span> (i = 0; i &lt; N - 1; i++) {
+        <span style="color: #51afef;">for</span> (j = 0; j &lt; N - 1; j++) {
+            <span style="color: #51afef;">if</span> (grille[i][j] == <span style="color: #98be65;">'.'</span>) {
+
+                <span style="color: #5B6268;">// </span><span style="color: #5B6268;">Tester les valeurs 1 &#224; 9
+</span>                <span style="color: #51afef;">for</span> (v = 1; v &lt;= 9; v++) {
+                    <span style="color: #5B6268;">// </span><span style="color: #5B6268;">Toutes les contraintes doivent &#234;tre respect&#233;es
+</span>                    <span style="color: #51afef;">if</span> (<span style="color: #51afef; font-weight: bold;">!</span>est_dans_ligne(grille, i, v)
+                     &amp;&amp; <span style="color: #51afef; font-weight: bold;">!</span>est_dans_colonne(grille, j, v)
+                     &amp;&amp; <span style="color: #51afef; font-weight: bold;">!</span>est_dans_bloc(grille, i, j, v)
+                     &amp;&amp; <span style="color: #51afef; font-weight: bold;">!</span>est_dans_cage(grille, cages, cages[i][j], v)
+                     &amp;&amp; compatible_avec_cage(grille, cages, cibles, i, j, v)) {
+
+                        grille[i][j] = v + <span style="color: #98be65;">'0'</span>; <span style="color: #5B6268;">// </span><span style="color: #5B6268;">on pose la valeur
+</span>                        <span style="color: #51afef;">if</span> (resoudre(grille, cages, cibles)) <span style="color: #51afef;">return</span> 1;
+                        grille[i][j] = <span style="color: #98be65;">'.'</span>; <span style="color: #5B6268;">// </span><span style="color: #5B6268;">backtrack : on annule
+</span>                    }
+                }
+
+                <span style="color: #5B6268;">// </span><span style="color: #5B6268;">Aucune valeur ne convient, on remonte
+</span>                <span style="color: #51afef;">return</span> 0;
+            }
+        }
+    }
+
+    <span style="color: #51afef;">return</span> 1;
+}
+
+<span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">main</span>() {
+    <span style="color: #ECBE7B;">char</span> <span style="color: #dcaeea;">grille</span>[N][N];
+    <span style="color: #ECBE7B;">char</span> <span style="color: #dcaeea;">cages</span>[N][N];
+    <span style="color: #ECBE7B;">int</span>  <span style="color: #dcaeea;">cibles</span>[256];
+    <span style="color: #ECBE7B;">int</span>  <span style="color: #dcaeea;">i</span>;
+
+    <span style="color: #5B6268;">// </span><span style="color: #5B6268;">Lecture des 9 lignes : grille et cages c&#244;te &#224; c&#244;te
+</span>    <span style="color: #51afef;">for</span> (i = 0; i &lt; N - 1; i++) {
+        scanf(<span style="color: #98be65;">"%s%s"</span>, grille[i], cages[i]);
+        fgetc(stdin);
+    }
+
+    <span style="color: #5B6268;">// </span><span style="color: #5B6268;">Lecture et parsing de la derni&#232;re ligne : "a=12 b=17 ..."
+</span>    <span style="color: #ECBE7B;">char</span> <span style="color: #dcaeea;">ligne_cibles</span>[251] = <span style="color: #98be65;">""</span>;
+    scanf(<span style="color: #98be65;">"%[^\n]"</span>, ligne_cibles);
+    lire_cibles_cages(ligne_cibles, cibles);
+
+    resoudre(grille, cages, cibles);
+    afficher_grille(grille);
+
+    <span style="color: #51afef;">return</span> 0;
+}
+</pre>
+</div>
+
+<hr />
+</div>
+</div>
+<div id="outline-container-org7ff472b" class="outline-2">
+<h2 id="org7ff472b"><span class="section-number-2">6.</span> Résultats</h2>
+<div class="outline-text-2" id="text-6">
+</div>
+<div id="outline-container-orgfe6d567" class="outline-3">
+<h3 id="orgfe6d567"><span class="section-number-3">6.1.</span> Exemple d&rsquo;exécution</h3>
+<div class="outline-text-3" id="text-6-1">
+<p>
+Avec la grille de l&rsquo;énoncé en entrée :
+</p>
+
+<pre class="example" id="org32ef9df">
+56..1..2. aabbccdde
+..72..68. afghhiide
+..2.87.15 jfggklmme
+......3.9 jjgnklopp
+.7....2.. qqgnooorr
+9.634.8.. stuuvwwxx
+2.9..8... stuuvvwyz
+..41.2... sAuuByyyz
+.8.4...3. CADDBEEFF
+a=12 b=17 c=4 d=14 e=15 f=13 g=19 h=7 i=10 j=16 k=10 l=13 m=10 n=15 o=15 p=13 q=11 r=11 s=18 t=3 u=28 v=15 w=20 x=8 y=22 z=12 A=11 B=13 C=6 D=9 E=10 F=5
+</pre>
+
+<p>
+Le programme produit en sortie :
+</p>
+
+<pre class="example" id="orgf0a06ad">
+568913427
+197254683
+342687915
+851726349
+473891256
+926345871
+219538764
+734162598
+685479132
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org2f9caba" class="outline-2">
+<h2 id="org2f9caba"><span class="section-number-2">7.</span> Solution alternative - Carl Wash</h2>
+<div class="outline-text-2" id="text-7">
+<ul class="org-ul">
+<li><a href="https://www.codingame.com/training/">Lien vers la solution de Carl Wash sur CodingGame</a></li>
+</ul>
+
+<div class="org-src-container">
+<pre class="src src-c"><span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdlib.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdio.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdbool.h&gt;</span>
+
+<span style="color: #51afef;">typedef</span> <span style="color: #51afef;">struct</span> { <span style="color: #ECBE7B;">char</span> <span style="color: #dcaeea;">val</span>; <span style="color: #ECBE7B;">char</span> <span style="color: #dcaeea;">id</span>; } <span style="color: #ECBE7B;">cell</span>;
+<span style="color: #51afef;">typedef</span> <span style="color: #51afef;">struct</span> { <span style="color: #ECBE7B;">char</span> *<span style="color: #dcaeea;">cells</span>[9]; <span style="color: #ECBE7B;">char</span> <span style="color: #dcaeea;">len</span>; <span style="color: #ECBE7B;">char</span> <span style="color: #dcaeea;">sum</span>; } <span style="color: #ECBE7B;">cage</span>;
+
+<span style="color: #ECBE7B;">cell</span> <span style="color: #dcaeea;">grid</span>[9][9];
+<span style="color: #ECBE7B;">cage</span> <span style="color: #dcaeea;">cages</span>[256];
+
+<span style="color: #ECBE7B;">bool</span> <span style="color: #c678dd;">place</span>(<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">y</span>, <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">x</span>, <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">n</span>) {
+    <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">yy</span> = 0; yy &lt; 9; ++yy) <span style="color: #51afef;">if</span> (grid[yy][x].val == n) <span style="color: #51afef;">return</span> <span style="color: #a9a1e1;">false</span>;
+    <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">xx</span> = 0; xx &lt; 9; ++xx) <span style="color: #51afef;">if</span> (grid[y][xx].val == n) <span style="color: #51afef;">return</span> <span style="color: #a9a1e1;">false</span>;
+
+    <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">yy</span> = 0; yy &lt; 3; ++yy)
+        <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">xx</span> = 0; xx &lt; 3; ++xx)
+            <span style="color: #51afef;">if</span> (grid[yy + y - y%3][xx + x - x%3].val == n) <span style="color: #51afef;">return</span> <span style="color: #a9a1e1;">false</span>;
+
+    grid[y][x].val = n;
+
+    <span style="color: #ECBE7B;">cage</span> *<span style="color: #dcaeea;">cg</span> = &amp;cages[grid[y][x].id];
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">sum</span> = 0;
+    <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 0; i &lt; cg-&gt;len; ++i) {
+        <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">n</span> = *cg-&gt;cells[i];
+        <span style="color: #51afef;">if</span> (<span style="color: #51afef; font-weight: bold;">!</span>n) <span style="color: #51afef;">return</span> <span style="color: #a9a1e1;">true</span>;
+        sum += n;
+    }
+    <span style="color: #51afef;">return</span> sum == cg-&gt;sum;
+}
+
+<span style="color: #ECBE7B;">void</span> <span style="color: #c678dd;">brute</span>(<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">y</span>, <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">x</span>) {
+    <span style="color: #51afef;">if</span> (y == 9) {
+        <span style="color: #51afef;">for</span> (y = 0; y &lt; 9; ++y) {
+            <span style="color: #51afef;">for</span> (x = 0; x &lt; 9; ++x) printf(<span style="color: #98be65;">"%d"</span>, grid[y][x].val);
+            printf(<span style="color: #98be65;">"\n"</span>);
+        }
+        exit(0);
+    }
+    <span style="color: #51afef;">if</span> (x == 9) <span style="color: #51afef;">return</span> brute(y+1, 0);
+    <span style="color: #51afef;">if</span> (grid[y][x].val) <span style="color: #51afef;">return</span> brute(y, x+1);
+
+    <span style="color: #5B6268;">// </span><span style="color: #a9a1e1; font-weight: bold;">HACK:</span><span style="color: #5B6268;"> naive recursion is too slow when iterating 1..9, so guess in reverse...?
+</span>    <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">n</span> = 9; n &gt;= 1; --n) <span style="color: #51afef;">if</span> (place(y, x, n)) brute(y, x+1);
+    grid[y][x].val = 0;
+}
+
+<span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">main</span>()
+{
+    <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">y</span> = 0; y &lt; 9; y++) {
+        <span style="color: #ECBE7B;">char</span> <span style="color: #dcaeea;">nums</span>[10], <span style="color: #dcaeea;">ids</span>[10];
+        scanf(<span style="color: #98be65;">"%s%s"</span>, nums, ids); fgetc(stdin);
+        <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">x</span> = 0; x &lt; 9; x++) {
+            <span style="color: #51afef;">if</span> (nums[x] != <span style="color: #98be65;">'.'</span>) grid[y][x].val = nums[x] - <span style="color: #98be65;">'0'</span>;
+
+            grid[y][x].id = ids[x];
+            <span style="color: #ECBE7B;">cage</span> *<span style="color: #dcaeea;">cg</span> = &amp;cages[ids[x]];
+            cg-&gt;cells[cg-&gt;len++] = &amp;grid[y][x].val;
+        }
+    }
+
+    <span style="color: #ECBE7B;">char</span> <span style="color: #dcaeea;">c</span>;
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">n</span>;
+    <span style="color: #51afef;">while</span> ((scanf(<span style="color: #98be65;">" %c=%d"</span>, &amp;c, &amp;n)) == 2) cages[c].sum = n;
+
+    brute(0, 0);
+    <span style="color: #51afef;">return</span> 1;
+}
+</pre>
+</div>
+
+
+<p>
+Le code est plus court que le mien et utilise deux <code>typedef struct</code> pour organiser
+les données. Les cages sont indexées directement avec le code ASCII de la lettre comme indice dans un tableau de taille 256,
+pareil que moi du coup sur ce point. Ce que j&rsquo;ai trouvé le plus interessant c&rsquo;est
+la gestion de la contrainte de cage qui n&rsquo;est vérifiée que quand toutes les cases
+sont remplies. Tant qu&rsquo;une case vaut 0, la fonction retourne <code>true</code> directement sans
+regarder la somme. C&rsquo;est beaucoup plus simple à coder mais on détecte les mauvaises
+combinaisons beaucoup plus tard que dans ma solution, ce qui explique pourquoi c&rsquo;est
+plus lent en théorie.
+</p>
+
+<p>
+Il y a aussi un commentaire dans le code qui m&rsquo;a bien fait rire :
+</p>
+
+<pre class="example" id="org7d8aa12">
+// HACK: naive recursion is too slow when iterating 1..9, so guess in reverse...?
+</pre>
+
+<p>
+Il teste les valeurs de 9 à 1 au lieu de 1 à 9, et apparement ça suffit à passer
+dans les temps (même lui sait pas trop pourquoi ça marche mieux dans ce sens).
+</p>
+
+
+<hr />
+</div>
+</div>
+<div id="outline-container-orgb6300ea" class="outline-2">
+<h2 id="orgb6300ea"><span class="section-number-2">8.</span> Bilan</h2>
+<div class="outline-text-2" id="text-8">
+<p>
+Ce puzzle était assez complexe, surtout la partie performances. Ma première
+version plantait sur les grilles difficiles parce que je n&rsquo;avais pas encore optimisé le backtracking. Ensuite j&rsquo;ai essayé de faire quelque chose de propre
+et lisible, avec des fonctions bien séparées qui font chacune une seule chose(plus facile à débugger.)
+Comparer avec la solution de Carl Wash m&rsquo;a montré qu&rsquo;utiliser des struct et des pointeurs permet d&rsquo;otpimiser le programme,
+ce que je n&rsquo;avais pas penser a utiliser.</p>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="date">Date: 5 Mars 2026</p>
+<p class="author">Auteur: ALEXANDRE Maé - Prep&rsquo;ISIMA 1</p>
+<p class="date">Created: 2026-05-07 jeu. 01:06</p>
+</div>
+</body>
+</html>

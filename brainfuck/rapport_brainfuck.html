@@ -1,0 +1,563 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr" xml:lang="fr">
+<head>
+<!-- 2026-05-07 jeu. 01:06 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Rapport - Brainfuck Interpreter</title>
+<meta name="author" content="ALEXANDRE Maé - Prep'ISIMA 1" />
+<meta name="generator" content="Org Mode" />
+<link rel="stylesheet" href="../css/org.css">
+<script defer src="../css/nav.js"></script>
+</head>
+<body>
+<div id="content" class="content">
+<h1 class="title">Rapport - Brainfuck Interpreter</h1>
+<div id="table-of-contents" role="doc-toc">
+<h2>Table des matières</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#org10ee5c9">1. Introduction</a></li>
+<li><a href="#orgf25c3bc">2. Analyse du problème</a></li>
+<li><a href="#org0e0625e">3. Méthode de résolution</a></li>
+<li><a href="#orgd34e961">4. Code commenté</a></li>
+<li><a href="#org377e688">5. Exemples de programmes Brainfuck</a></li>
+<li><a href="#org764b9a9">6. Solution alternative - PewPewBewn</a></li>
+<li><a href="#org7c7a98a">7. Bilan</a></li>
+</ul>
+</div>
+</div>
+<p>
+<a href="https://www.codingame.com/training/medium/what-the-brainfuck"><i>Lien vers l&rsquo;exercice sur Coding Games</i></a>
+<img src="../images/brainfuck.jpg" alt="brainfuck.jpg" />
+</p>
+<hr />
+<div id="outline-container-org10ee5c9" class="outline-2">
+<h2 id="org10ee5c9"><span class="section-number-2">1.</span> Introduction</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+Brainfuck est un langage de programmation minimaliste avec seulement 8
+instruction. Malgrés ça, il est <b>Turing-complet</b> : tout ce qu&rsquo;un
+ordinateur ordinaire peut calculer, Brainfuck peut le calculer aussi.
+</p>
+
+<p>
+L&rsquo;execution repose sur trois éléments :
+</p>
+
+<ol class="org-ol">
+<li>Un tableau de <code>S</code> cellules d&rsquo;un octet chacune, initialisées à 0.</li>
+<li>Un pointeur initialisée sur la cellule d&rsquo;indice 0.</li>
+<li>Un programme composé des 8 instructions valides.</li>
+</ol>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Instruction</th>
+<th scope="col" class="org-left">Effet</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">=&gt;</td>
+<td class="org-left">Déplace le pointeur vers la droite</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>&lt;</code></td>
+<td class="org-left">Déplace le pointeur vers la gauche</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>+</code></td>
+<td class="org-left">Incrémente la valeur de la cellule courante</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>-</code></td>
+<td class="org-left">Décrémente la valeur de la cellule courante</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>.</code></td>
+<td class="org-left">Affiche la valeur courante comme caractere ASCII</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>,</code></td>
+<td class="org-left">Lis un entier en entrée et le stocke dans la cellule courante</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>[</code></td>
+<td class="org-left">Saute après le <code>]</code> correspondant si la cellule courante vaut 0</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>]</code></td>
+<td class="org-left">Retourne après le <code>[</code> correspondant si la cellule courante est non nulle</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+Tout caractères qui ne fait pas partie de ces 8 symboles est simplement ignoré
+,ce qui permet de commenter le code Brainfuck librement.
+</p>
+
+<hr />
+</div>
+</div>
+<div id="outline-container-orgf25c3bc" class="outline-2">
+<h2 id="orgf25c3bc"><span class="section-number-2">2.</span> Analyse du problème</h2>
+<div class="outline-text-2" id="text-2">
+</div>
+<div id="outline-container-org86c07ab" class="outline-3">
+<h3 id="org86c07ab"><span class="section-number-3">2.1.</span> Structure de l&rsquo;entrée</h3>
+<div class="outline-text-3" id="text-2-1">
+<p>
+La première ligne contient trois entiers :
+</p>
+<ul class="org-ul">
+<li><code>L</code> : le nombre de lignes de code source</li>
+<li><code>S</code> : la taille du tableau mémoire</li>
+<li><code>N</code> : le nombre de valeurs d&rsquo;entrée pour l&rsquo;instruction <code>,</code></li>
+</ul>
+
+<p>
+Puis <code>L</code> lignes de code Brainfuck, puis <code>N</code> entiers représentant les entrées.
+</p>
+</div>
+</div>
+<div id="outline-container-org049f279" class="outline-3">
+<h3 id="org049f279"><span class="section-number-3">2.2.</span> Gestion des erreurs</h3>
+<div class="outline-text-3" id="text-2-2">
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Erreur</th>
+<th scope="col" class="org-left">Condition</th>
+<th scope="col" class="org-left">Moment</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left"><code>SYNTAX ERROR</code></td>
+<td class="org-left">Crochet <code>[</code> sans <code>]</code> correspondant, ou vice-versa</td>
+<td class="org-left">Avant exécution</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>POINTER OUT OF BOUNDS</code></td>
+<td class="org-left">Pointeur &lt; 0 ou ≥ S</td>
+<td class="org-left">À l&rsquo;exécution</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>INCORRECT VALUE</code></td>
+<td class="org-left">Valeur d&rsquo;une cellule &lt; 0 ou &gt; 255</td>
+<td class="org-left">À l&rsquo;exécution</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="outline-container-orgbb60de1" class="outline-3">
+<h3 id="orgbb60de1"><span class="section-number-3">2.3.</span> La difficulté principale : les crochets imbriqués</h3>
+<div class="outline-text-3" id="text-2-3">
+<p>
+Un <code>[</code> doit retrouver son <code>]</code> correspondant en tenant compte de l&rsquo;imbrication.
+Dans <code>[[]]</code> par exemple, le premier <code>[</code> correspond au dernier <code>]</code>, pas au
+deuxième. Il faut donc un compteur de profondeur pour trouver le bon
+homologue, et pas juste le premier qu&rsquo;on rencontre.
+</p>
+
+<hr />
+</div>
+</div>
+</div>
+<div id="outline-container-org0e0625e" class="outline-2">
+<h2 id="org0e0625e"><span class="section-number-2">3.</span> Méthode de résolution</h2>
+<div class="outline-text-2" id="text-3">
+
+<div id="org576d901" class="figure">
+<p><img src="algo.png" alt="algo.png" />
+</p>
+</div>
+
+
+<p>
+La vérification syntaxique repose sur un simple compteur de profondeur. On
+parcourt le programme une première fois : chaque <code>[</code> incrémente le compteur,
+chaque <code>]</code> le décrémente. Si le compteur passe sous zéro, c&rsquo;est qu&rsquo;on a un
+<code>]</code> sans <code>[</code> précédent. S&rsquo;il n&rsquo;est pas retombé à zéro à la fin, des <code>[</code> n&rsquo;ont
+pas été fermés. Dans les deux cas : <code>SYNTAX ERROR</code>.
+</p>
+
+<p>
+Pour les sauts <code>[</code> et <code>]</code>, on applique le même principe à l&rsquo;exécution, mais
+cette fois en avançant ou en reculant dans le programme jusqu&rsquo;à ce que le
+compteur retombe à zéro, ce qui garantit de tomber sur le bon crochet même
+en cas d&rsquo;imbrication.
+</p>
+
+<hr />
+</div>
+</div>
+<div id="outline-container-orgd34e961" class="outline-2">
+<h2 id="orgd34e961"><span class="section-number-2">4.</span> Code commenté</h2>
+<div class="outline-text-2" id="text-4">
+<div class="org-src-container">
+<pre class="src src-c"><span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdlib.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdio.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;string.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdbool.h&gt;</span>
+
+<span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">main</span>()
+{
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">L</span>, <span style="color: #dcaeea;">S</span>, <span style="color: #dcaeea;">N</span>;
+    <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">L = nombre de lignes de code, S = taille m&#233;moire, N = nombre d'entr&#233;es</span><span style="color: #5B6268;"> */</span>
+    scanf(<span style="color: #98be65;">"%d%d%d"</span>, &amp;L, &amp;S, &amp;N);
+    fgetc(stdin); <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">consomme le '\n' laiss&#233; par scanf pour ne pas bloquer la lecture suivante</span><span style="color: #5B6268;"> */</span>
+
+    <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">--- Lecture du programme Brainfuck ---</span><span style="color: #5B6268;"> */</span>
+    <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">Le code est r&#233;parti sur L lignes, on les colle bout &#224; bout en une seule cha&#238;ne</span><span style="color: #5B6268;"> */</span>
+    <span style="color: #ECBE7B;">char</span> <span style="color: #dcaeea;">prog</span>[L * 1025 + 1];
+    prog[0] = <span style="color: #98be65;">'\0'</span>;
+    <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 0; i &lt; L; i++) {
+        <span style="color: #ECBE7B;">char</span> <span style="color: #dcaeea;">r</span>[1025] = <span style="color: #98be65;">""</span>;
+        scanf(<span style="color: #98be65;">"%[^\n]"</span>, r); <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">lit toute la ligne sauf le '\n'</span><span style="color: #5B6268;"> */</span>
+        fgetc(stdin);       <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">consomme le '\n'</span><span style="color: #5B6268;"> */</span>
+        strcat(prog, r);    <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">ajoute la ligne au programme</span><span style="color: #5B6268;"> */</span>
+    }
+
+    <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">--- Lecture des valeurs d'entr&#233;e (utilis&#233;es par l'instruction ',') ---</span><span style="color: #5B6268;"> */</span>
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">inputs</span>[N];
+    <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 0; i &lt; N; i++)
+        scanf(<span style="color: #98be65;">"%d"</span>, &amp;inputs[i]);
+
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">plen</span> = strlen(prog); <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">longueur totale du programme</span><span style="color: #5B6268;"> */</span>
+
+    <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">--- V&#233;rification syntaxique AVANT toute ex&#233;cution ---</span><span style="color: #5B6268;"> */</span>
+    <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">On parcourt le programme et on compte les crochets ouverts/ferm&#233;s.
+     * Si depth passe sous 0 : un ']' sans '[' pr&#233;c&#233;dent.
+     * Si depth != 0 &#224; la fin : des '[' non ferm&#233;s.</span><span style="color: #5B6268;"> */</span>
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">depth</span> = 0;
+    <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 0; i &lt; plen; i++) {
+        <span style="color: #51afef;">if</span>      (prog[i] == <span style="color: #98be65;">'['</span>) depth++;
+        <span style="color: #51afef;">else</span> <span style="color: #51afef;">if</span> (prog[i] == <span style="color: #98be65;">']'</span>) depth--;
+        <span style="color: #51afef;">if</span> (depth &lt; 0) { printf(<span style="color: #98be65;">"SYNTAX ERROR\n"</span>); <span style="color: #51afef;">return</span> 0; }
+    }
+    <span style="color: #51afef;">if</span> (depth != 0) { printf(<span style="color: #98be65;">"SYNTAX ERROR\n"</span>); <span style="color: #51afef;">return</span> 0; }
+
+    <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">--- Initialisation de la m&#233;moire Brainfuck ---</span><span style="color: #5B6268;"> */</span>
+    <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">S cellules, toutes &#224; 0 au d&#233;part</span><span style="color: #5B6268;"> */</span>
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">cells</span>[S];
+    memset(cells, 0, <span style="color: #51afef;">sizeof</span>(<span style="color: #ECBE7B;">int</span>) * S);
+
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">ptr</span> = 0; <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">pointeur m&#233;moire  : indice de la cellule courante</span><span style="color: #5B6268;"> */</span>
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">ip</span>  = 0; <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">pointeur d'instruction : position dans prog[]</span><span style="color: #5B6268;">     */</span>
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">inp</span> = 0; <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">index de la prochaine valeur &#224; lire dans inputs[]</span><span style="color: #5B6268;"> */</span>
+
+    <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">Buffer de sortie : on accumule les caract&#232;res avant d'afficher</span><span style="color: #5B6268;"> */</span>
+    <span style="color: #ECBE7B;">char</span> <span style="color: #dcaeea;">output</span>[100000];
+    <span style="color: #ECBE7B;">int</span>  <span style="color: #dcaeea;">out_len</span> = 0;
+
+    <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">--- Boucle principale d'interpr&#233;tation ---</span><span style="color: #5B6268;"> */</span>
+    <span style="color: #51afef;">while</span> (ip &lt; plen) {
+        <span style="color: #ECBE7B;">char</span> <span style="color: #dcaeea;">cmd</span> = prog[ip]; <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">instruction courante</span><span style="color: #5B6268;"> */</span>
+
+        <span style="color: #51afef;">if</span> (cmd == <span style="color: #98be65;">'&gt;'</span>) {
+            <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">D&#233;place le pointeur d'une cellule vers la droite</span><span style="color: #5B6268;"> */</span>
+            ptr++;
+            <span style="color: #51afef;">if</span> (ptr &gt;= S) { printf(<span style="color: #98be65;">"POINTER OUT OF BOUNDS\n"</span>); <span style="color: #51afef;">return</span> 0; }
+        }
+        <span style="color: #51afef;">else</span> <span style="color: #51afef;">if</span> (cmd == <span style="color: #98be65;">'&lt;'</span>) {
+            <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">D&#233;place le pointeur d'une cellule vers la gauche</span><span style="color: #5B6268;"> */</span>
+            ptr--;
+            <span style="color: #51afef;">if</span> (ptr &lt; 0) { printf(<span style="color: #98be65;">"POINTER OUT OF BOUNDS\n"</span>); <span style="color: #51afef;">return</span> 0; }
+        }
+        <span style="color: #51afef;">else</span> <span style="color: #51afef;">if</span> (cmd == <span style="color: #98be65;">'+'</span>) {
+            <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">Incr&#233;mente la valeur de la cellule courante</span><span style="color: #5B6268;"> */</span>
+            cells[ptr]++;
+            <span style="color: #51afef;">if</span> (cells[ptr] &gt; 255) { printf(<span style="color: #98be65;">"INCORRECT VALUE\n"</span>); <span style="color: #51afef;">return</span> 0; }
+        }
+        <span style="color: #51afef;">else</span> <span style="color: #51afef;">if</span> (cmd == <span style="color: #98be65;">'-'</span>) {
+            <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">D&#233;cr&#233;mente la valeur de la cellule courante</span><span style="color: #5B6268;"> */</span>
+            cells[ptr]--;
+            <span style="color: #51afef;">if</span> (cells[ptr] &lt; 0) { printf(<span style="color: #98be65;">"INCORRECT VALUE\n"</span>); <span style="color: #51afef;">return</span> 0; }
+        }
+        <span style="color: #51afef;">else</span> <span style="color: #51afef;">if</span> (cmd == <span style="color: #98be65;">'.'</span>) {
+            <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">Affiche la cellule courante comme caract&#232;re ASCII</span><span style="color: #5B6268;"> */</span>
+            output[out_len++] = (<span style="color: #ECBE7B;">char</span>)cells[ptr];
+        }
+        <span style="color: #51afef;">else</span> <span style="color: #51afef;">if</span> (cmd == <span style="color: #98be65;">','</span>) {
+            <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">Stocke la prochaine valeur d'entr&#233;e dans la cellule courante.
+             * Si toutes les entr&#233;es ont d&#233;j&#224; &#233;t&#233; consomm&#233;es, on met 0.</span><span style="color: #5B6268;"> */</span>
+            cells[ptr] = (inp &lt; N) ? inputs[inp++] : 0;
+        }
+        <span style="color: #51afef;">else</span> <span style="color: #51afef;">if</span> (cmd == <span style="color: #98be65;">'['</span>) {
+            <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">Si la cellule courante vaut 0, on saute apr&#232;s le ']' correspondant.
+             * Le compteur d = 1 g&#232;re l'imbrication : on avance jusqu'&#224; ce que
+             * tous les '[' ouverts en chemin aient &#233;t&#233; referm&#233;s (d revient &#224; 0).</span><span style="color: #5B6268;"> */</span>
+            <span style="color: #51afef;">if</span> (cells[ptr] == 0) {
+                <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">d</span> = 1;
+                <span style="color: #51afef;">while</span> (d &gt; 0) {
+                    ip++;
+                    <span style="color: #51afef;">if</span>      (prog[ip] == <span style="color: #98be65;">'['</span>) d++;
+                    <span style="color: #51afef;">else</span> <span style="color: #51afef;">if</span> (prog[ip] == <span style="color: #98be65;">']'</span>) d--;
+                }
+                <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">ip est maintenant sur le ']' correspondant</span><span style="color: #5B6268;"> */</span>
+            }
+        }
+        <span style="color: #51afef;">else</span> <span style="color: #51afef;">if</span> (cmd == <span style="color: #98be65;">']'</span>) {
+            <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">Si la cellule courante est non nulle, on retourne apr&#232;s le '[' correspondant.
+             * M&#234;me principe qu'au-dessus mais en reculant dans le programme.</span><span style="color: #5B6268;"> */</span>
+            <span style="color: #51afef;">if</span> (cells[ptr] != 0) {
+                <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">d</span> = 1;
+                <span style="color: #51afef;">while</span> (d &gt; 0) {
+                    ip--;
+                    <span style="color: #51afef;">if</span>      (prog[ip] == <span style="color: #98be65;">']'</span>) d++;
+                    <span style="color: #51afef;">else</span> <span style="color: #51afef;">if</span> (prog[ip] == <span style="color: #98be65;">'['</span>) d--;
+                }
+                <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">ip est maintenant sur le '[' correspondant</span><span style="color: #5B6268;"> */</span>
+            }
+        }
+        <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">Tout autre caract&#232;re est ignor&#233; (commentaires Brainfuck)</span><span style="color: #5B6268;"> */</span>
+
+        ip++; <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">passe &#224; l'instruction suivante</span><span style="color: #5B6268;"> */</span>
+    }
+
+    <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">--- Affichage de la sortie accumul&#233;e ---</span><span style="color: #5B6268;"> */</span>
+    output[out_len] = <span style="color: #98be65;">'\0'</span>;
+    printf(<span style="color: #98be65;">"%s\n"</span>, output);
+    <span style="color: #51afef;">return</span> 0;
+}
+</pre>
+</div>
+
+<hr />
+</div>
+</div>
+<div id="outline-container-org377e688" class="outline-2">
+<h2 id="org377e688"><span class="section-number-2">5.</span> Exemples de programmes Brainfuck</h2>
+<div class="outline-text-2" id="text-5">
+</div>
+<div id="outline-container-orgae94ccf" class="outline-3">
+<h3 id="orgae94ccf"><span class="section-number-3">5.1.</span> Hello World</h3>
+<div class="outline-text-3" id="text-5-1">
+<pre class="example" id="org5441e92">
+++++++++[&gt;++++[&gt;++&gt;+++&gt;+++&gt;+&lt;&lt;&lt;&lt;-]&gt;+&gt;+&gt;-&gt;&gt;+[&lt;]&lt;-]
+&gt;&gt;.&gt;---.+++++++..+++.&gt;&gt;.&lt;-.&lt;.+++.------.--------.&gt;&gt;+.&gt;++.
+</pre>
+
+<p>
+Sortie : Hello World!
+</p>
+
+<p>
+Des boucles imbriquées construisent les valeurs ASCII lettre par lettre. Par
+exemple, H vaut 72 : on calcule 8×9 avec des boucles plutôt que de faire 72
+fois +.
+</p>
+</div>
+</div>
+<div id="outline-container-org38f77a4" class="outline-3">
+<h3 id="org38f77a4"><span class="section-number-3">5.2.</span> Afficher un caractère simple</h3>
+<div class="outline-text-3" id="text-5-2">
+<pre class="example" id="org61d8e57">
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.
+</pre>
+
+<p>
+Sortie : A (ASCII 65)
+</p>
+
+<p>
+On incrémente 65 fois la cellule 0 puis on affiche. 
+</p>
+</div>
+</div>
+<div id="outline-container-org4b622e7" class="outline-3">
+<h3 id="org4b622e7"><span class="section-number-3">5.3.</span> Doubler la valeur d&rsquo;entrée</h3>
+<div class="outline-text-3" id="text-5-3">
+<pre class="example" id="orgcb67592">
+,[-&gt;++&lt;]&gt;.
+</pre>
+
+<p>
+La boucle <code>[-&gt;++&lt;]</code> décrémente cells[0] et incrémente cells[1] de 2 à chaque
+tour. À la fin, cells[1] vaut 2n.
+</p>
+</div>
+</div>
+<div id="outline-container-org6f1ef78" class="outline-3">
+<h3 id="org6f1ef78"><span class="section-number-3">5.4.</span> Addition de deux entrées</h3>
+<div class="outline-text-3" id="text-5-4">
+<pre class="example" id="org7abff91">
+,&gt;,[-&lt;+&gt;]&lt;.
+</pre>
+
+<p>
+La boucle transfère la valeur de cells[1] vers cells[0] en les additionnant.
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-org764b9a9" class="outline-2">
+<h2 id="org764b9a9"><span class="section-number-2">6.</span> Solution alternative - PewPewBewn</h2>
+<div class="outline-text-2" id="text-6">
+<ul class="org-ul">
+<li><a href="https://www.codingame.com/training/medium/what-the-brainfuck/solution?id=22957693">Lien vers la solution de PewPewBewn sur CodingGame</a></li>
+</ul>
+
+<p>
+La solution de PewPewBewn prend une approche complètement différente : au lieu
+d&rsquo;interpréter le Brainfuck instruction par instruction comme on le fait, elle
+le compile directement.
+</p>
+
+
+<div class="org-src-container">
+<pre class="src src-c"><span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;sys/mman.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdio.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;string.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdlib.h&gt;</span>
+
+<span style="color: #51afef;">typedef</span> <span style="color: #ECBE7B;">unsigned</span> <span style="color: #ECBE7B;">char</span> <span style="color: #ECBE7B;">u8</span>;
+<span style="color: #51afef;">typedef</span> <span style="color: #ECBE7B;">unsigned</span> <span style="color: #ECBE7B;">int</span>  <span style="color: #ECBE7B;">u32</span>;
+
+<span style="color: #51afef;">static</span> <span style="color: #ECBE7B;">u8</span> *<span style="color: #dcaeea;">EXECUTE</span>;
+<span style="color: #51afef;">static</span> <span style="color: #ECBE7B;">u8</span>  <span style="color: #dcaeea;">bin</span>[1 &lt;&lt; 22];
+
+<span style="color: #5B6268;">/* </span><span style="color: #5B6268;">&#201;met un octet dans le buffer de code machine</span><span style="color: #5B6268;"> */</span>
+<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #c678dd;">EMIT</span>(<span style="color: #dcaeea;">x</span>) (*ptr++ = (x))
+
+<span style="color: #5B6268;">/* </span><span style="color: #5B6268;">&#201;met une valeur 32 bits (little-endian)</span><span style="color: #5B6268;"> */</span>
+<span style="color: #51afef;">static</span> <span style="color: #ECBE7B;">void</span> <span style="color: #c678dd;">emit32</span>(<span style="color: #ECBE7B;">u8</span> **<span style="color: #dcaeea;">p</span>, <span style="color: #ECBE7B;">u32</span> <span style="color: #dcaeea;">v</span>) {
+    (*p)[0] = v &amp; 0xFF; (*p)[1] = (v &gt;&gt; 8) &amp; 0xFF;
+    (*p)[2] = (v &gt;&gt; 16) &amp; 0xFF; (*p)[3] = (v &gt;&gt; 24) &amp; 0xFF;
+    *p += 4;
+}
+
+<span style="color: #ECBE7B;">void</span> <span style="color: #c678dd;">COMPILE</span>(<span style="color: #51afef;">const</span> <span style="color: #ECBE7B;">char</span> *<span style="color: #dcaeea;">bf</span>, <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">S</span>, <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">N</span>) {
+    <span style="color: #ECBE7B;">u8</span> *<span style="color: #dcaeea;">ptr</span> = bin;
+    <span style="color: #ECBE7B;">u8</span> *<span style="color: #dcaeea;">stack</span>[1024];
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">sp</span> = 0;
+
+    <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">Header : sauvegarde des registres + initialisation
+     * r12 = base du tableau m&#233;moire, rdx = pointeur courant (=0)
+     * r13 = entr&#233;es, r14/r15 = buffer de sortie</span><span style="color: #5B6268;"> */</span>
+    <span style="color: #ECBE7B;">u8</span> <span style="color: #dcaeea;">header</span>[] = {
+        0x41,0x54, 0x41,0x55, 0x41,0x56, 0x41,0x57,  <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">push r12-r15</span><span style="color: #5B6268;"> */</span>
+        0x53,                                          <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">push rbx</span><span style="color: #5B6268;">     */</span>
+        0x49,0x89,0xFC,                               <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">mov r12, rdi</span><span style="color: #5B6268;"> */</span>
+        0x31,0xD2,                                    <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">xor edx, edx</span><span style="color: #5B6268;"> */</span>
+        0x49,0x89,0xF5,                               <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">mov r13, rsi</span><span style="color: #5B6268;"> */</span>
+        0x4D,0x89,0xC7,                               <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">mov r15, r8</span><span style="color: #5B6268;">  */</span>
+        0x4D,0x89,0xC6,                               <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">mov r14, r8</span><span style="color: #5B6268;">  */</span>
+    };
+    memcpy(ptr, header, <span style="color: #51afef;">sizeof</span>(header)); ptr += <span style="color: #51afef;">sizeof</span>(header);
+
+    <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">Parcours du programme Brainfuck et &#233;mission du code x86</span><span style="color: #5B6268;"> */</span>
+    <span style="color: #51afef;">for</span> (; *bf; bf++) {
+        <span style="color: #51afef;">switch</span> (*bf) {
+        <span style="color: #51afef;">case</span> <span style="color: #98be65;">'+'</span>: <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">add BYTE PTR [r12+rdx], 1</span><span style="color: #5B6268;"> */</span>
+            EMIT(0x41); EMIT(0x80); EMIT(0x04); EMIT(0x14); EMIT(0x01);
+            <span style="color: #51afef;">break</span>;
+        <span style="color: #51afef;">case</span> <span style="color: #98be65;">'-'</span>: <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">sub BYTE PTR [r12+rdx], 1</span><span style="color: #5B6268;"> */</span>
+            EMIT(0x41); EMIT(0x80); EMIT(0x2C); EMIT(0x14); EMIT(0x01);
+            <span style="color: #51afef;">break</span>;
+        <span style="color: #51afef;">case</span> <span style="color: #98be65;">'&gt;'</span>: <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">inc rdx</span><span style="color: #5B6268;"> */</span>
+            EMIT(0x48); EMIT(0xFF); EMIT(0xC2);
+            <span style="color: #51afef;">break</span>;
+        <span style="color: #51afef;">case</span> <span style="color: #98be65;">'&lt;'</span>: <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">dec rdx</span><span style="color: #5B6268;"> */</span>
+            EMIT(0x48); EMIT(0xFF); EMIT(0xCA);
+            <span style="color: #51afef;">break</span>;
+        <span style="color: #51afef;">case</span> <span style="color: #98be65;">'.'</span>: <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">mov [r14], BYTE PTR [r12+rdx] ; inc r14</span><span style="color: #5B6268;"> */</span>
+            EMIT(0x43); EMIT(0x8A); EMIT(0x04); EMIT(0x14);
+            EMIT(0x41); EMIT(0x88); EMIT(0x06);
+            EMIT(0x49); EMIT(0xFF); EMIT(0xC6);
+            <span style="color: #51afef;">break</span>;
+        <span style="color: #51afef;">case</span> <span style="color: #98be65;">'['</span>:
+            <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">cmp BYTE PTR [r12+rdx], 0 ; je (adresse &#224; remplir plus tard)</span><span style="color: #5B6268;"> */</span>
+            EMIT(0x41); EMIT(0x80); EMIT(0x3C); EMIT(0x14); EMIT(0x00);
+            EMIT(0x0F); EMIT(0x84);
+            stack[sp++] = ptr;  <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">on sauvegarde la position pour patcher</span><span style="color: #5B6268;"> */</span>
+            ptr += 4;           <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">r&#233;serve 4 octets pour l'adresse de saut</span><span style="color: #5B6268;"> */</span>
+            <span style="color: #51afef;">break</span>;
+        <span style="color: #51afef;">case</span> <span style="color: #98be65;">']'</span>:
+            <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">Patch du '[' correspondant avec l'adresse courante</span><span style="color: #5B6268;"> */</span>
+            { <span style="color: #ECBE7B;">u8</span> *<span style="color: #dcaeea;">open</span> = stack[--sp];
+              <span style="color: #ECBE7B;">u32</span> <span style="color: #dcaeea;">fwd</span> = (<span style="color: #ECBE7B;">u32</span>)(ptr - open - 4 + 5);
+              emit32(&amp;open, fwd);
+              <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">jmp retour</span><span style="color: #5B6268;"> */</span>
+              EMIT(0xE9); emit32(&amp;ptr, (<span style="color: #ECBE7B;">u32</span>)(open - ptr - 4 - 5)); }
+            <span style="color: #51afef;">break</span>;
+        }
+    }
+
+    <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">&#201;pilogue : &#233;criture du buffer de sortie + ret</span><span style="color: #5B6268;"> */</span>
+    <span style="color: #ECBE7B;">u8</span> <span style="color: #dcaeea;">footer</span>[] = { 0x5B, 0x41,0x5F, 0x41,0x5E, 0x41,0x5D, 0x41,0x5C, 0xC3 };
+    memcpy(ptr, footer, <span style="color: #51afef;">sizeof</span>(footer)); ptr += <span style="color: #51afef;">sizeof</span>(footer);
+
+    <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">Copie dans une zone m&#233;moire ex&#233;cutable</span><span style="color: #5B6268;"> */</span>
+    EXECUTE = mmap(0, <span style="color: #51afef;">sizeof</span>(bin), PROT_READ|PROT_WRITE|PROT_EXEC,
+                   MAP_PRIVATE|MAP_ANONYMOUS, -1, 0);
+    memcpy(EXECUTE, bin, ptr - bin);
+}
+</pre>
+</div>
+
+<p>
+Au lieu d&rsquo;interpréter le Brainfuck instruction par instruction comme on le
+fait, PewPewBewn le traduit directement comme du vrai code machine, en le compilant directement et en allouant la 
+ mémoire avec <code>mmap(PROT_EXEC)</code> . En plus, les séquences
+répétées comme <code>++++</code> sont fusionnés en une seule instruction, ce qu&rsquo;on ne
+fait pas du tout. C&rsquo;est ~350 lignes contre ~80 pour nous. Impressionnant, mais clairement BEAUCOUP trop pour du Braifuck.
+</p>
+
+<hr />
+</div>
+</div>
+<div id="outline-container-org7c7a98a" class="outline-2">
+<h2 id="org7c7a98a"><span class="section-number-2">7.</span> Bilan</h2>
+<div class="outline-text-2" id="text-7">
+<p>
+Cet exercice était moins compliqué algorithmiquement que les précedents, mais il
+permet de comprendre ce qu&rsquo;est un interpréteur. Le point clef
+à retenir est le compteur de profondeur pour la gestion des crochet, en prenant bien en compte l&rsquo;imbrication. La
+solution JIT de PewPewBewn était intéressante à analyser même si pas mal de
+détails dépassent mes connaissances .
+</p>
+
+<hr />
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="date">Date: 26 Mars 2026</p>
+<p class="author">Auteur: ALEXANDRE Maé - Prep&rsquo;ISIMA 1</p>
+<p class="date">Created: 2026-05-07 jeu. 01:06</p>
+</div>
+</body>
+</html>

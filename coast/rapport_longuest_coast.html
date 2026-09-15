@@ -1,0 +1,420 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr" xml:lang="fr">
+<head>
+<!-- 2026-05-07 jeu. 01:07 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Rapport - Longest Coast Island</title>
+<meta name="author" content="ALEXANDRE Maé - Prep'ISIMA 1" />
+<meta name="generator" content="Org Mode" />
+<link rel="stylesheet" href="../css/org.css">
+<script defer src="../css/nav.js"></script>
+</head>
+<body>
+<div id="content" class="content">
+<h1 class="title">Rapport - Longest Coast Island</h1>
+<div id="table-of-contents" role="doc-toc">
+<h2>Table des matières</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#org8525027">1. Introduction</a></li>
+<li><a href="#orgff116cb">2. Analyse du problème</a></li>
+<li><a href="#orgf782ff7">3. Méthode de résolution</a></li>
+<li><a href="#org2a146af">4. Code commenté</a></li>
+<li><a href="#org6a828f0">5. Tests</a></li>
+<li><a href="#org82eef32">6. Solution alternative - MJZ</a></li>
+<li><a href="#orgb805f25">7. Bilan</a></li>
+</ul>
+</div>
+</div>
+<p>
+<a href="https://www.codingame.com/training/easy/longest-coast"><i>Lien vers le puzzle sur CodingGame</i></a>
+<img src="../images/ile.png" alt="ile.png" />
+</p>
+<hr />
+<div id="outline-container-org8525027" class="outline-2">
+<h2 id="org8525027"><span class="section-number-2">1.</span> Introduction</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+Longest Coast Island est un exercice CodingGame. On a une
+grille n×n composée de cases d&rsquo;eau (~) et de blocs de terre (#). Les blocs
+connectés horizontalement et verticalement forment des <b>îles</b>. L&rsquo;objectif est de
+trouver l&rsquo;île dont le <b>littoral</b> est le plus long, et d&rsquo;afficher son index ainsi
+que la longueur de ce littoral.
+</p>
+
+<p>
+Le littoral d&rsquo;une île est le nombre de cases ~ <b>distinctes</b> adjacentes
+(haut, bas, gauche, droite) à au moins un bloc de cette ile. Les cases hors
+de la grille ne comptent pas.
+</p>
+
+<p>
+Les iles sont numérotés dans l&rsquo;ordre de découverte  (parcourt
+la grille ligne par ligne, colonne par colonne, et chaque nouveau bloc non
+visité marque le début d&rsquo;une nouvelle île.) En cas d&rsquo;égalité, on retient l&rsquo;île
+d&rsquo;index le plus petit.
+</p>
+
+<hr />
+</div>
+</div>
+<div id="outline-container-orgff116cb" class="outline-2">
+<h2 id="orgff116cb"><span class="section-number-2">2.</span> Analyse du problème</h2>
+<div class="outline-text-2" id="text-2">
+</div>
+<div id="outline-container-org01a7b84" class="outline-3">
+<h3 id="org01a7b84"><span class="section-number-3">2.1.</span> Structure de l&rsquo;entrée</h3>
+<div class="outline-text-3" id="text-2-1">
+<p>
+La première ligne contient un entier <code>n</code>, la taille de la grille. Puis <code>n</code>
+lignes de <code>n</code> caractères : <code>~</code> (eau) ou <code>#</code> (terre).
+</p>
+
+<pre class="example" id="org0e79ad4">
+5
+~~~~#
+~~~##
+~~~~~
+~##~~
+~~~~~
+</pre>
+</div>
+</div>
+<div id="outline-container-org86e915b" class="outline-3">
+<h3 id="org86e915b"><span class="section-number-3">2.2.</span> La difficulté principale - le double comptage</h3>
+<div class="outline-text-3" id="text-2-2">
+<p>
+La vraie difficulté n&rsquo;est pas le parcours en lui même, c&rsquo;est d&rsquo;éviter de
+compter deux fois la même case ~. Si deux blocs <code>#</code> sont adjacents à la même
+case d&rsquo;eau, elle ne doit contribuer qu&rsquo;<b>une seule fois</b> au littoral de l&rsquo;île.
+</p>
+
+<p>
+Dans l&rsquo;exemple ci-dessus, l&rsquo;île 2 à deux blocs adjacents. Chaque bloc à 3
+voisins ~, mais ils ne partagent aucun voisin en commun, donc le total est
+bien 6. Sur une configuration différente, sans protection contre le double
+comptage, on pourrait facilement sur-estimer le littoral.
+</p>
+
+<hr />
+</div>
+</div>
+</div>
+<div id="outline-container-orgf782ff7" class="outline-2">
+<h2 id="orgf782ff7"><span class="section-number-2">3.</span> Méthode de résolution</h2>
+<div class="outline-text-2" id="text-3">
+
+<div id="orgb89a8dc" class="figure">
+<p><img src="algo.png" alt="algo.png" />
+</p>
+</div>
+
+
+<p>
+Pour éviter le double comptage on utilise un tableau booléen <code>water_counted</code>
+remis à <code>false</code> avant chaque île. Pendant le DFS, chaque case ~ n&rsquo;est
+comptée que si elle n&rsquo;a pas encore été marquée pour cette île. La condition
+stricte <code>&gt;</code>  dans la comparaison garantit qu&rsquo;en cas d&rsquo;égalité de littoral,
+c&rsquo;est la première île (plus petit index) qui est conservée.
+</p>
+
+<hr />
+</div>
+</div>
+<div id="outline-container-org2a146af" class="outline-2">
+<h2 id="org2a146af"><span class="section-number-2">4.</span> Code commenté</h2>
+<div class="outline-text-2" id="text-4">
+<div class="org-src-container">
+<pre class="src src-c"><span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdlib.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdio.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;string.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdbool.h&gt;</span>
+
+<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">n</span>;
+<span style="color: #ECBE7B;">char</span> <span style="color: #dcaeea;">grid</span>[50][51];          <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">grille de jeu : n lignes de n caract&#232;res (# ou ~)</span><span style="color: #5B6268;">      */</span>
+<span style="color: #ECBE7B;">bool</span> <span style="color: #dcaeea;">visited</span>[50][50];       <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">true si ce bloc # a d&#233;j&#224; &#233;t&#233; explor&#233; par le DFS</span><span style="color: #5B6268;">        */</span>
+<span style="color: #ECBE7B;">bool</span> <span style="color: #dcaeea;">water_counted</span>[50][50]; <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">true si cette case ~ a d&#233;j&#224; &#233;t&#233; compt&#233;e pour l'&#238;le en
+                               cours. Remis &#224; false avant chaque nouvelle &#238;le.</span><span style="color: #5B6268;">         */</span>
+
+<span style="color: #5B6268;">/* </span><span style="color: #5B6268;">vecteurs de d&#233;placement pour les 4 directions</span><span style="color: #5B6268;"> */</span>
+<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">dx</span>[] = {0, 0, 1, -1};
+<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">dy</span>[] = {1, -1, 0, 0};
+
+<span style="color: #5B6268;">/*</span><span style="color: #5B6268;">
+  dfs  parcourt r&#233;cursivement tous les blocs # connect&#233;s &#224; (x, y)
+ et retourne le nombre de cases ~ distinctes adjacentes &#224; l'&#238;le.
+ 
+  water_counted (remis &#224; z&#233;ro avant chaque &#238;le) garantit qu'une case ~
+  adjacente &#224; plusieurs blocs de la m&#234;me &#238;le n'est compt&#233;e qu'une fois.
+</span><span style="color: #5B6268;"> */</span>
+<span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">dfs</span>(<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">x</span>, <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">y</span>) {
+    <span style="color: #51afef;">if</span> (x &lt; 0 || x &gt;= n || y &lt; 0 || y &gt;= n) <span style="color: #51afef;">return</span> 0; <span style="color: #5B6268;">// </span><span style="color: #5B6268;">hors grille    
+</span>    <span style="color: #51afef;">if</span> (visited[x][y]) <span style="color: #51afef;">return</span> 0;                        <span style="color: #5B6268;">// </span><span style="color: #5B6268;">d&#233;j&#224; explor&#233;    
+</span>    <span style="color: #51afef;">if</span> (grid[x][y] != <span style="color: #98be65;">'#'</span>) <span style="color: #51afef;">return</span> 0;                    <span style="color: #5B6268;">// </span><span style="color: #5B6268;">pas de la terre 
+</span>
+    visited[x][y] = <span style="color: #a9a1e1;">true</span>;
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">coast</span> = 0;
+
+    <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">d</span> = 0; d &lt; 4; d++) {
+        <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">nx</span> = x + dx[d];
+        <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">ny</span> = y + dy[d];
+
+        <span style="color: #51afef;">if</span> (nx &gt;= 0 &amp;&amp; nx &lt; n &amp;&amp; ny &gt;= 0 &amp;&amp; ny &lt; n) {
+            <span style="color: #51afef;">if</span> (grid[nx][ny] == <span style="color: #98be65;">'~'</span>) {
+                <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">compter la case eau seulement si elle ne l'a pas d&#233;j&#224; &#233;t&#233;
+                 * pour cette &#238;le c'est l&#224; qu'on evite le double comptage</span><span style="color: #5B6268;"> */</span>
+                <span style="color: #51afef;">if</span> (<span style="color: #51afef; font-weight: bold;">!</span>water_counted[nx][ny]) {
+                    water_counted[nx][ny] = <span style="color: #a9a1e1;">true</span>;
+                    coast++;
+                }
+            } <span style="color: #51afef;">else</span> <span style="color: #51afef;">if</span> (grid[nx][ny] == <span style="color: #98be65;">'#'</span>) {
+                coast += dfs(nx, ny);
+            }
+        }
+    }
+
+    <span style="color: #51afef;">return</span> coast;
+}
+
+<span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">main</span>() {
+    scanf(<span style="color: #98be65;">"%d"</span>, &amp;n); fgetc(stdin);
+
+    <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 0; i &lt; n; i++) {
+        scanf(<span style="color: #98be65;">"%[^\n]"</span>, grid[i]); fgetc(stdin);
+    }
+
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">best_island</span>  = -1;
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">best_coast</span>   = -1;
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">island_index</span> =  0;
+
+    <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 0; i &lt; n; i++) {
+        <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">j</span> = 0; j &lt; n; j++) {
+
+            <span style="color: #51afef;">if</span> (grid[i][j] == <span style="color: #98be65;">'#'</span> &amp;&amp; <span style="color: #51afef; font-weight: bold;">!</span>visited[i][j]) {
+                island_index++;
+
+                <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">reset obligatoire avant chaque &#238;le : sans &#231;a, une case ~
+                  d&#233;j&#224; compt&#233;e pour l'&#238;le pr&#233;c&#233;dente ne serait pas recompt&#233;e
+                  pour la nouvelle, m&#234;me si elle lui est aussi adjacente.
+                 co&#251;t : O(n&#178;) &#224; chaque &#238;le, point le moins optimal de cette
+                  solution par rapport &#224; la version avec identifiants.</span><span style="color: #5B6268;"> */</span>
+                <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">r</span> = 0; r &lt; n; r++)
+                    <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">c</span> = 0; c &lt; n; c++)
+                        water_counted[r][c] = <span style="color: #a9a1e1;">false</span>;
+
+                <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">coast</span> = dfs(i, j);
+
+                <span style="color: #5B6268;">// </span><span style="color: #5B6268;">condition stricte &gt; : en cas d'egalit&#233; on garde la premi&#232;re &#238;le 
+</span>                <span style="color: #51afef;">if</span> (coast &gt; best_coast) {
+                    best_coast  = coast;
+                    best_island = island_index;
+                }
+            }
+        }
+    }
+
+    printf(<span style="color: #98be65;">"%d %d\n"</span>, best_island, best_coast);
+    <span style="color: #51afef;">return</span> 0;
+}
+</pre>
+</div>
+
+<hr />
+</div>
+</div>
+<div id="outline-container-org6a828f0" class="outline-2">
+<h2 id="org6a828f0"><span class="section-number-2">5.</span> Tests</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+Sur l&rsquo;exemple donné dans la présentation :
+</p>
+
+<pre class="example" id="orgb70046f">
+5
+~~~~#
+~~~##
+~~~~~
+~##~~
+~~~~~
+</pre>
+
+<p>
+On identifie deux îles :
+</p>
+<ul class="org-ul">
+<li>Île 1 : les blocs <code>#</code> en (0,4), (1,3) et (1,4). Cases ~ distinctes adjacentes :
+(0,3), (1,2), (2,3), (2,4) littoral = <b>4</b></li>
+<li>Île 2 : les blocs <code>#</code> en (3,1) et (3,2). Cases ~ distinctes adjacentes :
+(2,1), (4,1), (3,0), (2,2), (4,2), (3,3)  littoral = <b>6</b></li>
+</ul>
+
+<p>
+Le programme renvoie donc :
+</p>
+
+<pre class="example" id="org22bff80">
+2 6
+</pre>
+
+<p>
+Ce qui correspond bien à l&rsquo;île numéro 2 avec une côte de 6. 
+</p>
+
+<p>
+On peut aussi tester un cas limite : une grille avec une seule île isolée au centre.
+</p>
+
+<pre class="example" id="orgb9c851f">
+3
+~~~
+~#~
+~~~
+</pre>
+
+<p>
+Une seule île, entourée de 4 cases d&rsquo;eau dans les 4 directions :
+</p>
+
+<pre class="example" id="orgeaa84e2">
+1 4
+</pre>
+
+<p>
+Et un dernier cas avec deux blocs <code>#</code> qui partagent un voisin ~ en commun (pour
+vérifier que le double comptage est bien évité) :
+</p>
+
+<pre class="example" id="orga20ab6e">
+3
+~~~
+##~
+~~~
+</pre>
+
+<p>
+Les deux blocs adjacents partagent le voisin ~ en (0,0) et (2,0). Sans protection,
+on compterait (0,0) et (2,0) deux fois. Avec <code>water_counted</code>, le total est bien 6 :
+</p>
+
+<pre class="example" id="org100a576">
+1 6
+</pre>
+
+<hr />
+</div>
+</div>
+<div id="outline-container-org82eef32" class="outline-2">
+<h2 id="org82eef32"><span class="section-number-2">6.</span> Solution alternative - MJZ</h2>
+<div class="outline-text-2" id="text-6">
+<ul class="org-ul">
+<li><a href="https://www.codingame.com/training/easy/longest-coast/solution?id=26381543">Lien vers la solution de MJZ sur CodingGame</a></li>
+</ul>
+
+<p>
+MJZ adopte une approche <b>destructive/restauration</b> : plutôt que d&rsquo;un tableau
+de marquage séparé, elle modifie directement les caractères de la grille. Un
+bloc <code>#</code> visité devient <code>X</code>, une case <code>~</code> comptée devient <code>W</code>. Après le
+traitement de chaque île, <code>restore_water</code> reparcourt la grille pour remettre
+les <code>W</code> en <code>~</code>.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-c"><span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdio.h&gt;</span>
+ 
+<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">n</span>, <span style="color: #dcaeea;">islands</span>, <span style="color: #dcaeea;">water</span>[100];
+<span style="color: #ECBE7B;">char</span> <span style="color: #dcaeea;">map</span>[50][51];
+ 
+<span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">count_water</span>(<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">r</span>, <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">c</span>) {
+    <span style="color: #51afef;">if</span> (r &lt; 0 || r &gt;= n)  <span style="color: #51afef;">return</span> 0;
+    <span style="color: #51afef;">if</span> (c &lt; 0 || c &gt;= n)  <span style="color: #51afef;">return</span> 0;
+    <span style="color: #51afef;">if</span> (map[r][c] == <span style="color: #98be65;">'~'</span>) {
+        map[r][c] = <span style="color: #98be65;">'W'</span>; <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">marquer la case eau comme compt&#233;e</span><span style="color: #5B6268;"> */</span>
+        <span style="color: #51afef;">return</span> 1;
+    }
+    <span style="color: #51afef;">if</span> (map[r][c] == <span style="color: #98be65;">'#'</span>) {
+        map[r][c] = <span style="color: #98be65;">'X'</span>; <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">marquer le bloc comme visit&#233;</span><span style="color: #5B6268;"> */</span>
+        <span style="color: #51afef;">return</span> count_water(r+1, c) + count_water(r, c+1) +
+               count_water(r-1, c) + count_water(r, c-1);
+    }
+    <span style="color: #51afef;">return</span> 0;
+}
+ 
+<span style="color: #ECBE7B;">void</span> <span style="color: #c678dd;">restore_water</span>() {
+    <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">r</span> = 0; r &lt; n; r++)
+        <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">c</span> = 0; c &lt; n; c++)
+            <span style="color: #51afef;">if</span> (map[r][c] == <span style="color: #98be65;">'W'</span>)
+                map[r][c] = <span style="color: #98be65;">'~'</span>; <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">restaurer les ~ pour la prochaine &#238;le</span><span style="color: #5B6268;"> */</span>
+}
+ 
+<span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">main</span>() {
+    scanf(<span style="color: #98be65;">"%d"</span>, &amp;n);
+    <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">r</span> = 0; r &lt; n; r++)
+        scanf(<span style="color: #98be65;">"%s"</span>, map[r]);
+    <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">r</span> = 0; r &lt; n; r++)
+        <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">c</span> = 0; c &lt; n; c++)
+            <span style="color: #51afef;">if</span> (map[r][c] == <span style="color: #98be65;">'#'</span>) {
+                water[islands++] = count_water(r, c);
+                restore_water();
+            }
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">imax</span> = 0;
+    <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 1; i &lt; islands; i++)
+        <span style="color: #51afef;">if</span> (water[imax] &lt; water[i])
+            imax = i;
+    printf(<span style="color: #98be65;">"%i %i"</span>, imax + 1, water[imax]);
+}
+</pre>
+</div>
+
+
+<p>
+La différence principale avec ma solution est la façon dont on évite le double
+comptage. Moi j&rsquo;utilise un tableau externe <code>water_counted</code> que je remets à
+<code>false</code> avant chaque île. MJZ n&rsquo;a aucun tableau auxiliaire : elle marque
+directement dans la grille, en remplaçant <code>~</code> par <code>W</code> et <code>#</code> par <code>X</code>. Le
+résultat est le même, mais la mécanique est inversée.
+</p>
+
+<p>
+Autre différence notable : ma fonction <code>dfs</code> retourne un entier et accumule le
+littoral au fur et à mesure de la récursion. Chez MJZ, <code>count_water</code> fait la
+même chose mais elle est aussi appelée sur les cases <code>~</code>, ce qui lui permet de
+gérer eau et terre dans une seule fonction récursive sans boucle sur les 4
+directions.
+</p>
+
+
+
+<hr />
+</div>
+</div>
+<div id="outline-container-orgb805f25" class="outline-2">
+<h2 id="orgb805f25"><span class="section-number-2">7.</span> Bilan</h2>
+<div class="outline-text-2" id="text-7">
+<p>
+L&rsquo;exercice était globalement accessible, le DFS sur grille se met en place
+assez naturellement une fois qu&rsquo;on a compris le principe. Le seul vrai point de
+blocage était le double comptage des cases que je n&rsquo;avais au début  pas
+anticipé . Une fois le tableau <code>water_counted</code> en place avec son reset, tout s&rsquo;est débloqué assez vite.
+</p>
+
+<p>
+En comparant avec la solution de MJZ, je réalise que modifier directement la
+grille est une technique à retenir : ça évite de devoir synchroniser deux
+structures en parallèle.
+</p>
+
+
+<hr />
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="date">Date: 26 Mars 2026</p>
+<p class="author">Auteur: ALEXANDRE Maé - Prep&rsquo;ISIMA 1</p>
+<p class="date">Created: 2026-05-07 jeu. 01:07</p>
+</div>
+</body>
+</html>

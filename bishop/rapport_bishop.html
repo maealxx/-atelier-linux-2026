@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="ALEXANDRE Maé - Prep’ISIMA 1" />
+  <title>Rapport The Drunken Bishop</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    /* CSS for syntax highlighting */
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="../css/md.css" />
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Rapport The Drunken Bishop</h1>
+<p class="author">ALEXANDRE Maé - Prep’ISIMA 1</p>
+<p class="date">23 Janvier 2026</p>
+</header>
+<h1 id="ascii-art-the-drunken-bishop-algorithm">ASCII Art — The Drunken
+Bishop Algorithm</h1>
+<p><a
+href="https://www.codingame.com/training/easy/ascii-art-the-drunken-bishop-algorithm">Lien
+vers l’exercice CodingGame</a> <img src="../images/bishop.png"
+alt="bishop" /></p>
+<hr />
+<h2 id="introduction">1. Introduction</h2>
+<p>Ce puzzle coding game traite de la génération du <strong>SSH
+Randomart</strong>, aussi appelé <em>Drunken Bishop Algorithm</em>.
+C’est l’algorithme utilisé par <a
+href="https://fr.wikipedia.org/wiki/OpenSSH">OpenSSH</a> pour produire
+des petits dessins ASCII afin de rendre une empreinte hexadécimale
+visuellement reconnaissable pour un humain.</p>
+<p>Le but est que a partir d’une empreinte hexadécimale de 32 octets, on
+déplace un “évêque” sur une grille 17×9, en partant du centre (8 ; 4)
+notée <code>S</code>. Chaque octet de l’empreinte code 4 déplacements
+diagonaux grâce à ses paires de bits. Une fois les 128 déplacements
+effectués, chaque case de la grille affiche un symbole selon le nombre
+de fois que l’évêque l’a visitée, et la case finale est marquée
+<code>E</code>.</p>
+<hr />
+<h2 id="algorithme-de-résolution">2. Algorithme de résolution</h2>
+<p>Afin de résoudre ce problème, on suivra l’algorithme suivant :</p>
+<ol type="1">
+<li>Initialiser une grille 17×9 remplie de zéros, et placer le curseur
+au centre en (8, 4).</li>
+<li>Découper l’empreinte hexadécimale octet par octet .</li>
+<li><strong>Pour chaque octet</strong> :
+<ul>
+<li>Convertir l’octet hexadécimal en entier.</li>
+<li><strong>Pour chaque paire de bits</strong> (de 0 à 3, en partant du
+poids faible) :
+<ul>
+<li>Extraire la paire par décalage et masque.</li>
+<li><strong>Selon la valeur de la paire</strong> : déterminer la
+direction diagonale qui correspond a la valeur (haut-gauche,
+haut-droite, bas-gauche ou bas-droite).</li>
+<li>Calculer la position suivante.</li>
+<li><strong>Si</strong> la nouvelle position sort des bornes
+horizontales on annule le déplacement horizontal.</li>
+<li><strong>Si</strong> la nouvelle position sort des bornes verticales
+alors on annule le déplacement vertical.</li>
+<li>Mettre à jour la position et incrémenter le compteur de la case
+atteinte.</li>
+</ul></li>
+</ul></li>
+<li>sauvegarder la position finale.</li>
+<li>Afficher la grille : <strong>pour chaque case</strong>, afficher le
+point de départ, d’arrivée, ou le symbole correspondant au
+compteur.</li>
+</ol>
+<hr />
+<h2 id="code-commenté">3. Code commenté</h2>
+<p><a href="./bishop.py"><em>Voir le fichier bishop.py</em></a></p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>fingerprint <span class="op">=</span> <span class="bu">input</span>()</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Symboles utilisés pour représenter le nombre de passages sur une case</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>SYMBOLES <span class="op">=</span> [<span class="st">&#39; &#39;</span>, <span class="st">&#39;.&#39;</span>, <span class="st">&#39;o&#39;</span>, <span class="st">&#39;+&#39;</span>, <span class="st">&#39;=&#39;</span>, <span class="st">&#39;*&#39;</span>, <span class="st">&#39;B&#39;</span>, <span class="st">&#39;O&#39;</span>, <span class="st">&#39;X&#39;</span>, <span class="st">&#39;@&#39;</span>, <span class="st">&#39;%&#39;</span>, <span class="st">&#39;&amp;&#39;</span>, <span class="st">&#39;#&#39;</span>, <span class="st">&#39;/&#39;</span>, <span class="st">&#39;^&#39;</span>]</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>LARGEUR, HAUTEUR <span class="op">=</span> <span class="dv">17</span>, <span class="dv">9</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Grille qui va compter le nombre de passages sur chaque case</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>grille <span class="op">=</span> [[<span class="dv">0</span>] <span class="op">*</span> LARGEUR <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(HAUTEUR)]</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Position de départ du curseur</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>x, y <span class="op">=</span> <span class="dv">8</span>, <span class="dv">4</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>depart <span class="op">=</span> (x, y)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="co"># On sépare l&#39;empreinte en octets</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>liste_octets <span class="op">=</span> fingerprint.split(<span class="st">&#39;:&#39;</span>)</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> octet <span class="kw">in</span> liste_octets:</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    <span class="co"># On convertit l&#39;octet hexadécimal en entier</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    valeur <span class="op">=</span> <span class="bu">int</span>(octet, <span class="dv">16</span>)</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> n <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">4</span>):</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>        <span class="co"># On extrait la n-ième paire de bits (de droite à gauche)</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>        paire <span class="op">=</span> (valeur <span class="op">&gt;&gt;</span> (n <span class="op">*</span> <span class="dv">2</span>)) <span class="op">&amp;</span> <span class="bn">0b11</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>        <span class="co"># On associe chaque paire à une direction diagonale</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> paire <span class="op">==</span> <span class="bn">0b00</span>:</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>            dx, dy <span class="op">=</span> <span class="op">-</span><span class="dv">1</span>, <span class="op">-</span><span class="dv">1</span>  <span class="co"># haut-gauche</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>        <span class="cf">elif</span> paire <span class="op">==</span> <span class="bn">0b01</span>:</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>            dx, dy <span class="op">=</span> <span class="dv">1</span>, <span class="op">-</span><span class="dv">1</span>   <span class="co"># haut-droite</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>        <span class="cf">elif</span> paire <span class="op">==</span> <span class="bn">0b10</span>:</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>            dx, dy <span class="op">=</span> <span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>   <span class="co"># bas-gauche</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>            dx, dy <span class="op">=</span> <span class="dv">1</span>, <span class="dv">1</span>    <span class="co"># bas-droite</span></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>        nx <span class="op">=</span> x <span class="op">+</span> dx</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>        ny <span class="op">=</span> y <span class="op">+</span> dy</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Si le curseur sort de la grille, on annule le déplacement sur l&#39;axe concerné</span></span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> nx <span class="op">&lt;</span> <span class="dv">0</span> <span class="kw">or</span> nx <span class="op">&gt;=</span> LARGEUR:</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>            nx <span class="op">=</span> x</span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> ny <span class="op">&lt;</span> <span class="dv">0</span> <span class="kw">or</span> ny <span class="op">&gt;=</span> HAUTEUR:</span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>            ny <span class="op">=</span> y</span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>        x, y <span class="op">=</span> nx, ny</span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>        <span class="co"># On incrémente le compteur de la case visitée</span></span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>        grille[y][x] <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a><span class="co"># On mémorise la position finale</span></span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>arrivee <span class="op">=</span> (x, y)</span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;+---[CODINGAME]---+&quot;</span>)</span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(HAUTEUR):</span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>    ligne <span class="op">=</span> <span class="st">&quot;|&quot;</span></span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> j <span class="kw">in</span> <span class="bu">range</span>(LARGEUR):</span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>        <span class="co"># On place S au départ, E à l&#39;arrivée, sinon le symbole correspondant</span></span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (j, i) <span class="op">==</span> depart:</span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a>            ligne <span class="op">+=</span> <span class="st">&quot;S&quot;</span></span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a>        <span class="cf">elif</span> (j, i) <span class="op">==</span> arrivee:</span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a>            ligne <span class="op">+=</span> <span class="st">&quot;E&quot;</span></span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Le modulo évite de dépasser la taille de la liste</span></span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a>            ligne <span class="op">+=</span> SYMBOLES[grille[i][j] <span class="op">%</span> <span class="bu">len</span>(SYMBOLES)]</span>
+<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(ligne <span class="op">+</span> <span class="st">&quot;|&quot;</span>)</span>
+<span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;+-----------------+&quot;</span>)</span></code></pre></div>
+<hr />
+<h2 id="résultats">4. Résultats</h2>
+<p>Pour l’empreinte
+<code>16:27:ac:a5:76:28:2d:36:63:1b:56:4d:eb:df:a6:48</code> :</p>
+<pre><code>+---[CODINGAME]---+
+|        .        |
+|       + .       |
+|      . B .      |
+|     o S +       |
+|    . * o        |
+|   o B + .       |
+|  . O o .        |
+|   .=E           |
+|    ..           |
++-----------------+</code></pre>
+<p>Les cases centrales ont plus de passages (symboles denses comme
+<code>B</code>, <code>O</code>), ce qui est logique car l’évêque part du
+centre et à plus de chances d’y rester.</p>
+<hr />
+<h2 id="solution-alternative">5. Solution alternative</h2>
+<p><a
+href="https://www.codingame.com/training/easy/ascii-art-the-drunken-bishop-algorithm/solution?id=31142030">Voir
+la solution de <em>NiXerasse</em> sur CodingGame</a></p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>bits <span class="op">=</span> <span class="ss">f&#39;</span><span class="sc">{</span><span class="bu">int</span>(<span class="bu">input</span>().replace(<span class="st">&quot;:&quot;</span>, <span class="st">&quot;&quot;</span>), <span class="dv">16</span>)<span class="sc">:0128b}</span><span class="ss">&#39;</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>f <span class="op">=</span> [[<span class="dv">0</span>] <span class="op">*</span> <span class="dv">17</span> <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">9</span>)]</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>x, y <span class="op">=</span> <span class="dv">8</span>, <span class="dv">4</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">0</span>, <span class="dv">128</span>, <span class="dv">8</span>):</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    byte <span class="op">=</span> bits[i:i<span class="op">+</span><span class="dv">8</span>][::<span class="op">-</span><span class="dv">1</span>]</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> a, b <span class="kw">in</span> <span class="bu">zip</span>(byte[::<span class="dv">2</span>], byte[<span class="dv">1</span>::<span class="dv">2</span>]):</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>        dx, dy <span class="op">=</span> [(<span class="op">-</span><span class="dv">1</span>, <span class="op">-</span><span class="dv">1</span>), (<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>), (<span class="dv">1</span>, <span class="op">-</span><span class="dv">1</span>), (<span class="dv">1</span>, <span class="dv">1</span>)][<span class="bu">int</span>(a <span class="op">+</span> b, <span class="dv">2</span>)]</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>        x <span class="op">+=</span> dx <span class="op">*</span> (<span class="dv">0</span> <span class="op">&lt;=</span> x <span class="op">+</span> dx <span class="op">&lt;</span> <span class="dv">17</span>)</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>        y <span class="op">+=</span> dy <span class="op">*</span> (<span class="dv">0</span> <span class="op">&lt;=</span> y <span class="op">+</span> dy <span class="op">&lt;</span> <span class="dv">9</span>)</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>        f[y][x] <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> py <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">9</span>):</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> px <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">17</span>):</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>        f[py][px] <span class="op">=</span> <span class="st">&#39; .o+=*BOX@%&amp;#/^&#39;</span>[f[py][px] <span class="op">%</span> <span class="dv">15</span>]</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>f[<span class="dv">4</span>][<span class="dv">8</span>], f[y][x] <span class="op">=</span> <span class="st">&#39;SE&#39;</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&#39;+---[CODINGAME]---+&#39;</span>)</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> r <span class="kw">in</span> f:</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">&#39;|&#39;</span> <span class="op">+</span> <span class="st">&#39;&#39;</span>.join(r) <span class="op">+</span> <span class="st">&#39;|&#39;</span>)</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&#39;+-----------------+&#39;</span>)</span></code></pre></div>
+<p>Cette solution à un peu près le même algorithme que le mien, mais la
+forme est différente.</p>
+<p>La première différence majeure concerne la conversion de l’empreinte.
+Là où je traite les octets un par un dans une boucle, NiXerasse
+convertit toute l’empreinte en une seule chaîne de 128 bits dès le
+départ avec <code>f'{int(..., 16):0128b}'</code>.</p>
+<p>La deuxième différence est la gestion de l’ordre LSB-first. Dans mon
+code, je l’obtiens grâce au décalage <code>&gt;&gt; (n * 2)</code>. Ici,
+l’octet est simplement inversé avec <code>[::-1]</code> avant d’en
+extraire les paires.</p>
+<p>La troisième différence est la gestion des bords. Au lieu d’un
+<code>if</code>, le déplacement est multiplié par le résultat d’une
+comparaison booléenne : <code>dx * (0 &lt;= x + dx &lt; 17)</code>. Donc
+si la nouvelle position sort de la grille, le déplacement est annulé par
+la multiplication par <code>0</code>.</p>
+<hr />
+<h2 id="bilan">6. Bilan</h2>
+<p>Ce projet m’a permis de manipuler les bits en Python notamment les
+décalages <code>&gt;&gt;</code> que je n’avais jamais utilisés avant.
+J’ai aussi vu que l’ordre LSB-first est une convention du protocole
+SSH.</p>
+<p>En regardant la solution de NiXerasse, j’ai vu une autre facon de
+gérer les bords en faisant la multiplication booléenne au lieu des
+<code>if</code>.</p>
+<hr />
+<script>
+(function() {
+  const bar = document.createElement('div');
+  bar.id = 'nav-bar';
+
+  // Bouton accueil
+  const home = document.createElement('a');
+  home.href = '../index.html';
+  home.textContent = '← Accueil';
+  bar.appendChild(home);
+
+  // Bouton .md — déduit automatiquement depuis l'URL de la page
+  const md = document.createElement('a');
+  const mdName = location.pathname.split('/').pop().replace('.html', '.md');
+  md.href = './' + mdName;
+  md.textContent = '⬇ .md';
+  bar.appendChild(md);
+
+  // Bouton toggle thème
+  const toggle = document.createElement('button');
+  if (localStorage.getItem('theme') === 'dark') {
+    document.body.classList.add('dark');
+    toggle.textContent = '☀ Jour';
+  } else {
+    toggle.textContent = '☾ Nuit';
+  }
+  toggle.addEventListener('click', () => {
+    document.body.classList.toggle('dark');
+    const isDark = document.body.classList.contains('dark');
+    toggle.textContent = isDark ? '☀ Jour' : '☾ Nuit';
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+  });
+  bar.appendChild(toggle);
+
+  document.body.appendChild(bar);
+})();
+</script>
+</body>
+</html>

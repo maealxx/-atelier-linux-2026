@@ -1,0 +1,622 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Doc_labyrinthe: Référence du fichier labyrinthe.c</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectlogo"><img alt="Logo" src="maze1.gif"/></td>
+  <td id="projectalign">
+   <div id="projectname">Doc_labyrinthe
+   </div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Généré par Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('',true,false,'search.php','Recherche');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Chargement...</div>
+<div class="SRStatus" id="Searching">Recherche...</div>
+<div class="SRStatus" id="NoMatches">Aucune correspondance</div>
+</div>
+</div>
+</div>
+</div>
+
+</div><!-- top -->
+<div class="header">
+  <div class="summary">
+<a href="#nested-classes">Classes</a> &#124;
+<a href="#define-members">Macros</a> &#124;
+<a href="#func-members">Fonctions</a> &#124;
+<a href="#var-members">Variables</a>  </div>
+  <div class="headertitle"><div class="title">Référence du fichier labyrinthe.c</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>Bot Rick pour le puzzle "The Labyrinth" sur CodingGame.  
+<a href="#details">Plus de détails...</a></p>
+<div class="textblock"><code>#include &lt;stdlib.h&gt;</code><br />
+<code>#include &lt;stdio.h&gt;</code><br />
+<code>#include &lt;string.h&gt;</code><br />
+<code>#include &lt;stdbool.h&gt;</code><br />
+</div><div class="textblock"><div class="dynheader">
+Graphe des dépendances par inclusion de labyrinthe.c:</div>
+<div class="dyncontent">
+<div class="center"><img src="labyrinthe_8c__incl.png" border="0" usemap="#alabyrinthe_8c" alt=""/></div>
+<map name="alabyrinthe_8c" id="alabyrinthe_8c">
+<area shape="rect" title="Bot Rick pour le puzzle &quot;The Labyrinth&quot; sur CodingGame." alt="" coords="131,5,230,31"/>
+<area shape="rect" title=" " alt="" coords="5,79,76,104"/>
+<area shape="poly" title=" " alt="" coords="159,33,77,75,74,70,157,28"/>
+<area shape="rect" title=" " alt="" coords="101,79,167,104"/>
+<area shape="poly" title=" " alt="" coords="175,32,151,69,147,66,171,30"/>
+<area shape="rect" title=" " alt="" coords="192,79,263,104"/>
+<area shape="poly" title=" " alt="" coords="191,30,214,66,210,69,186,32"/>
+<area shape="rect" title=" " alt="" coords="287,79,370,104"/>
+<area shape="poly" title=" " alt="" coords="206,28,293,70,291,75,203,33"/>
+</map>
+</div>
+</div><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structNode.html">Node</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Nœud représentant une case de la grille.  <a href="structNode.html#details">Plus de détails...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
+Macros</h2></td></tr>
+<tr class="memitem:a88c180b8abe327953dd306afb7c1d13e" id="r_a88c180b8abe327953dd306afb7c1d13e"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="labyrinthe_8c.html#a88c180b8abe327953dd306afb7c1d13e">MAXR</a>&#160;&#160;&#160;100</td></tr>
+<tr class="separator:a88c180b8abe327953dd306afb7c1d13e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a879e25d1a53f3b9894f442d2d54cecdc" id="r_a879e25d1a53f3b9894f442d2d54cecdc"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="labyrinthe_8c.html#a879e25d1a53f3b9894f442d2d54cecdc">MAXC</a>&#160;&#160;&#160;200</td></tr>
+<tr class="separator:a879e25d1a53f3b9894f442d2d54cecdc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2d1edde91ea515b363277f4bbdc3244d" id="r_a2d1edde91ea515b363277f4bbdc3244d"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="labyrinthe_8c.html#a2d1edde91ea515b363277f4bbdc3244d">MAXPATH</a>&#160;&#160;&#160;20000</td></tr>
+<tr class="separator:a2d1edde91ea515b363277f4bbdc3244d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+Fonctions</h2></td></tr>
+<tr class="memitem:a0d65297609df413476c352221774c365" id="r_a0d65297609df413476c352221774c365"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="labyrinthe_8c.html#a0d65297609df413476c352221774c365">inBounds</a> (int r, int c)</td></tr>
+<tr class="memdesc:a0d65297609df413476c352221774c365"><td class="mdescLeft">&#160;</td><td class="mdescRight">Vérifie qu'une case est dans les limites de la grille.  <br /></td></tr>
+<tr class="separator:a0d65297609df413476c352221774c365"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac453f3f68b4975f7ff11400dbe40383a" id="r_ac453f3f68b4975f7ff11400dbe40383a"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="labyrinthe_8c.html#ac453f3f68b4975f7ff11400dbe40383a">bfs_distance</a> (int ligneDepart, int colDepart, int ligneCible, int colCible)</td></tr>
+<tr class="memdesc:ac453f3f68b4975f7ff11400dbe40383a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calcule la distance BFS entre deux cases en évitant '#' et '?'.  <br /></td></tr>
+<tr class="separator:ac453f3f68b4975f7ff11400dbe40383a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a64e07c39e374cbdcf62a0589d6095e5d" id="r_a64e07c39e374cbdcf62a0589d6095e5d"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="labyrinthe_8c.html#a64e07c39e374cbdcf62a0589d6095e5d">bfs_move</a> (int ligneDepart, int colDepart, char cible)</td></tr>
+<tr class="memdesc:a64e07c39e374cbdcf62a0589d6095e5d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Renvoie la direction du premier pas BFS vers un caractère cible.  <br /></td></tr>
+<tr class="separator:a64e07c39e374cbdcf62a0589d6095e5d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aae3937f6386f6753309dba34ce814844" id="r_aae3937f6386f6753309dba34ce814844"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="labyrinthe_8c.html#aae3937f6386f6753309dba34ce814844">bfs_explore</a> (int ligneDepart, int colDepart)</td></tr>
+<tr class="memdesc:aae3937f6386f6753309dba34ce814844"><td class="mdescLeft">&#160;</td><td class="mdescRight">Renvoie la direction vers la zone inconnue ('?') la plus proche.  <br /></td></tr>
+<tr class="separator:aae3937f6386f6753309dba34ce814844"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2fef3fb1b7ccaf8e9b1f27d30ba9f22a" id="r_a2fef3fb1b7ccaf8e9b1f27d30ba9f22a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="labyrinthe_8c.html#a2fef3fb1b7ccaf8e9b1f27d30ba9f22a">bfs_build_path</a> (int ligneDepart, int colDepart, int ligneCible, int colCible)</td></tr>
+<tr class="memdesc:a2fef3fb1b7ccaf8e9b1f27d30ba9f22a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construit le chemin BFS optimal de (ligneDepart, colDepart) à (ligneCible, colCible) et le stocke dans cheminRetour[].  <br /></td></tr>
+<tr class="separator:a2fef3fb1b7ccaf8e9b1f27d30ba9f22a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae66f6b31b5ad750f1fe042a706a4e3d4" id="r_ae66f6b31b5ad750f1fe042a706a4e3d4"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="labyrinthe_8c.html#ae66f6b31b5ad750f1fe042a706a4e3d4">main</a> ()</td></tr>
+<tr class="memdesc:ae66f6b31b5ad750f1fe042a706a4e3d4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Point d'entrée — boucle principale du jeu.  <br /></td></tr>
+<tr class="separator:ae66f6b31b5ad750f1fe042a706a4e3d4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
+Variables</h2></td></tr>
+<tr class="memitem:a3d90133d3051fbc4816d02efd9566d8e" id="r_a3d90133d3051fbc4816d02efd9566d8e"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="labyrinthe_8c.html#a3d90133d3051fbc4816d02efd9566d8e">R</a></td></tr>
+<tr class="separator:a3d90133d3051fbc4816d02efd9566d8e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5464533d23b59ba11030432e73528730" id="r_a5464533d23b59ba11030432e73528730"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="labyrinthe_8c.html#a5464533d23b59ba11030432e73528730">C</a></td></tr>
+<tr class="separator:a5464533d23b59ba11030432e73528730"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a56a52f73797a8d06045cf5bc1ab831bf" id="r_a56a52f73797a8d06045cf5bc1ab831bf"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="labyrinthe_8c.html#a56a52f73797a8d06045cf5bc1ab831bf">A</a></td></tr>
+<tr class="separator:a56a52f73797a8d06045cf5bc1ab831bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aebd4eefb7047a9afff63de1d1795a9bb" id="r_aebd4eefb7047a9afff63de1d1795a9bb"><td class="memItemLeft" align="right" valign="top">char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="labyrinthe_8c.html#aebd4eefb7047a9afff63de1d1795a9bb">grille</a> [<a class="el" href="labyrinthe_8c.html#a88c180b8abe327953dd306afb7c1d13e">MAXR</a>][<a class="el" href="labyrinthe_8c.html#a879e25d1a53f3b9894f442d2d54cecdc">MAXC</a>]</td></tr>
+<tr class="separator:aebd4eefb7047a9afff63de1d1795a9bb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a55c5c8093daf64c544d0e6519be526e1" id="r_a55c5c8093daf64c544d0e6519be526e1"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="labyrinthe_8c.html#a55c5c8093daf64c544d0e6519be526e1">deltaLigne</a> [4] = {-1, 1, 0, 0}</td></tr>
+<tr class="separator:a55c5c8093daf64c544d0e6519be526e1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afaf2760c25fd67b86ea732deb154fdaf" id="r_afaf2760c25fd67b86ea732deb154fdaf"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="labyrinthe_8c.html#afaf2760c25fd67b86ea732deb154fdaf">deltaCol</a> [4] = {0, 0, -1, 1}</td></tr>
+<tr class="separator:afaf2760c25fd67b86ea732deb154fdaf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab564514d01b7be43bc94982d9a289787" id="r_ab564514d01b7be43bc94982d9a289787"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="labyrinthe_8c.html#ab564514d01b7be43bc94982d9a289787">nomDir</a> [4] = {&quot;UP&quot;, &quot;DOWN&quot;, &quot;LEFT&quot;, &quot;RIGHT&quot;}</td></tr>
+<tr class="separator:ab564514d01b7be43bc94982d9a289787"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a869cb10a94bf419d4cd6a6722d4adf97" id="r_a869cb10a94bf419d4cd6a6722d4adf97"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="labyrinthe_8c.html#a869cb10a94bf419d4cd6a6722d4adf97">cheminRetour</a> [<a class="el" href="labyrinthe_8c.html#a2d1edde91ea515b363277f4bbdc3244d">MAXPATH</a>]</td></tr>
+<tr class="separator:a869cb10a94bf419d4cd6a6722d4adf97"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a23f998e4282c5a01bc8594f8e8baf04b" id="r_a23f998e4282c5a01bc8594f8e8baf04b"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="labyrinthe_8c.html#a23f998e4282c5a01bc8594f8e8baf04b">longueurChemin</a> = 0</td></tr>
+<tr class="separator:a23f998e4282c5a01bc8594f8e8baf04b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0435af466dce43184ce3125cfd982639" id="r_a0435af466dce43184ce3125cfd982639"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="labyrinthe_8c.html#a0435af466dce43184ce3125cfd982639">indexChemin</a> = 0</td></tr>
+<tr class="separator:a0435af466dce43184ce3125cfd982639"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Description détaillée</h2>
+<div class="textblock"><p>Bot Rick pour le puzzle "The Labyrinth" sur CodingGame. </p>
+<p>Rick explore un labyrinthe inconnu, trouve la salle de commande (C), appuie dessus, puis revient à son point de départ (T) avant que l'alarme n'expire. On utilise BFS pour explorer, se diriger et précalculer le chemin de retour.</p>
+<dl class="section author"><dt>Auteur</dt><dd>ALEXANDRE Maé </dd></dl>
+<dl class="section date"><dt>Date</dt><dd>2025-2026 </dd></dl>
+</div><h2 class="groupheader">Documentation des macros</h2>
+<a id="a879e25d1a53f3b9894f442d2d54cecdc" name="a879e25d1a53f3b9894f442d2d54cecdc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a879e25d1a53f3b9894f442d2d54cecdc">&#9670;&#160;</a></span>MAXC</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define MAXC&#160;&#160;&#160;200</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Nombre maximum de colonnes de la grille. </p>
+
+</div>
+</div>
+<a id="a2d1edde91ea515b363277f4bbdc3244d" name="a2d1edde91ea515b363277f4bbdc3244d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2d1edde91ea515b363277f4bbdc3244d">&#9670;&#160;</a></span>MAXPATH</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define MAXPATH&#160;&#160;&#160;20000</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Taille maximale du chemin de retour stocké. </p>
+
+</div>
+</div>
+<a id="a88c180b8abe327953dd306afb7c1d13e" name="a88c180b8abe327953dd306afb7c1d13e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a88c180b8abe327953dd306afb7c1d13e">&#9670;&#160;</a></span>MAXR</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define MAXR&#160;&#160;&#160;100</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Nombre maximum de lignes de la grille. </p>
+
+</div>
+</div>
+<h2 class="groupheader">Documentation des fonctions</h2>
+<a id="a2fef3fb1b7ccaf8e9b1f27d30ba9f22a" name="a2fef3fb1b7ccaf8e9b1f27d30ba9f22a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2fef3fb1b7ccaf8e9b1f27d30ba9f22a">&#9670;&#160;</a></span>bfs_build_path()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void bfs_build_path </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>ligneDepart</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>colDepart</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>ligneCible</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>colCible</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Construit le chemin BFS optimal de (ligneDepart, colDepart) à (ligneCible, colCible) et le stocke dans cheminRetour[]. </p>
+<p>Reconstruit le chemin à rebours via le tableau parent, puis l'inverse pour l'obtenir dans le bon sens (source -&gt; cible). Les cases '#' et '?' sont exclues du parcours.</p>
+<dl class="params"><dt>Paramètres</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ligneDepart</td><td>Ligne source (position de Rick sur C au moment de l'appel). </td></tr>
+    <tr><td class="paramname">colDepart</td><td>Colonne source. </td></tr>
+    <tr><td class="paramname">ligneCible</td><td>Ligne cible (position de départ T). </td></tr>
+    <tr><td class="paramname">colCible</td><td>Colonne cible. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ac453f3f68b4975f7ff11400dbe40383a" name="ac453f3f68b4975f7ff11400dbe40383a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac453f3f68b4975f7ff11400dbe40383a">&#9670;&#160;</a></span>bfs_distance()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int bfs_distance </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>ligneDepart</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>colDepart</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>ligneCible</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>colCible</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Calcule la distance BFS entre deux cases en évitant '#' et '?'. </p>
+<p>Utilisée pour vérifier que la distance de retour depuis C est inférieure ou égale au budget A avant de s'engager vers C.</p>
+<dl class="params"><dt>Paramètres</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ligneDepart</td><td>Ligne source. </td></tr>
+    <tr><td class="paramname">colDepart</td><td>Colonne source. </td></tr>
+    <tr><td class="paramname">ligneCible</td><td>Ligne cible. </td></tr>
+    <tr><td class="paramname">colCible</td><td>Colonne cible. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Renvoie</dt><dd>Distance en nombre de cases, ou -1 si aucun chemin n'existe. </dd></dl>
+
+</div>
+</div>
+<a id="aae3937f6386f6753309dba34ce814844" name="aae3937f6386f6753309dba34ce814844"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aae3937f6386f6753309dba34ce814844">&#9670;&#160;</a></span>bfs_explore()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">char * bfs_explore </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>ligneDepart</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>colDepart</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Renvoie la direction vers la zone inconnue ('?') la plus proche. </p>
+<p>Effectue un BFS sur le terrain connu uniquement (sans '#' ni '?'). Pour chaque case visitée, inspecte ses voisins immédiats : dès qu'un voisin est '?', on se dirige vers lui sans le traverser.</p>
+<dl class="params"><dt>Paramètres</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ligneDepart</td><td>Ligne source. </td></tr>
+    <tr><td class="paramname">colDepart</td><td>Colonne source. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Renvoie</dt><dd>Chaîne de direction vers la frontière inconnue, ou NULL si aucune zone '?' n'est atteignable. </dd></dl>
+
+</div>
+</div>
+<a id="a64e07c39e374cbdcf62a0589d6095e5d" name="a64e07c39e374cbdcf62a0589d6095e5d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a64e07c39e374cbdcf62a0589d6095e5d">&#9670;&#160;</a></span>bfs_move()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">char * bfs_move </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>ligneDepart</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>colDepart</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char&#160;</td>
+          <td class="paramname"><em>cible</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Renvoie la direction du premier pas BFS vers un caractère cible. </p>
+<p>Parcourt la carte en autorisant les cases '?' (on sait déjà où est la cible donc on peut traverser l'inconnu). Remonte le tableau parent pour identifier le voisin direct de la source, puis déduit la direction à prendre.</p>
+<dl class="params"><dt>Paramètres</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ligneDepart</td><td>Ligne source (position actuelle de Rick). </td></tr>
+    <tr><td class="paramname">colDepart</td><td>Colonne source. </td></tr>
+    <tr><td class="paramname">cible</td><td>Caractère cible à atteindre (ex. 'C'). </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Renvoie</dt><dd>Chaîne de direction ("UP", "DOWN", "LEFT", "RIGHT"), ou NULL si la cible est inaccessible. </dd></dl>
+
+</div>
+</div>
+<a id="a0d65297609df413476c352221774c365" name="a0d65297609df413476c352221774c365"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0d65297609df413476c352221774c365">&#9670;&#160;</a></span>inBounds()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool inBounds </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>r</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>c</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Vérifie qu'une case est dans les limites de la grille. </p>
+<dl class="params"><dt>Paramètres</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">r</td><td>Ligne à tester. </td></tr>
+    <tr><td class="paramname">c</td><td>Colonne à tester. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Renvoie</dt><dd>true si (r, c) est dans [0, R[ x [0, C[, false sinon. </dd></dl>
+
+</div>
+</div>
+<a id="ae66f6b31b5ad750f1fe042a706a4e3d4" name="ae66f6b31b5ad750f1fe042a706a4e3d4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae66f6b31b5ad750f1fe042a706a4e3d4">&#9670;&#160;</a></span>main()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int main </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Point d'entrée — boucle principale du jeu. </p>
+<p>Lit les dimensions et le budget d'alarme, initialise la carte à '?', puis tourne en boucle infinie. À chaque tour, met à jour la carte, évalue l'état courant (exploration / aller vers C / retour vers T) et émet une direction sur stdout.</p>
+<dl class="section return"><dt>Renvoie</dt><dd>0 (jamais atteint en pratique). </dd></dl>
+
+</div>
+</div>
+<h2 class="groupheader">Documentation des variables</h2>
+<a id="a56a52f73797a8d06045cf5bc1ab831bf" name="a56a52f73797a8d06045cf5bc1ab831bf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a56a52f73797a8d06045cf5bc1ab831bf">&#9670;&#160;</a></span>A</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int A</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Budget de tours pour revenir après avoir atteint C. </p>
+
+</div>
+</div>
+<a id="a5464533d23b59ba11030432e73528730" name="a5464533d23b59ba11030432e73528730"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5464533d23b59ba11030432e73528730">&#9670;&#160;</a></span>C</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int C</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Nombre réel de colonnes (lu en entrée). </p>
+
+</div>
+</div>
+<a id="a869cb10a94bf419d4cd6a6722d4adf97" name="a869cb10a94bf419d4cd6a6722d4adf97"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a869cb10a94bf419d4cd6a6722d4adf97">&#9670;&#160;</a></span>cheminRetour</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int cheminRetour[<a class="el" href="labyrinthe_8c.html#a2d1edde91ea515b363277f4bbdc3244d">MAXPATH</a>]</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Indices de direction du chemin de retour (0=UP 1=DOWN 2=LEFT 3=RIGHT). </p>
+
+</div>
+</div>
+<a id="afaf2760c25fd67b86ea732deb154fdaf" name="afaf2760c25fd67b86ea732deb154fdaf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afaf2760c25fd67b86ea732deb154fdaf">&#9670;&#160;</a></span>deltaCol</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int deltaCol[4] = {0, 0, -1, 1}</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Deltas de colonne pour les 4 directions : haut, bas, gauche, droite. </p>
+
+</div>
+</div>
+<a id="a55c5c8093daf64c544d0e6519be526e1" name="a55c5c8093daf64c544d0e6519be526e1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a55c5c8093daf64c544d0e6519be526e1">&#9670;&#160;</a></span>deltaLigne</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int deltaLigne[4] = {-1, 1, 0, 0}</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Deltas de ligne pour les 4 directions : haut, bas, gauche, droite. </p>
+
+</div>
+</div>
+<a id="aebd4eefb7047a9afff63de1d1795a9bb" name="aebd4eefb7047a9afff63de1d1795a9bb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aebd4eefb7047a9afff63de1d1795a9bb">&#9670;&#160;</a></span>grille</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">char grille[<a class="el" href="labyrinthe_8c.html#a88c180b8abe327953dd306afb7c1d13e">MAXR</a>][<a class="el" href="labyrinthe_8c.html#a879e25d1a53f3b9894f442d2d54cecdc">MAXC</a>]</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Carte persistante du labyrinthe. '?' = case encore inconnue. </p>
+
+</div>
+</div>
+<a id="a0435af466dce43184ce3125cfd982639" name="a0435af466dce43184ce3125cfd982639"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0435af466dce43184ce3125cfd982639">&#9670;&#160;</a></span>indexChemin</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int indexChemin = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Indice du prochain pas à jouer dans cheminRetour. </p>
+
+</div>
+</div>
+<a id="a23f998e4282c5a01bc8594f8e8baf04b" name="a23f998e4282c5a01bc8594f8e8baf04b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a23f998e4282c5a01bc8594f8e8baf04b">&#9670;&#160;</a></span>longueurChemin</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int longueurChemin = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Nombre total de pas dans le chemin de retour. </p>
+
+</div>
+</div>
+<a id="ab564514d01b7be43bc94982d9a289787" name="ab564514d01b7be43bc94982d9a289787"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab564514d01b7be43bc94982d9a289787">&#9670;&#160;</a></span>nomDir</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">char* nomDir[4] = {&quot;UP&quot;, &quot;DOWN&quot;, &quot;LEFT&quot;, &quot;RIGHT&quot;}</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Noms des directions, dans le même ordre que deltaLigne / deltaCol. </p>
+
+</div>
+</div>
+<a id="a3d90133d3051fbc4816d02efd9566d8e" name="a3d90133d3051fbc4816d02efd9566d8e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3d90133d3051fbc4816d02efd9566d8e">&#9670;&#160;</a></span>R</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int R</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Nombre réel de lignes (lu en entrée). </p>
+
+</div>
+</div>
+</div><!-- contents -->
+<!-- start footer part -->
+<hr class="footer"/><address class="footer"><small>
+Généré par&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8
+</small></address>
+</body>
+</html>

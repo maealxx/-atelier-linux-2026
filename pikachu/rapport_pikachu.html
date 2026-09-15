@@ -1,0 +1,445 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr" xml:lang="fr">
+<head>
+<!-- 2026-05-07 jeu. 01:06 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Rapport - Detective Pikaptcha EP1 &amp; EP2</title>
+<meta name="author" content="ALEXANDRE Maé - Prep'ISIMA 1" />
+<meta name="generator" content="Org Mode" />
+<link rel="stylesheet" href="../css/org.css">
+<script defer src="../css/nav.js"></script>
+</head>
+<body>
+<div id="content" class="content">
+<h1 class="title">Rapport - Detective Pikaptcha EP1 &amp; EP2</h1>
+<div id="table-of-contents" role="doc-toc">
+<h2>Table des matières</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#org2444ddd">1. Introduction</a></li>
+<li><a href="#org3554e55">2. EP1 - Passages adjacents</a></li>
+<li><a href="#org02c1ff7">3. EP2 - Wall-following</a></li>
+<li><a href="#orgee05ac6">4. Solution alternative - EP2</a></li>
+<li><a href="#org06e6249">5. Bilan</a></li>
+</ul>
+</div>
+</div>
+<ul class="org-ul">
+<li><a href="https://www.codingame.com/training/easy/detective-pikaptcha-ep1">Lien vers EP1 sur CodingGame</a></li>
+<li><a href="https://www.codingame.com/training/easy/detective-pikaptcha-ep2">Lien vers EP2 sur CodingGame</a></li>
+</ul>
+
+
+<div id="org9e33e03" class="figure">
+<p><img src="../images/detective.jpeg" alt="detective.jpeg" />
+</p>
+<p><span class="figure-number">Figure&nbsp;1&nbsp;: </span>Image extraite du film &laquo;&nbsp;Détective Pikachu&nbsp;&raquo;</p>
+</div>
+
+<hr />
+<div id="outline-container-org2444ddd" class="outline-2">
+<h2 id="org2444ddd"><span class="section-number-2">1.</span> Introduction</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+Le détective Pikaptcha se retrouve piegé dans un labyrinthe déformé par un  poké-bot. Pour s&rsquo;en sortir, il doit cartographier son environnement.
+</p>
+
+<p>
+Ces deux puzzles CodingGame travaillent sur une grille 2D faite de passages (<code>0</code>) et de murs (<code>#</code>) :
+</p>
+
+<ul class="org-ul">
+<li><b>EP1</b> : pour chaque case passage, compter le nombre de passages voisins adjacents (4 directions).</li>
+<li><b>EP2</b> : simuler le deplacement de Pikaptcha qui suit un mur (gauche ou droite) et compter le nombre de passages sur chaque case jusqu&rsquo;au retour au point de départ.</li>
+</ul>
+
+
+<hr />
+</div>
+</div>
+<div id="outline-container-org3554e55" class="outline-2">
+<h2 id="org3554e55"><span class="section-number-2">2.</span> EP1 - Passages adjacents</h2>
+<div class="outline-text-2" id="text-2">
+</div>
+<div id="outline-container-org19a4d73" class="outline-3">
+<h3 id="org19a4d73"><span class="section-number-3">2.1.</span> Démarche</h3>
+<div class="outline-text-3" id="text-2-1">
+<p>
+En lisant l&rsquo;énoncé, la logique est assez directe : chaque case passage doit afficher 
+combien de ses voisins direct sont aussi des passages. La première idée qui vient, c&rsquo;est de parcourir toute la grille case par case, et pour chaque case passage, de regarder ses 4 voisins (haut, bas, gauche, droite). 
+</p>
+
+<p>
+Le seul piège, c&rsquo;est les bords de la grille,car un voisin peut ne pas exister si on est sur une bordure ou dans un coin. La solution, c&rsquo;est de vérifier d&rsquo;abord que les coordonnées du voisin sont valides avant d&rsquo;essayer d&rsquo;y accéder. 
+</p>
+</div>
+</div>
+<div id="outline-container-org4fd087d" class="outline-3">
+<h3 id="org4fd087d"><span class="section-number-3">2.2.</span> Algorithme de résolution</h3>
+<div class="outline-text-3" id="text-2-2">
+<p>
+<b>Entrée :</b> une grille <code>h × w</code> de caractères (<code>'0'</code> ou <code>'#'</code>)
+<b>Sortie :</b> la même grille où chaque <code>'0'</code> est remplacé par le nombre de passages adjacents
+</p>
+
+
+<div id="org54bec67" class="figure">
+<p><img src="../images/ep1_digraph.png" alt="ep1_digraph.png" />
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-org7efa4a6" class="outline-3">
+<h3 id="org7efa4a6"><span class="section-number-3">2.3.</span> Code commenté</h3>
+<div class="outline-text-3" id="text-2-3">
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #51afef;">import</span> sys
+
+<span style="color: #dcaeea;">largeur</span>, <span style="color: #dcaeea;">hauteur</span> <span style="color: #51afef;">=</span> [<span style="color: #c678dd;">int</span>(i) <span style="color: #51afef;">for</span> i <span style="color: #51afef;">in</span> <span style="color: #c678dd;">input</span>().split()]  <span style="color: #5B6268;"># </span><span style="color: #5B6268;">Dimensions de la grille
+</span>
+<span style="color: #dcaeea;">grille</span> <span style="color: #51afef;">=</span> []
+<span style="color: #51afef;">for</span> i <span style="color: #51afef;">in</span> <span style="color: #c678dd;">range</span>(hauteur):
+    grille.append(<span style="color: #c678dd;">input</span>())  <span style="color: #5B6268;"># </span><span style="color: #5B6268;">On stocke chaque ligne comme une cha&#238;ne
+</span>
+<span style="color: #51afef;">for</span> ligne <span style="color: #51afef;">in</span> <span style="color: #c678dd;">range</span>(hauteur):
+    <span style="color: #dcaeea;">resultat</span> <span style="color: #51afef;">=</span> <span style="color: #98be65;">""</span>  <span style="color: #5B6268;"># </span><span style="color: #5B6268;">Cha&#238;ne de sortie reconstruite &#224; chaque ligne
+</span>    <span style="color: #51afef;">for</span> col <span style="color: #51afef;">in</span> <span style="color: #c678dd;">range</span>(largeur):
+
+        <span style="color: #51afef;">if</span> grille[ligne][col] <span style="color: #51afef;">==</span> <span style="color: #98be65;">'#'</span>:
+            <span style="color: #dcaeea;">resultat</span> <span style="color: #51afef;">+=</span> <span style="color: #98be65;">'#'</span>  <span style="color: #5B6268;"># </span><span style="color: #5B6268;">Mur : recopi&#233; tel quel
+</span>        <span style="color: #51afef;">else</span>:
+            <span style="color: #dcaeea;">compteur</span> <span style="color: #51afef;">=</span> 0  <span style="color: #5B6268;"># </span><span style="color: #5B6268;">Nombre de voisins passage autour de cette case
+</span>            <span style="color: #51afef;">for</span> delta_ligne, delta_col <span style="color: #51afef;">in</span> [(<span style="color: #51afef;">-</span>1, 0), (1, 0), (0, <span style="color: #51afef;">-</span>1), (0, 1)]:  <span style="color: #5B6268;"># </span><span style="color: #5B6268;">Haut, bas, gauche, droite
+</span>                <span style="color: #dcaeea;">voisin_ligne</span> <span style="color: #51afef;">=</span> ligne <span style="color: #51afef;">+</span> delta_ligne
+                <span style="color: #dcaeea;">voisin_col</span>   <span style="color: #51afef;">=</span> col <span style="color: #51afef;">+</span> delta_col
+                <span style="color: #51afef;">if</span> 0 <span style="color: #51afef;">&lt;=</span> voisin_ligne <span style="color: #51afef;">&lt;</span> hauteur <span style="color: #51afef;">and</span> 0 <span style="color: #51afef;">&lt;=</span> voisin_col <span style="color: #51afef;">&lt;</span> largeur:  <span style="color: #5B6268;"># </span><span style="color: #5B6268;">V&#233;rif bornes avant acc&#232;s
+</span>                    <span style="color: #51afef;">if</span> grille[voisin_ligne][voisin_col] <span style="color: #51afef;">==</span> <span style="color: #98be65;">'0'</span>:
+                        <span style="color: #dcaeea;">compteur</span> <span style="color: #51afef;">+=</span> 1  <span style="color: #5B6268;"># </span><span style="color: #5B6268;">Le voisin est un passage, on le compte
+</span>            <span style="color: #dcaeea;">resultat</span> <span style="color: #51afef;">+=</span> <span style="color: #c678dd;">str</span>(compteur)  <span style="color: #5B6268;"># </span><span style="color: #5B6268;">str() obligatoire : on concat&#232;ne dans une cha&#238;ne
+</span>
+    <span style="color: #c678dd;">print</span>(resultat)  <span style="color: #5B6268;"># </span><span style="color: #5B6268;">On affiche la ligne une fois tous les cols trait&#233;s</span>
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orgad6f5b0" class="outline-3">
+<h3 id="orgad6f5b0"><span class="section-number-3">2.4.</span> Résultats</h3>
+<div class="outline-text-3" id="text-2-4">
+<p>
+Pour l&rsquo;entrée suivante :
+</p>
+
+<pre class="example" id="orgc0e6bb3">
+5 3
+&gt;000#
+#0#00
+00#0#
+</pre>
+
+<p>
+Sortie attendue :
+</p>
+
+<pre class="example" id="org7cf098c">
+1322#
+#2#31
+12#1#
+</pre>
+
+
+<hr />
+</div>
+</div>
+</div>
+<div id="outline-container-org02c1ff7" class="outline-2">
+<h2 id="org02c1ff7"><span class="section-number-2">3.</span> EP2 - Wall-following</h2>
+<div class="outline-text-2" id="text-3">
+</div>
+<div id="outline-container-orgd1b9b10" class="outline-3">
+<h3 id="orgd1b9b10"><span class="section-number-3">3.1.</span> Démarche</h3>
+<div class="outline-text-3" id="text-3-1">
+<p>
+Ici c&rsquo;est plus compliqué car Pikaptcha se déplace en suivant un mur, et il faut compter combien de fois il passe sur chaque case.
+</p>
+
+<p>
+L&rsquo;idée , c&rsquo;est que Pikaptcha a toujours une direction de marche, et a chaque étapes il essaie en priorité de coller au mur (tourner vers lui), puis d&rsquo;aller tout droit, puis de s&rsquo;en éloigner, et si il n&rsquo;y a plus d&rsquo;autre options de faire demi-tour. C&rsquo;est cet ordre de priorité qui définit tout le comportement.
+</p>
+
+<p>
+Pour représenter les directions, on les numérote en ordre horaire (0=Haut, 1=Droite, 2=Bas, 3=Gauche) : comme ça, tourner à droite = +1 mod 4, tourner à gauche = -1 mod 4 (ça évite beaucoup de if/else/). Pour les compteurs, on maintient un tableau séparé et on incrémente la case courante <b>avant</b> de bouger, pour bien compter la case de départ dès le premier passage. La condition d&rsquo;arrêt, c&rsquo;est de revenir à la case de départ, mais on la vérifie <b>après</b> le déplacement pour ne pas s&rsquo;arrêter immédiatement au lancement.
+</p>
+</div>
+</div>
+<div id="outline-container-org0edac30" class="outline-3">
+<h3 id="org0edac30"><span class="section-number-3">3.2.</span> Algorithme de résolution</h3>
+<div class="outline-text-3" id="text-3-2">
+<p>
+<b>Entrée :</b> une grille <code>h × w</code>, la position/direction initiales de Pikaptcha, le mur suivi (<code>L</code> ou <code>R</code>)
+</p>
+
+<p>
+<b>Sortie :</b> la grille où chaque passage indique le nombre de fois que Pikaptcha l&rsquo;a traversé
+</p>
+
+
+<div id="orgc2737dc" class="figure">
+<p><img src="../images/ep2_digraph.png" alt="ep2_digraph.png" />
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-orge6d57bd" class="outline-3">
+<h3 id="orge6d57bd"><span class="section-number-3">3.3.</span> Code commenté</h3>
+<div class="outline-text-3" id="text-3-3">
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #51afef;">import</span> sys
+
+<span style="color: #dcaeea;">width</span>, <span style="color: #dcaeea;">height</span> <span style="color: #51afef;">=</span> [<span style="color: #c678dd;">int</span>(i) <span style="color: #51afef;">for</span> i <span style="color: #51afef;">in</span> <span style="color: #c678dd;">input</span>().split()]  <span style="color: #5B6268;"># </span><span style="color: #5B6268;">Dimensions de la grille
+</span>
+<span style="color: #5B6268;"># </span><span style="color: #5B6268;">Directions en ordre horaire : Haut=0, Droite=1, Bas=2, Gauche=3
+</span><span style="color: #dcaeea;">dy</span> <span style="color: #51afef;">=</span> [<span style="color: #51afef;">-</span>1, 0, 1, 0]
+<span style="color: #dcaeea;">dx</span> <span style="color: #51afef;">=</span> [0, 1, 0, <span style="color: #51afef;">-</span>1]
+<span style="color: #dcaeea;">dir_map</span> <span style="color: #51afef;">=</span> {<span style="color: #98be65;">'^'</span>: 0, <span style="color: #98be65;">'&gt;'</span>: 1, <span style="color: #98be65;">'v'</span>: 2, <span style="color: #98be65;">'&lt;'</span>: 3}  <span style="color: #5B6268;"># </span><span style="color: #5B6268;">Conversion caract&#232;re &#8594; indice
+</span>
+<span style="color: #dcaeea;">grille</span> <span style="color: #51afef;">=</span> []
+<span style="color: #dcaeea;">start_x</span>, <span style="color: #dcaeea;">start_y</span>, <span style="color: #dcaeea;">start_dir</span> <span style="color: #51afef;">=</span> 0, 0, 0
+
+<span style="color: #51afef;">for</span> y <span style="color: #51afef;">in</span> <span style="color: #c678dd;">range</span>(height):
+    <span style="color: #dcaeea;">line</span> <span style="color: #51afef;">=</span> <span style="color: #c678dd;">list</span>(<span style="color: #c678dd;">input</span>())  <span style="color: #5B6268;"># </span><span style="color: #5B6268;">Liste de caract&#232;res pour pouvoir modifier les cases
+</span>    grille.append(line)
+    <span style="color: #51afef;">for</span> x <span style="color: #51afef;">in</span> <span style="color: #c678dd;">range</span>(width):
+        <span style="color: #51afef;">if</span> line[x] <span style="color: #51afef;">in</span> dir_map:
+            <span style="color: #dcaeea;">start_x</span>, <span style="color: #dcaeea;">start_y</span> <span style="color: #51afef;">=</span> x, y            <span style="color: #5B6268;"># </span><span style="color: #5B6268;">Position de d&#233;part m&#233;moris&#233;e
+</span>            <span style="color: #dcaeea;">start_dir</span> <span style="color: #51afef;">=</span> dir_map[line[x]]        <span style="color: #5B6268;"># </span><span style="color: #5B6268;">Direction de d&#233;part convertie en indice
+</span>            grille[y][x] <span style="color: #51afef;">=</span> <span style="color: #98be65;">'0'</span>                  <span style="color: #5B6268;"># </span><span style="color: #5B6268;">On remplace le symbole par un passage normal
+</span>
+<span style="color: #dcaeea;">side</span> <span style="color: #51afef;">=</span> <span style="color: #c678dd;">input</span>().strip()  <span style="color: #5B6268;"># </span><span style="color: #5B6268;">Mur &#224; longer : 'L' ou 'R'
+</span>
+<span style="color: #dcaeea;">compteur</span> <span style="color: #51afef;">=</span> [[0] <span style="color: #51afef;">*</span> width <span style="color: #51afef;">for</span> _ <span style="color: #51afef;">in</span> <span style="color: #c678dd;">range</span>(height)]  <span style="color: #5B6268;"># </span><span style="color: #5B6268;">Nombre de passages par case, initialis&#233; &#224; 0
+</span>
+<span style="color: #dcaeea;">x</span>, <span style="color: #dcaeea;">y</span>, <span style="color: #dcaeea;">d</span> <span style="color: #51afef;">=</span> start_x, start_y, start_dir
+
+<span style="color: #5B6268;"># </span><span style="color: #5B6268;">True si on longe le mur droit (sens horaire), False pour le mur gauche
+</span><span style="color: #dcaeea;">horaire</span> <span style="color: #51afef;">=</span> (side <span style="color: #51afef;">==</span> <span style="color: #98be65;">'R'</span>)
+
+<span style="color: #51afef;">while</span> <span style="color: #a9a1e1;">True</span>:
+    <span style="color: #5B6268;"># </span><span style="color: #5B6268;">On calcule l'ordre de priorit&#233; des 4 directions selon le mur long&#233;
+</span>    <span style="color: #5B6268;"># </span><span style="color: #5B6268;">L'id&#233;e : toujours essayer de coller au mur en premier, demi-tour en dernier recours
+</span>    <span style="color: #51afef;">if</span> horaire:
+        <span style="color: #dcaeea;">vers_mur</span>   <span style="color: #51afef;">=</span> (d <span style="color: #51afef;">+</span> 1) <span style="color: #51afef;">%</span> 4   <span style="color: #5B6268;"># </span><span style="color: #5B6268;">Tourner vers le mur droit
+</span>        <span style="color: #dcaeea;">tout_droit</span> <span style="color: #51afef;">=</span> d              <span style="color: #5B6268;"># </span><span style="color: #5B6268;">Continuer dans la m&#234;me direction
+</span>        <span style="color: #dcaeea;">autre_cote</span> <span style="color: #51afef;">=</span> (d <span style="color: #51afef;">-</span> 1) <span style="color: #51afef;">%</span> 4   <span style="color: #5B6268;"># </span><span style="color: #5B6268;">S'&#233;loigner du mur
+</span>        <span style="color: #dcaeea;">demi_tour</span>  <span style="color: #51afef;">=</span> (d <span style="color: #51afef;">+</span> 2) <span style="color: #51afef;">%</span> 4   <span style="color: #5B6268;"># </span><span style="color: #5B6268;">Faire demi-tour
+</span>    <span style="color: #51afef;">else</span>:
+        <span style="color: #dcaeea;">vers_mur</span>   <span style="color: #51afef;">=</span> (d <span style="color: #51afef;">-</span> 1) <span style="color: #51afef;">%</span> 4   <span style="color: #5B6268;"># </span><span style="color: #5B6268;">Tourner vers le mur gauche
+</span>        <span style="color: #dcaeea;">tout_droit</span> <span style="color: #51afef;">=</span> d
+        <span style="color: #dcaeea;">autre_cote</span> <span style="color: #51afef;">=</span> (d <span style="color: #51afef;">+</span> 1) <span style="color: #51afef;">%</span> 4
+        <span style="color: #dcaeea;">demi_tour</span>  <span style="color: #51afef;">=</span> (d <span style="color: #51afef;">+</span> 2) <span style="color: #51afef;">%</span> 4
+
+    <span style="color: #dcaeea;">ordre</span> <span style="color: #51afef;">=</span> [vers_mur, tout_droit, autre_cote, demi_tour]
+
+    <span style="color: #dcaeea;">bouge</span> <span style="color: #51afef;">=</span> <span style="color: #a9a1e1;">False</span>
+    <span style="color: #51afef;">for</span> next_dir <span style="color: #51afef;">in</span> ordre:
+        <span style="color: #dcaeea;">nx</span> <span style="color: #51afef;">=</span> x <span style="color: #51afef;">+</span> dx[next_dir]
+        <span style="color: #dcaeea;">ny</span> <span style="color: #51afef;">=</span> y <span style="color: #51afef;">+</span> dy[next_dir]
+        <span style="color: #dcaeea;">dans_grille</span> <span style="color: #51afef;">=</span> 0 <span style="color: #51afef;">&lt;=</span> nx <span style="color: #51afef;">&lt;</span> width <span style="color: #51afef;">and</span> 0 <span style="color: #51afef;">&lt;=</span> ny <span style="color: #51afef;">&lt;</span> height  <span style="color: #5B6268;"># </span><span style="color: #5B6268;">V&#233;rif bornes avant acc&#232;s
+</span>        <span style="color: #51afef;">if</span> dans_grille <span style="color: #51afef;">and</span> grille[ny][nx] <span style="color: #51afef;">==</span> <span style="color: #98be65;">'0'</span>:           <span style="color: #5B6268;"># </span><span style="color: #5B6268;">Case franchissable
+</span>            <span style="color: #dcaeea;">x</span>, <span style="color: #dcaeea;">y</span>, <span style="color: #dcaeea;">d</span> <span style="color: #51afef;">=</span> nx, ny, next_dir  <span style="color: #5B6268;"># </span><span style="color: #5B6268;">On se d&#233;place et on met &#224; jour la direction
+</span>            compteur[y][x] <span style="color: #51afef;">+=</span> 1         <span style="color: #5B6268;"># </span><span style="color: #5B6268;">On compte le passage sur la nouvelle case
+</span>            <span style="color: #dcaeea;">bouge</span> <span style="color: #51afef;">=</span> <span style="color: #a9a1e1;">True</span>
+            <span style="color: #51afef;">break</span>  <span style="color: #5B6268;"># </span><span style="color: #5B6268;">Premi&#232;re direction valide trouv&#233;e, on arr&#234;te
+</span>
+    <span style="color: #51afef;">if</span> <span style="color: #51afef;">not</span> bouge:                           <span style="color: #5B6268;"># </span><span style="color: #5B6268;">Pikaptcha est bloqu&#233;, on sort
+</span>        <span style="color: #51afef;">break</span>
+    <span style="color: #51afef;">if</span> (x, y) <span style="color: #51afef;">==</span> (start_x, start_y):       <span style="color: #5B6268;"># </span><span style="color: #5B6268;">Retour au point de d&#233;part, boucle termin&#233;e
+</span>        <span style="color: #51afef;">break</span>
+
+<span style="color: #51afef;">for</span> y <span style="color: #51afef;">in</span> <span style="color: #c678dd;">range</span>(height):
+    <span style="color: #dcaeea;">ligne</span> <span style="color: #51afef;">=</span> <span style="color: #98be65;">""</span>
+    <span style="color: #51afef;">for</span> x <span style="color: #51afef;">in</span> <span style="color: #c678dd;">range</span>(width):
+        <span style="color: #dcaeea;">ligne</span> <span style="color: #51afef;">+=</span> <span style="color: #98be65;">'#'</span> <span style="color: #51afef;">if</span> grille[y][x] <span style="color: #51afef;">==</span> <span style="color: #98be65;">'#'</span> <span style="color: #51afef;">else</span> <span style="color: #c678dd;">str</span>(compteur[y][x])
+    <span style="color: #c678dd;">print</span>(ligne)
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org4c0a9e5" class="outline-3">
+<h3 id="org4c0a9e5"><span class="section-number-3">3.4.</span> Résultats</h3>
+<div class="outline-text-3" id="text-3-4">
+<p>
+Pour l&rsquo;entrée suivante :
+</p>
+
+<pre class="example" id="org833a73e">
+5 3
+&gt;000#
+#0#00
+00#0#
+L
+</pre>
+
+<p>
+Sortie attendue :
+</p>
+
+<pre class="example" id="org91bdd24">
+1322#
+#2#31
+12#1#
+</pre>
+
+<p>
+Pikaptcha part en <code>&gt;</code> en <code>(0,0)</code> et suit le mur gauche. Les cases les plus fréquentées sont celles aux intersections ou dans les couloirs étroits où le chemin repasse plusieurs fois.
+</p>
+
+<hr />
+</div>
+</div>
+</div>
+<div id="outline-container-orgee05ac6" class="outline-2">
+<h2 id="orgee05ac6"><span class="section-number-2">4.</span> Solution alternative - EP2</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+<a href="https://www.codingame.com/training/easy/detective-pikaptcha-ep2/solution?id=12154498">Voir la solution de <b>iAmMortos</b> sur CodingGame</a>
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #51afef;">class</span> <span style="color: #ECBE7B;">Pikaptcha</span>(<span style="color: #c678dd;">object</span>):
+    <span style="color: #51afef;">def</span> <span style="color: #c678dd;">__init__</span>(<span style="color: #51afef;">self</span>, width, height, maze, side):
+        <span style="color: #51afef;">self</span>.<span style="color: #dcaeea;">width</span> <span style="color: #51afef;">=</span> width
+        <span style="color: #51afef;">self</span>.<span style="color: #dcaeea;">height</span> <span style="color: #51afef;">=</span> height
+        <span style="color: #51afef;">self</span>.<span style="color: #dcaeea;">maze</span> <span style="color: #51afef;">=</span> maze
+        <span style="color: #51afef;">self</span>.<span style="color: #dcaeea;">side</span> <span style="color: #51afef;">=</span> side
+        <span style="color: #51afef;">self</span>.<span style="color: #dcaeea;">curpos</span> <span style="color: #51afef;">=</span> (<span style="color: #a9a1e1;">None</span>, <span style="color: #a9a1e1;">None</span>)
+        <span style="color: #51afef;">self</span>.<span style="color: #dcaeea;">startingpos</span> <span style="color: #51afef;">=</span> (<span style="color: #a9a1e1;">None</span>, <span style="color: #a9a1e1;">None</span>)
+        <span style="color: #51afef;">self</span>.<span style="color: #dcaeea;">facingidx</span> <span style="color: #51afef;">=</span> <span style="color: #a9a1e1;">None</span>
+        <span style="color: #51afef;">self</span>.<span style="color: #dcaeea;">sideval</span> <span style="color: #51afef;">=</span> 1 <span style="color: #51afef;">if</span> <span style="color: #51afef;">self</span>.side <span style="color: #51afef;">==</span> <span style="color: #98be65;">'R'</span> <span style="color: #51afef;">else</span> <span style="color: #51afef;">-</span>1
+        <span style="color: #51afef;">self</span>.<span style="color: #dcaeea;">directions</span> <span style="color: #51afef;">=</span> [<span style="color: #98be65;">'L'</span>, <span style="color: #98be65;">'U'</span>, <span style="color: #98be65;">'R'</span>, <span style="color: #98be65;">'D'</span>]
+        <span style="color: #51afef;">self</span>.<span style="color: #dcaeea;">dirchars</span> <span style="color: #51afef;">=</span> [<span style="color: #98be65;">'&lt;'</span>, <span style="color: #98be65;">'^'</span>, <span style="color: #98be65;">'&gt;'</span>, <span style="color: #98be65;">'v'</span>]
+        <span style="color: #51afef;">self</span>.<span style="color: #dcaeea;">numdirs</span> <span style="color: #51afef;">=</span> 4
+
+        <span style="color: #51afef;">for</span> y, line <span style="color: #51afef;">in</span> <span style="color: #c678dd;">enumerate</span>(<span style="color: #51afef;">self</span>.maze):
+            <span style="color: #51afef;">for</span> x, c <span style="color: #51afef;">in</span> <span style="color: #c678dd;">enumerate</span>(line):
+                <span style="color: #51afef;">if</span> c <span style="color: #51afef;">in</span> <span style="color: #51afef;">self</span>.dirchars:
+                    <span style="color: #51afef;">self</span>.<span style="color: #dcaeea;">curpos</span> <span style="color: #51afef;">=</span> (x, y)
+                    <span style="color: #51afef;">self</span>.<span style="color: #dcaeea;">startingpos</span> <span style="color: #51afef;">=</span> (x, y)
+                    <span style="color: #51afef;">self</span>.<span style="color: #dcaeea;">facingidx</span> <span style="color: #51afef;">=</span> <span style="color: #51afef;">self</span>.dirchars.index(c)
+                    <span style="color: #51afef;">self</span>.maze[y][x] <span style="color: #51afef;">=</span> 0
+                <span style="color: #51afef;">elif</span> c <span style="color: #51afef;">==</span> <span style="color: #98be65;">'#'</span>:
+                    <span style="color: #51afef;">self</span>.maze[y][x] <span style="color: #51afef;">=</span> <span style="color: #51afef;">-</span>1
+                <span style="color: #51afef;">else</span>:
+                    <span style="color: #51afef;">self</span>.maze[y][x] <span style="color: #51afef;">=</span> <span style="color: #c678dd;">int</span>(c)
+
+    <span style="color: #51afef;">def</span> <span style="color: #c678dd;">run</span>(<span style="color: #51afef;">self</span>):
+        <span style="color: #51afef;">self</span>.step()
+        <span style="color: #51afef;">while</span> <span style="color: #51afef;">self</span>.curpos <span style="color: #51afef;">!=</span> <span style="color: #51afef;">self</span>.startingpos:
+            <span style="color: #51afef;">self</span>.step()
+
+    <span style="color: #51afef;">def</span> <span style="color: #c678dd;">step</span>(<span style="color: #51afef;">self</span>):
+        <span style="color: #51afef;">if</span> <span style="color: #51afef;">self</span>.can_turn_move:
+            <span style="color: #51afef;">self</span>.turn(); <span style="color: #51afef;">self</span>.move_forward()
+        <span style="color: #51afef;">elif</span> <span style="color: #51afef;">self</span>.can_move_forward:
+            <span style="color: #51afef;">self</span>.move_forward()
+        <span style="color: #51afef;">elif</span> <span style="color: #51afef;">self</span>.can_turn_away_move:
+            <span style="color: #51afef;">self</span>.turn_away(); <span style="color: #51afef;">self</span>.move_forward()
+        <span style="color: #51afef;">elif</span> <span style="color: #51afef;">self</span>.can_move_back:
+            <span style="color: #51afef;">self</span>.turn_back(); <span style="color: #51afef;">self</span>.move_forward()
+
+    <span style="color: #51afef;">def</span> <span style="color: #c678dd;">move_forward</span>(<span style="color: #51afef;">self</span>):
+        <span style="color: #51afef;">self</span>.<span style="color: #dcaeea;">curpos</span> <span style="color: #51afef;">=</span> <span style="color: #51afef;">self</span>.get_forward_coords()
+        <span style="color: #dcaeea;">x</span>, <span style="color: #dcaeea;">y</span> <span style="color: #51afef;">=</span> <span style="color: #51afef;">self</span>.curpos
+        <span style="color: #51afef;">self</span>.maze[y][x] <span style="color: #51afef;">+=</span> 1
+
+    <span style="color: #51afef;">def</span> <span style="color: #c678dd;">get_coords_in_dir</span>(<span style="color: #51afef;">self</span>, d):
+        <span style="color: #dcaeea;">x</span>, <span style="color: #dcaeea;">y</span> <span style="color: #51afef;">=</span> <span style="color: #51afef;">self</span>.curpos
+        <span style="color: #51afef;">return</span> (x <span style="color: #51afef;">-</span> 1 <span style="color: #51afef;">if</span> d <span style="color: #51afef;">==</span> <span style="color: #98be65;">'L'</span> <span style="color: #51afef;">else</span> x <span style="color: #51afef;">+</span> 1 <span style="color: #51afef;">if</span> d <span style="color: #51afef;">==</span> <span style="color: #98be65;">'R'</span> <span style="color: #51afef;">else</span> x,
+                y <span style="color: #51afef;">-</span> 1 <span style="color: #51afef;">if</span> d <span style="color: #51afef;">==</span> <span style="color: #98be65;">'U'</span> <span style="color: #51afef;">else</span> y <span style="color: #51afef;">+</span> 1 <span style="color: #51afef;">if</span> d <span style="color: #51afef;">==</span> <span style="color: #98be65;">'D'</span> <span style="color: #51afef;">else</span> y)
+
+    <span style="color: #51afef;">def</span> <span style="color: #c678dd;">get_forward_coords</span>(<span style="color: #51afef;">self</span>): <span style="color: #51afef;">return</span> <span style="color: #51afef;">self</span>.get_coords_in_dir(<span style="color: #51afef;">self</span>.facing)
+    <span style="color: #51afef;">def</span> <span style="color: #c678dd;">turn</span>(<span style="color: #51afef;">self</span>):      <span style="color: #51afef;">self</span>.facingidx <span style="color: #51afef;">=</span> (<span style="color: #51afef;">self</span>.facingidx <span style="color: #51afef;">+</span> <span style="color: #51afef;">self</span>.sideval) <span style="color: #51afef;">%</span> <span style="color: #51afef;">self</span>.numdirs
+    <span style="color: #51afef;">def</span> <span style="color: #c678dd;">turn_away</span>(<span style="color: #51afef;">self</span>): <span style="color: #51afef;">self</span>.facingidx <span style="color: #51afef;">=</span> (<span style="color: #51afef;">self</span>.facingidx <span style="color: #51afef;">-</span> <span style="color: #51afef;">self</span>.sideval) <span style="color: #51afef;">%</span> <span style="color: #51afef;">self</span>.numdirs
+    <span style="color: #51afef;">def</span> <span style="color: #c678dd;">turn_back</span>(<span style="color: #51afef;">self</span>): <span style="color: #51afef;">self</span>.facingidx <span style="color: #51afef;">=</span> (<span style="color: #51afef;">self</span>.facingidx <span style="color: #51afef;">+</span> 2) <span style="color: #51afef;">%</span> <span style="color: #51afef;">self</span>.numdirs
+
+    <span style="color: #51afef;">def</span> <span style="color: #c678dd;">can_move</span>(<span style="color: #51afef;">self</span>, direction):
+        <span style="color: #dcaeea;">x</span>, <span style="color: #dcaeea;">y</span> <span style="color: #51afef;">=</span> <span style="color: #51afef;">self</span>.get_coords_in_dir(direction)
+        <span style="color: #51afef;">if</span> 0 <span style="color: #51afef;">&lt;=</span> x <span style="color: #51afef;">&lt;</span> <span style="color: #51afef;">self</span>.width <span style="color: #51afef;">and</span> 0 <span style="color: #51afef;">&lt;=</span> y <span style="color: #51afef;">&lt;</span> <span style="color: #51afef;">self</span>.height:
+            <span style="color: #51afef;">return</span> <span style="color: #51afef;">self</span>.maze[y][x] <span style="color: #51afef;">&gt;=</span> 0
+        <span style="color: #51afef;">return</span> <span style="color: #a9a1e1;">False</span>
+
+    @<span style="color: #c678dd;">property</span>
+    <span style="color: #51afef;">def</span> <span style="color: #c678dd;">can_move_forward</span>(<span style="color: #51afef;">self</span>):    <span style="color: #51afef;">return</span> <span style="color: #51afef;">self</span>.can_move(<span style="color: #51afef;">self</span>.facing)
+    @<span style="color: #c678dd;">property</span>
+    <span style="color: #51afef;">def</span> <span style="color: #c678dd;">can_move_back</span>(<span style="color: #51afef;">self</span>):       <span style="color: #51afef;">return</span> <span style="color: #51afef;">self</span>.can_move(<span style="color: #51afef;">self</span>.backdir)
+    @<span style="color: #c678dd;">property</span>
+    <span style="color: #51afef;">def</span> <span style="color: #c678dd;">can_turn_move</span>(<span style="color: #51afef;">self</span>):       <span style="color: #51afef;">return</span> <span style="color: #51afef;">self</span>.can_move(<span style="color: #51afef;">self</span>.turndir)
+    @<span style="color: #c678dd;">property</span>
+    <span style="color: #51afef;">def</span> <span style="color: #c678dd;">can_turn_away_move</span>(<span style="color: #51afef;">self</span>):  <span style="color: #51afef;">return</span> <span style="color: #51afef;">self</span>.can_move(<span style="color: #51afef;">self</span>.turnawaydir)
+    @<span style="color: #c678dd;">property</span>
+    <span style="color: #51afef;">def</span> <span style="color: #c678dd;">facing</span>(<span style="color: #51afef;">self</span>):     <span style="color: #51afef;">return</span> <span style="color: #51afef;">self</span>.directions[<span style="color: #51afef;">self</span>.facingidx]
+    @<span style="color: #c678dd;">property</span>
+    <span style="color: #51afef;">def</span> <span style="color: #c678dd;">backdir</span>(<span style="color: #51afef;">self</span>):    <span style="color: #51afef;">return</span> <span style="color: #51afef;">self</span>.directions[(<span style="color: #51afef;">self</span>.facingidx <span style="color: #51afef;">+</span> 2) <span style="color: #51afef;">%</span> <span style="color: #51afef;">self</span>.numdirs]
+    @<span style="color: #c678dd;">property</span>
+    <span style="color: #51afef;">def</span> <span style="color: #c678dd;">turndir</span>(<span style="color: #51afef;">self</span>):    <span style="color: #51afef;">return</span> <span style="color: #51afef;">self</span>.directions[(<span style="color: #51afef;">self</span>.facingidx <span style="color: #51afef;">+</span> <span style="color: #51afef;">self</span>.sideval) <span style="color: #51afef;">%</span> <span style="color: #51afef;">self</span>.numdirs]
+    @<span style="color: #c678dd;">property</span>
+    <span style="color: #51afef;">def</span> <span style="color: #c678dd;">turnawaydir</span>(<span style="color: #51afef;">self</span>):<span style="color: #51afef;">return</span> <span style="color: #51afef;">self</span>.directions[(<span style="color: #51afef;">self</span>.facingidx <span style="color: #51afef;">-</span> <span style="color: #51afef;">self</span>.sideval) <span style="color: #51afef;">%</span> <span style="color: #51afef;">self</span>.numdirs]
+
+    <span style="color: #51afef;">def</span> <span style="color: #c678dd;">__repr__</span>(<span style="color: #51afef;">self</span>):
+        <span style="color: #dcaeea;">s</span> <span style="color: #51afef;">=</span> <span style="color: #98be65;">''</span>
+        <span style="color: #51afef;">for</span> line <span style="color: #51afef;">in</span> <span style="color: #51afef;">self</span>.maze:
+            <span style="color: #51afef;">for</span> c <span style="color: #51afef;">in</span> line:
+                <span style="color: #dcaeea;">s</span> <span style="color: #51afef;">+=</span> <span style="color: #98be65;">'#'</span> <span style="color: #51afef;">if</span> c <span style="color: #51afef;">&lt;</span> 0 <span style="color: #51afef;">else</span> <span style="color: #c678dd;">str</span>(c)
+            <span style="color: #dcaeea;">s</span> <span style="color: #51afef;">+=</span> <span style="color: #98be65;">'</span><span style="color: #a9a1e1;">\n</span><span style="color: #98be65;">'</span>
+        <span style="color: #51afef;">return</span> s.strip()
+
+<span style="color: #51afef;">def</span> <span style="color: #c678dd;">main</span>():
+    <span style="color: #dcaeea;">width</span>, <span style="color: #dcaeea;">height</span> <span style="color: #51afef;">=</span> [<span style="color: #c678dd;">int</span>(i) <span style="color: #51afef;">for</span> i <span style="color: #51afef;">in</span> <span style="color: #c678dd;">input</span>().split()]
+    <span style="color: #dcaeea;">maze</span> <span style="color: #51afef;">=</span> [<span style="color: #c678dd;">list</span>(<span style="color: #c678dd;">input</span>()) <span style="color: #51afef;">for</span> _ <span style="color: #51afef;">in</span> <span style="color: #c678dd;">range</span>(height)]
+    <span style="color: #dcaeea;">side</span> <span style="color: #51afef;">=</span> <span style="color: #c678dd;">input</span>()
+    <span style="color: #dcaeea;">pika</span> <span style="color: #51afef;">=</span> Pikaptcha(width, height, maze, side)
+    pika.run()
+    <span style="color: #c678dd;">print</span>(pika)
+
+<span style="color: #51afef;">if</span> <span style="color: #c678dd;">__name__</span> <span style="color: #51afef;">==</span> <span style="color: #98be65;">'__main__'</span>:
+    main()
+</pre>
+</div>
+
+<p>
+Cette solution interprete Pikaptcha comme un <b>objet</b>. 
+</p>
+
+<p>
+La différence principale avec ma version est dans la structure,. Ici, chaque responsabilité est isolée dans une méthode dédiée (<code>turn</code>, <code>move_forward</code>, <code>can_move=…), ce qui rend le code plus lisible. Deux détails techniques intéressant : la grille est convertie en entiers dès l'init (murs = =-1</code>, passages ≥ <code>0</code>), ce qui évite de maintenir un tableau de compteurs séparé. Et <code>sideval</code> (<code>+1</code> ou <code>-1</code>) unifie les deux modes de rotation en un seul calcul.
+</p>
+
+<p>
+Côté Python pur, les <code>@property</code> que je ne connaissais pas permettent d&rsquo;appeler <code>can_turn_move</code> comme un attribut sans parenthèses, ce qui rend le <code>step()</code> très lisible.
+</p>
+
+<hr />
+</div>
+</div>
+<div id="outline-container-org06e6249" class="outline-2">
+<h2 id="org06e6249"><span class="section-number-2">5.</span> Bilan</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+L&rsquo;EP1 était assez simple, la logique de voisinage sur grille était déjà vue. L&rsquo;EP2 était plus intéressant et compliqué : comprendre l&rsquo;ordre de priorité des directions a demandé de bien visualiser le comportement de Pikaptcha pas à pas. Le bug le plus fréquent était une boucle infinie, souvent due à une mauvaise condition d&rsquo;arrêt.
+</p>
+
+<p>
+Côté Python, j&rsquo;ai pu améliorer ma maîtrise des listes, et la solution alternative m&rsquo;a fait découvrir les <code>@property</code>. Pas de nouvelles notions algorithmiques majeures, hormis l&rsquo;Algorithme du <a href="https://en.wikipedia.org/wiki/Maze-solving_algorithm">WallFollowing</a>.
+</p>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="date">Date: 15 Février 2026</p>
+<p class="author">Auteur: ALEXANDRE Maé - Prep&rsquo;ISIMA 1</p>
+<p class="date">Created: 2026-05-07 jeu. 01:06</p>
+</div>
+</body>
+</html>

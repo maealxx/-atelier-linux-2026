@@ -1,0 +1,37 @@
+<script>
+(function() {
+  const bar = document.createElement('div');
+  bar.id = 'nav-bar';
+
+  // Bouton accueil
+  const home = document.createElement('a');
+  home.href = '../index.html';
+  home.textContent = '← Accueil';
+  bar.appendChild(home);
+
+  // Bouton .md — déduit automatiquement depuis l'URL de la page
+  const md = document.createElement('a');
+  const mdName = location.pathname.split('/').pop().replace('.html', '.md');
+  md.href = './' + mdName;
+  md.textContent = '⬇ .md';
+  bar.appendChild(md);
+
+  // Bouton toggle thème
+  const toggle = document.createElement('button');
+  if (localStorage.getItem('theme') === 'dark') {
+    document.body.classList.add('dark');
+    toggle.textContent = '☀ Jour';
+  } else {
+    toggle.textContent = '☾ Nuit';
+  }
+  toggle.addEventListener('click', () => {
+    document.body.classList.toggle('dark');
+    const isDark = document.body.classList.contains('dark');
+    toggle.textContent = isDark ? '☀ Jour' : '☾ Nuit';
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+  });
+  bar.appendChild(toggle);
+
+  document.body.appendChild(bar);
+})();
+</script>

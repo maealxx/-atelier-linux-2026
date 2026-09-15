@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="ALEXANDRE Maé - Prep’ISIMA 1" />
+  <title>Les Fractales</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    /* CSS for syntax highlighting */
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="../css/md.css" />
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"
+  type="text/javascript"></script>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Les Fractales</h1>
+<p class="author">ALEXANDRE Maé - Prep’ISIMA 1</p>
+<p class="date">29 Janvier 2026</p>
+</header>
+<h1 id="les-fractales---mathématiques-de-linfini">Les Fractales -
+Mathématiques de l’Infini</h1>
+<h2 id="introduction">1. Introduction</h2>
+<p>Les <a href="https://fr.wikipedia.org/wiki/Fractale">fractales</a>
+sont le sujet que j’avais choisi pour mon Grand Oral de terminale. On
+les retrouvent partout dans la nature : flocons de neige, côtes
+rocheuses, arbres, vaisseaux sanguins.</p>
+<blockquote>
+<p><em>“Bottomless wonders spring from simple rules, which are repeated
+without end.”</em> - Benoît Mandelbrot, 1982</p>
+</blockquote>
+<figure>
+<img src="../images/mandelbrot.jpg" alt="Ensemble de Mandelbrot" />
+<figcaption aria-hidden="true"><em>Ensemble de
+Mandelbrot</em></figcaption>
+</figure>
+<hr />
+<h2 id="quest-ce-quune-fractale">2. Qu’est-ce qu’une fractale ?</h2>
+<p>Une fractale c’est une structure géométrique qui présente la
+propriété d’<strong>auto-similarité</strong> : elle se répète à
+l’identique (ou presque) a toutes les échelles d’observation.</p>
+<h3 id="propriétés-fondamentales">Propriétés fondamentales</h3>
+<ul>
+<li><strong>Auto-similarité</strong> : chaque partie ressemble au
+tout</li>
+<li><strong>Dimension non entiere</strong> : une fractale peut avoir une
+dimension de 1.58, par exemple</li>
+<li><strong>Complexité infinie</strong> : on peut zoomer indéfiniment
+sans perdre le détail</li>
+<li><strong>Construction itérative</strong> : générées par la répétition
+d’une règle simple</li>
+</ul>
+<hr />
+<h2 id="lensemble-de-mandelbrot">3. L’ensemble de Mandelbrot</h2>
+<p>C’est la fractale la plus célèbre. Elle est définie dans le plan
+complexe par la suite :</p>
+<p><span class="math display">\[z_{n+1} = z_n^2 + c\]</span></p>
+<p>avec <span class="math inline">\(z_0 = 0\)</span> et <span
+class="math inline">\(c \in \mathbb{C}\)</span>.</p>
+<p>Un point <span class="math inline">\(c\)</span> appartient à
+l’ensemble de Mandelbrot si et seulement si la suite <span
+class="math inline">\((z_n)\)</span> <strong>reste bornée</strong> :</p>
+<p><span class="math display">\[\exists M &gt; 0, \quad \forall n \in
+\mathbb{N}, \quad |z_n| \leq M\]</span></p>
+<p>Si <span class="math inline">\(|z_n| &gt; 2\)</span> pour un certain
+<span class="math inline">\(n\)</span>, la suite diverge et <span
+class="math inline">\(c\)</span> n’appartient pas à l’ensemble.</p>
+<figure>
+<img src="../images/mandelbrot.gif"
+alt="Zoom animé sur l’ensemble de Mandelbrot" />
+<figcaption aria-hidden="true"><em>Zoom animé sur l’ensemble de
+Mandelbrot</em></figcaption>
+</figure>
+<hr />
+<h2 id="autres-fractales-célèbres">4. Autres fractales célèbres</h2>
+<h3 id="le-triangle-de-sierpiński">Le triangle de Sierpiński</h3>
+<p>Il est obtenu en retirant récursivement le triangle central de chaque
+triangle :</p>
+<table>
+<thead>
+<tr class="header">
+<th>Itération</th>
+<th>Nombre de triangles</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td>1</td>
+<td>3</td>
+</tr>
+<tr class="odd">
+<td>2</td>
+<td>9</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(n\)</span></td>
+<td><span class="math inline">\(3^n\)</span></td>
+</tr>
+</tbody>
+</table>
+<figure>
+<img src="../images/triangle1.png" alt="Triangle de Sierpiński" />
+<figcaption aria-hidden="true"><em>Triangle de
+Sierpiński</em></figcaption>
+</figure>
+<h3 id="le-flocon-de-koch">Le flocon de Koch</h3>
+<p>il est Construit à partir d’un triangle équilatéral en remplaçant à
+chaque itération le tiers central de chaque segment par un triangle
+équilatéral.</p>
+<p><strong>Étapes de construction :</strong></p>
+<ol type="1">
+<li>Partir d’un segment de longueur <span
+class="math inline">\(L\)</span></li>
+<li>Diviser en 3 parties égales</li>
+<li>Remplacer la partie centrale par deux côtés d’un triangle
+équilatéral</li>
+<li>Répéter à l’infini sur chaque segment</li>
+</ol>
+<figure>
+<img src="../images/flocon2.jpg"
+alt="Les 4 premières itérations du flocon de Koch" />
+<figcaption aria-hidden="true"><em>Les 4 premières itérations du flocon
+de Koch</em></figcaption>
+</figure>
+<hr />
+<h2 id="implémentation---flocon-de-koch">5. Implémentation - Flocon de
+Koch</h2>
+<p>Le code suivant calcule le périmètre du flocon de Koch après un
+nombre d’itérations donné.</p>
+<h3 id="en-c">En C</h3>
+<div class="sourceCode" id="cb1"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;stdio.h&gt;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> nb_segments <span class="op">=</span> <span class="dv">3</span><span class="op">;</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">double</span> longueur <span class="op">=</span> <span class="fl">1.0</span><span class="op">;</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    printf<span class="op">(</span><span class="st">&quot;Iteration | Perimetre</span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">);</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    printf<span class="op">(</span><span class="st">&quot;----------|----------</span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">);</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> n <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> n <span class="op">&lt;=</span> <span class="dv">6</span><span class="op">;</span> n<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>        <span class="dt">double</span> perimetre <span class="op">=</span> nb_segments <span class="op">*</span> longueur<span class="op">;</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>        printf<span class="op">(</span><span class="st">&quot;    </span><span class="sc">%d</span><span class="st">     | </span><span class="sc">%.6f\n</span><span class="st">&quot;</span><span class="op">,</span> n<span class="op">,</span> perimetre<span class="op">);</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>        nb_segments <span class="op">=</span> nb_segments <span class="op">*</span> <span class="dv">4</span><span class="op">;</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>        longueur <span class="op">=</span> longueur <span class="op">/</span> <span class="fl">3.0</span><span class="op">;</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="en-python">En Python</h3>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>nb_segments <span class="op">=</span> <span class="dv">3</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>longueur <span class="op">=</span> <span class="fl">1.0</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;Iteration | Perimetre&quot;</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">&quot;----------|----------&quot;</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> n <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">7</span>):</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    perimetre <span class="op">=</span> nb_segments <span class="op">*</span> longueur</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f&quot;    </span><span class="sc">{</span>n<span class="sc">}</span><span class="ss">     | </span><span class="sc">{</span>perimetre<span class="sc">:.6f}</span><span class="ss">&quot;</span>)</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    <span class="co"># a chaque iteration : 4x plus de segments, chacun 3x plus court</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    nb_segments <span class="op">=</span> nb_segments <span class="op">*</span> <span class="dv">4</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    longueur <span class="op">=</span> longueur <span class="op">/</span> <span class="dv">3</span></span></code></pre></div>
+<p><strong>Sortie des deux programmes :</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th>Itération</th>
+<th>Périmètre</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0</td>
+<td>3.000000</td>
+</tr>
+<tr class="even">
+<td>1</td>
+<td>4.000000</td>
+</tr>
+<tr class="odd">
+<td>2</td>
+<td>5.333333</td>
+</tr>
+<tr class="even">
+<td>3</td>
+<td>7.111111</td>
+</tr>
+<tr class="odd">
+<td>4</td>
+<td>9.481481</td>
+</tr>
+<tr class="even">
+<td>5</td>
+<td>12.641975</td>
+</tr>
+<tr class="odd">
+<td>6</td>
+<td>16.855967</td>
+</tr>
+</tbody>
+</table>
+<p>Le périmètre tend vers l’infini à mesure que les itérations
+augmentent, alors que l’aire reste finie.</p>
+<hr />
+<script>
+(function() {
+  const bar = document.createElement('div');
+  bar.id = 'nav-bar';
+
+  // Bouton accueil
+  const home = document.createElement('a');
+  home.href = '../index.html';
+  home.textContent = '← Accueil';
+  bar.appendChild(home);
+
+  // Bouton .md — déduit automatiquement depuis l'URL de la page
+  const md = document.createElement('a');
+  const mdName = location.pathname.split('/').pop().replace('.html', '.md');
+  md.href = './' + mdName;
+  md.textContent = '⬇ .md';
+  bar.appendChild(md);
+
+  // Bouton toggle thème
+  const toggle = document.createElement('button');
+  if (localStorage.getItem('theme') === 'dark') {
+    document.body.classList.add('dark');
+    toggle.textContent = '☀ Jour';
+  } else {
+    toggle.textContent = '☾ Nuit';
+  }
+  toggle.addEventListener('click', () => {
+    document.body.classList.toggle('dark');
+    const isDark = document.body.classList.contains('dark');
+    toggle.textContent = isDark ? '☀ Jour' : '☾ Nuit';
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+  });
+  bar.appendChild(toggle);
+
+  document.body.appendChild(bar);
+})();
+</script>
+</body>
+</html>

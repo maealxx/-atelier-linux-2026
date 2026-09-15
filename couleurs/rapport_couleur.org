@@ -1,0 +1,253 @@
+#+HTML_HEAD: <link rel="stylesheet" href="../css/org.css">
+#+HTML_HEAD_EXTRA: <script defer src="../css/nav.js"></script>
+#+OPTIONS: toc:t num:t html-style:nil html-scripts:nil H:4
+#+TITLE: Mise en couleur dans un terminal : C et Bash
+#+AUTHOR: ALEXANDRE Maé - Prep'ISIMA 1
+#+DATE: 26 Mars 2026
+#+OPTIONS: toc:1
+#+LANGUAGE: fr
+
+[[../images/color.png]]
+
+* Introduction
+
+L'affichage en couleur dans un terminal est quelque chose qu'on remarque pas forcément
+au début, mais qui devient vite utile dès qu'on commence à écrire des programmes
+un peu sérieux. 
+
+Ce rapport présente deux façons d'utiliser les couleurs dans un terminal : en langage C,
+en insérant des séquences spéciales dans les chaînes passées à =printf=, et en Bash, en
+modifiant l'invite de commande via la variable =PS1=.
+
+
+* Les Couleurs en C
+
+** Principe
+
+Pour afficher du texte en couleur en C, on utilise des *séquences d'échappement ANSI*.
+Ce sont des chaînes de caractères spéciales que le terminal intercepte et interprète
+comme des instructions de mise en forme, plutôt que de les afficher directement.
+
+La forme générale est la suivante :
+
+#+BEGIN_SRC
+\033[CODE_STYLE;CODE_COULEURm
+#+END_SRC
+
+- =\033= est le caractère ESC (code ASCII 27, en octal 033),
+- =[= ouvre la séquence de contrôle,
+- =CODE_STYLE= est optionnel (gras, souligné, italique…),
+- =CODE_COULEUR= définit la couleur du texte ou du fond,
+- =m= termine la séquence.
+
+#+BEGIN_QUOTE
+*Important :* il faut toujours terminer une zone colorée avec la séquence =\033[0m=.
+Sans ça, la couleur reste active pour tout ce qui suit dans le terminal, même après
+la fin du programme, ce qui peut être assez perturbant.
+#+END_QUOTE
+
+Voici les principaux codes de couleur pour le texte (on ajoute 10 pour avoir la couleur de fond) :
+
+| Code | Couleur      |
+|------+--------------|
+|   30 | Noir         |
+|   31 | Rouge        |
+|   32 | Vert         |
+|   33 | Jaune        |
+|   34 | Bleu         |
+|   35 | Magenta      |
+|   36 | Cyan         |
+|   37 | Gris clair   |
+|   90 | Gris foncé   |
+|   91 | Rouge clair  |
+|   92 | Vert clair   |
+|   97 | Blanc        |
+
+Et les codes de style :
+
+| Code | Style              |
+|------+--------------------|
+|    0 | Normal (reset)     |
+|    1 | Gras               |
+|    2 | Intensité réduite  |
+|    3 | Italique           |
+|    4 | Souligné           |
+|  5/6 | Clignotement       |
+|    7 | Inversion encre/fond |
+
+** Exemples progressifs
+
+*** Exemple 1 : Hello World en couleur
+
+Le premier exemple est le plus basique : on affiche un message en rouge et en gras.
+
+#+BEGIN_SRC c
+#include <stdio.h>
+
+int main() {
+    printf("\033[1;31mHello, World !\033[0m\n");
+    return 0;
+}
+#+END_SRC
+
+#+CAPTION: Résultat de l'exemple 1
+[[file:../images/screen1.png]]
+
+*** Exemple 2 : messages de statut
+
+On peut enchaîner plusieurs couleurs pour simuler des niveaux de sévérité : rouge
+pour une erreur, jaune pour un avertissement, vert pour un succès. 
+
+#+BEGIN_SRC c
+#include <stdio.h>
+
+int main() {
+    printf("\033[1;31m[ERREUR]  \033[0m Segmentation fault detectee\n");
+    printf("\033[1;33m[WARN]    \033[0m Valeur hors plage, utilisation du defaut\n");
+    printf("\033[1;32m[OK]      \033[0m Fichier charge avec succes\n");
+    return 0;
+}
+#+END_SRC
+
+#+CAPTION: Résultat de l'exemple 2
+[[file:../images/screen2.png]]
+
+*** Exemple 3 : compteur coloré
+
+Affiche une suite de nombres avec une couleur unique.
+
+#+BEGIN_SRC c
+
+int main() {
+    for (int i = 1; i <= 5; i++) {
+        printf("\033[34m%d \033[0m", i);
+    }
+    printf("\n");
+    return 0;
+}
+#+END_SRC
+
+#+CAPTION: Résultat de l'exemple 3
+[[file:../images/screen3.png]]
+
+*** Exemple 4 : logo ASCII art en couleur
+
+On affiche un logo ASCII art en colorisant chaque ligne avec une couleur différente,
+en cyclant sur un tableau de codes via le modulo. 
+
+#+BEGIN_SRC c
+#include <stdio.h>
+
+int main() {
+    int couleurs[] = {31, 33, 32, 36, 34, 35};
+    int nb_couleurs = 6;
+
+    char *lignes[] = {
+        "  _____ ",
+        " / ____|",
+        "| |     ",
+        "| |     ",
+        "| |____ ",
+        " \\_____|",
+    };
+    int nb_lignes = 6;
+
+    for (int i = 0; i < nb_lignes; i++) {
+        printf("\033[1;%dm%s\033[0m\n", couleurs[i % nb_couleurs], lignes[i]);
+    }
+    return 0;
+}
+#+END_SRC
+
+#+CAPTION: Résultat de l'exemple 4
+[[file:../images/screen4.png]]
+
+
+* Les Couleurs en Bash
+
+** Principe
+
+En Bash, les couleurs servent principalement à personnalisé l'*invite de commande*,
+aussi appelée prompt. C'est le texte affiché avant chaque commande dans le terminal,
+et il est définit par le contenu de la variable =PS1=. On peut voir sa valeur actuelle
+avec :
+
+#+BEGIN_SRC bash
+echo $PS1
+#+END_SRC
+
+La syntaxe des séquences ANSI est la même qu'en C, mais avec une particularité
+importante : les séquences non imprimables doivent être encadrées par =\[= et =\]=
+pour que Bash calcule correctement la longueur de la ligne et gère le curseur sans
+décalage.
+
+#+BEGIN_SRC bash
+PS1='\[\033[CODE;COULEURm\]texte\[\033[0m\]'
+#+END_SRC
+
+#+BEGIN_QUOTE
+*Attention :* il faut impérativement utiliser des guillemets simples =''= autour
+de la valeur de =PS1=. Avec des guillemets doubles, les codes comme =\u= ou =\h=
+ne fonctionnes pas correctement.
+#+END_QUOTE
+
+Bash propose aussi des codes spéciaux pour insérer des informations dynamiques
+dans l'invite :
+
+| Code | Résultat                          |
+|------+-----------------------------------|
+| =\u= | Nom de l'utilisateur courant      |
+| =\h= | Nom de la machine (hostname)      |
+| =\w= | Répertoire courant (HOME = ~)     |
+| =\W= | Dernier composant du chemin       |
+| =\t= | Heure au format 24h (HH:MM:SS)   |
+| =\d= | Date (ex : Tue May 26)            |
+| =\$= | # si root, $ sinon               |
+| =\n= | Saut de ligne                     |
+
+Pour que la configuration soit permanente, il suffit d'ajouter la ligne =PS1=...= à
+la fin du fichier =~/.bashrc=, qui est lu automatiquement à chaque ouverture d'un terminal.
+
+** Exemples progressifs
+
+
+
+*** Exemple 1 : utilisateur, machine et répertoire
+
+On complète l'invite avec le nom de la machine en bleu et le répertoire courant en
+jaune. 
+
+#+BEGIN_SRC bash
+PS1='\[\033[1;32m\]\u\[\033[0;97m\]@\[\033[1;34m\]\h\[\033[0;97m\]:\[\033[1;33m\]\W\[\033[0m\]\$ '
+#+END_SRC
+
+#+CAPTION: Résultat de l'exemple 1 
+[[file:../images/screen5.png]]
+
+*** Exemple 2 : prompt avec compteur de commandes
+
+Ce prompt affiche le numéro de la commande en cours dans la session. 
+Cela permet de suivre facilement combien de commandes ont été exécutées, 
+ce qui peut être utile pour se repérer ou pour du débogage.
+
+#+BEGIN_SRC bash
+PS1='\[\033[1;35m\][\#] \[\033[1;36m\]\W \[\033[1;32m\]$ \[\033[0m\]'
+#+END_SRC
+
+
+#+CAPTION: Résultat de l'exemple 2 
+[[file:../images/screen6.png]]
+
+*** Exemple 3 : prompt "humeur du terminal"
+
+Ce prompt change d'apparence selon le résultat de la dernière commande.
+Si la commande réussit, un symbole positif s’affiche.
+Sinon, un symbole indique une erreur. 
+
+#+BEGIN_SRC bash
+PS1='\[\033[1;32m\]$(if [ $? -eq 0 ]; then echo ":)"; else echo ":("; fi) \[\033[1;34m\]\W \[\033[1;33m\]$ \[\033[0m\]'
+#+END_SRC
+
+#+CAPTION: Résultat de l'exemple 3
+[[file:../images/screen7.png]]
+

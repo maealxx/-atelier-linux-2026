@@ -1,0 +1,329 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr" xml:lang="fr">
+<head>
+<!-- 2026-05-07 jeu. 01:07 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Comment craque-t-on un mot de passe ?</title>
+<meta name="author" content="ALEXANDRE Maé - Prep'ISIMA 1" />
+<meta name="generator" content="Org Mode" />
+<link rel="stylesheet" href="../css/org.css">
+<script defer src="../css/nav.js"></script>
+</head>
+<body>
+<div id="content" class="content">
+<h1 class="title">Comment craque-t-on un mot de passe ?</h1>
+<div id="table-of-contents" role="doc-toc">
+<h2>Table des matières</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#orgfc87575">1. Introduction</a></li>
+<li><a href="#org8d86e30">2. Les mots de passe les plus utilisés au monde</a></li>
+<li><a href="#orgc64beef">3. Les principales techniques d&rsquo;attaque</a></li>
+<li><a href="#org2070466">4. Un exemple de brute force en C</a></li>
+<li><a href="#orgc28bdb7">5. Ce qu&rsquo;il reste à faire</a></li>
+<li><a href="#org38fbaa7">6. Conclusion</a></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgfc87575" class="outline-2">
+<h2 id="orgfc87575"><span class="section-number-2">1.</span> Introduction</h2>
+<div class="outline-text-2" id="text-1">
+
+<div id="org42304f1" class="figure">
+<p><img src="../images/password.GIF" alt="password.GIF" />
+</p>
+</div>
+
+<p>
+Un mot de passe est censé protéger nos données. Pourtant, chaque année, des millions
+de comptes sont compromis car les gens choisissent des mots de passe catastrophiques.
+</p>
+
+<blockquote>
+<p>
+«Le maillon le plus faible d&rsquo;une chaîne de sécurité, c&rsquo;est presque toujours l&rsquo;humain.»
+</p>
+<ul class="org-ul">
+<li>Bruce Schneier, cryptographe</li>
+</ul>
+</blockquote>
+
+<p>
+Avant de voir comment on craque un mot de passe, petit tour sur ce que les
+gens utilisent réellement.
+</p>
+</div>
+</div>
+<div id="outline-container-org8d86e30" class="outline-2">
+<h2 id="org8d86e30"><span class="section-number-2">2.</span> Les mots de passe les plus utilisés au monde</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+Chaque année, des bases de données leaked sont analysée. Le résultat est&#x2026; décourageant.
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-right">Rang</th>
+<th scope="col" class="org-left">Mot de passe</th>
+<th scope="col" class="org-left">Temps pour le craquer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-right">1</td>
+<td class="org-left"><code>123456</code></td>
+<td class="org-left">moins d&rsquo;1 seconde</td>
+</tr>
+
+<tr>
+<td class="org-right">2</td>
+<td class="org-left"><code>password</code></td>
+<td class="org-left">moins d&rsquo;1 seconde</td>
+</tr>
+
+<tr>
+<td class="org-right">3</td>
+<td class="org-left"><code>123456789</code></td>
+<td class="org-left">moins d&rsquo;1 seconde</td>
+</tr>
+
+<tr>
+<td class="org-right">4</td>
+<td class="org-left"><code>azerty</code></td>
+<td class="org-left">moins d&rsquo;1 seconde</td>
+</tr>
+
+<tr>
+<td class="org-right">5</td>
+<td class="org-left"><code>iloveyou</code></td>
+<td class="org-left">moins d&rsquo;1 seconde</td>
+</tr>
+
+<tr>
+<td class="org-right">6</td>
+<td class="org-left"><code>admin</code></td>
+<td class="org-left">moins d&rsquo;1 seconde</td>
+</tr>
+
+<tr>
+<td class="org-right">7</td>
+<td class="org-left"><code>motdepasse</code></td>
+<td class="org-left">moins d&rsquo;1 seconde</td>
+</tr>
+
+<tr>
+<td class="org-right">8</td>
+<td class="org-left"><code>qwerty123</code></td>
+<td class="org-left">moins d&rsquo;1 seconde</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="outline-container-orgc64beef" class="outline-2">
+<h2 id="orgc64beef"><span class="section-number-2">3.</span> Les principales techniques d&rsquo;attaque</h2>
+<div class="outline-text-2" id="text-3">
+</div>
+<div id="outline-container-org0826294" class="outline-3">
+<h3 id="org0826294"><span class="section-number-3">3.1.</span> Brute force</h3>
+<div class="outline-text-3" id="text-3-1">
+<p>
+La technique la plus simple : on essaie <b>toutes les combinaisons possibles</b>,
+une par une, jusqu&rsquo;à trouver la bonne.
+</p>
+
+<ul class="org-ul">
+<li><code>a</code>, <code>b</code>, <code>c</code>&#x2026; <code>z</code></li>
+<li><code>aa</code>, <code>ab</code>, <code>ac</code>&#x2026;</li>
+<li><code>aaa</code>, <code>aab</code>&#x2026;</li>
+</ul>
+
+<p>
+C&rsquo;est lent, mais avec un bon ordinateur (ou un GPU), ça va très vite :
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Longueur</th>
+<th scope="col" class="org-left">Caractères utilisés</th>
+<th scope="col" class="org-left">Temps estimé</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">6 car.</td>
+<td class="org-left">minuscules seulement</td>
+<td class="org-left"><code>3 secondes</code></td>
+</tr>
+
+<tr>
+<td class="org-left">8 car.</td>
+<td class="org-left">minuscules + chiffres</td>
+<td class="org-left"><code>7 heures</code></td>
+</tr>
+
+<tr>
+<td class="org-left">10 car.</td>
+<td class="org-left">majuscules + minuscules + chiffres</td>
+<td class="org-left"><code>8 ans</code></td>
+</tr>
+
+<tr>
+<td class="org-left">12 car.</td>
+<td class="org-left">tous caractères</td>
+<td class="org-left"><code>plusieurs siècles</code></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="outline-container-orga6c076b" class="outline-3">
+<h3 id="orga6c076b"><span class="section-number-3">3.2.</span> Attaque par dictionnaire</h3>
+<div class="outline-text-3" id="text-3-2">
+<p>
+Plutôt que toutes les combinaisons, on essaie une liste de mots courants :
+noms communs, prénoms, dates, mots de passe connus&#x2026;
+</p>
+
+<div class="tip" id="org9dad742">
+<p>
+Les attaques par dictionnaire réussissent dans <b>la majorité des cas</b>,
+<code>Soleil1!</code> ne trompe personne.
+</p>
+
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-org2070466" class="outline-2">
+<h2 id="org2070466"><span class="section-number-2">4.</span> Un exemple de brute force en C</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+Voici un programme minimaliste qui illustre le principe d&rsquo;une attaque brute force
+sur un code à 4 chiffres :
+</p>
+
+<div class="org-src-container">
+<pre class="src src-C" id="orgabae088"><span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdio.h&gt;</span>
+
+<span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">main</span>() {
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">cible</span> = 1337;
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">essais</span> = 0;
+
+    <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 0; i &lt;= 9999; i++) {
+        essais++;
+        <span style="color: #51afef;">if</span> (i == cible) {
+            printf(<span style="color: #98be65;">"Mot de passe trouv&#233; : %04d\n"</span>, i);
+            printf(<span style="color: #98be65;">"Nombre d'essais    : %d\n"</span>, essais);
+            <span style="color: #51afef;">return</span> 0;
+        }
+    }
+    <span style="color: #51afef;">return</span> 0;
+}
+</pre>
+</div>
+
+<p>
+en python :
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #dcaeea;">cible</span> <span style="color: #51afef;">=</span> 1337
+<span style="color: #dcaeea;">essais</span> <span style="color: #51afef;">=</span> 0
+
+<span style="color: #51afef;">for</span> i <span style="color: #51afef;">in</span> <span style="color: #c678dd;">range</span>(10000):
+    <span style="color: #dcaeea;">essais</span> <span style="color: #51afef;">+=</span> 1
+    <span style="color: #51afef;">if</span> i <span style="color: #51afef;">==</span> cible:
+        <span style="color: #c678dd;">print</span>(f<span style="color: #98be65;">"Mot de passe trouv&#233; : </span>{i:04d}<span style="color: #98be65;">"</span>)
+        <span style="color: #c678dd;">print</span>(f<span style="color: #98be65;">"Nombre d'essais     : </span>{essais}<span style="color: #98be65;">"</span>)
+        <span style="color: #51afef;">break</span>
+</pre>
+</div>
+
+
+
+
+<div id="orgb0e2f1b" class="figure">
+<p><img src="../images/crack_time.png" alt="crack_time.png" />
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-orgc28bdb7" class="outline-2">
+<h2 id="orgc28bdb7"><span class="section-number-2">5.</span> Ce qu&rsquo;il reste à faire</h2>
+<div class="outline-text-2" id="text-5">
+</div>
+<div id="outline-container-orgac12d29" class="outline-3">
+<h3 id="orgac12d29"><span class="section-number-3">5.1.</span> <span class="todo TODO">TODO</span> Activer la double authentification (2FA) sur ses comptes principaux</h3>
+<div class="outline-text-3" id="text-5-1">
+<p>
+La 2FA ajoute une deuxième couche de sécurité, meme si l&rsquo;appareil est volé.
+</p>
+</div>
+</div>
+<div id="outline-container-org4bb9dc6" class="outline-3">
+<h3 id="org4bb9dc6"><span class="section-number-3">5.2.</span> <span class="todo TODO">TODO</span> Installer un gestionnaire de mots de passe</h3>
+<div class="outline-text-3" id="text-5-2">
+<p>
+Retenir 50 mots de passe différents, c&rsquo;est impossible. 
+</p>
+</div>
+</div>
+<div id="outline-container-org27f912f" class="outline-3">
+<h3 id="org27f912f"><span class="section-number-3">5.3.</span> <span class="todo TODO">TODO</span> Vérifier ses comptes compromis</h3>
+<div class="outline-text-3" id="text-5-3">
+<p>
+<a href="https://haveibeenpwned.com">haveibeenpwned.com</a> recense les bases de données leaked. S
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-org38fbaa7" class="outline-2">
+<h2 id="org38fbaa7"><span class="section-number-2">6.</span> Conclusion</h2>
+<div class="outline-text-2" id="text-6">
+<p>
+La meilleure défense reste simple :
+un mot de passe long, unique, et stocké dans un gestionnaire.
+</p>
+
+<div class="note" id="org02b4a18">
+<p>
+<b>Recette d&rsquo;un bon mot de passe :</b> une phrase dont tu te souviendras, avec
+quelques substitutions - <code>MonChatMange3Souris!</code> est bien plus solide que
+<code>P@ssw0rd</code>, et pourtant bien plus facile à retenir.
+</p>
+
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="date">Date: 13 Février 2026</p>
+<p class="author">Auteur: ALEXANDRE Maé - Prep&rsquo;ISIMA 1</p>
+<p class="date">Created: 2026-05-07 jeu. 01:07</p>
+</div>
+</body>
+</html>

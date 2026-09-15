@@ -1,0 +1,450 @@
+#+HTML_HEAD: <link rel="stylesheet" href="../css/org.css">
+#+HTML_HEAD_EXTRA: <script defer src="../css/nav.js"></script>
+#+OPTIONS: toc:t num:t html-style:nil html-scripts:nil H:4
+
+#+TITLE: Rapport - Brainfuck Interpreter
+#+AUTHOR: ALEXANDRE Maé - Prep'ISIMA 1
+#+DATE: 26 Mars 2026
+#+OPTIONS: toc:1
+#+LANGUAGE: fr
+
+
+
+[[https://www.codingame.com/training/medium/what-the-brainfuck][/Lien vers l'exercice sur Coding Games/]]
+[[../images/brainfuck.jpg]]
+-----
+
+* Introduction
+
+Brainfuck est un langage de programmation minimaliste avec seulement 8
+instruction. Malgrés ça, il est *Turing-complet* : tout ce qu'un
+ordinateur ordinaire peut calculer, Brainfuck peut le calculer aussi.
+
+L'execution repose sur trois éléments :
+
+1. Un tableau de =S= cellules d'un octet chacune, initialisées à 0.
+2. Un pointeur initialisée sur la cellule d'indice 0.
+3. Un programme composé des 8 instructions valides.
+
+| Instruction | Effet                                                                    |
+|-------------+--------------------------------------------------------------------------|
+| =>         | Déplace le pointeur vers la droite                                       |
+| =<=         | Déplace le pointeur vers la gauche                                       |
+| =+=         | Incrémente la valeur de la cellule courante                              |
+| =-=         | Décrémente la valeur de la cellule courante                              |
+| =.=         | Affiche la valeur courante comme caractere ASCII                         |
+| =,=         | Lis un entier en entrée et le stocke dans la cellule courante            |
+| =[=         | Saute après le =]= correspondant si la cellule courante vaut 0           |
+| =]=         | Retourne après le =[= correspondant si la cellule courante est non nulle |
+
+Tout caractères qui ne fait pas partie de ces 8 symboles est simplement ignoré
+,ce qui permet de commenter le code Brainfuck librement.
+
+-----
+
+* Analyse du problème
+
+** Structure de l'entrée
+
+La première ligne contient trois entiers :
+- =L= : le nombre de lignes de code source
+- =S= : la taille du tableau mémoire
+- =N= : le nombre de valeurs d'entrée pour l'instruction =,=
+
+Puis =L= lignes de code Brainfuck, puis =N= entiers représentant les entrées.
+
+** Gestion des erreurs
+
+| Erreur                  | Condition                                          | Moment          |
+|-------------------------+----------------------------------------------------+-----------------|
+| =SYNTAX ERROR=          | Crochet =[= sans =]= correspondant, ou vice-versa | Avant exécution |
+| =POINTER OUT OF BOUNDS= | Pointeur < 0 ou ≥ S                               | À l'exécution   |
+| =INCORRECT VALUE=       | Valeur d'une cellule < 0 ou > 255                 | À l'exécution   |
+
+
+
+**  La difficulté principale : les crochets imbriqués
+
+Un =[= doit retrouver son =]= correspondant en tenant compte de l'imbrication.
+Dans =[[]]= par exemple, le premier =[= correspond au dernier =]=, pas au
+deuxième. Il faut donc un compteur de profondeur pour trouver le bon
+homologue, et pas juste le premier qu'on rencontre.
+
+-----
+
+*  Méthode de résolution
+
+
+
+#+BEGIN_SRC dot :results file :file algo.png
+digraph {
+    graph [rankdir=TB, nodesep=0.5, ranksep=0.6, bgcolor="transparent"]
+    node [fontname="sans-serif", fontsize=11, style="filled,rounded", shape=box]
+    edge [fontname="sans-serif", fontsize=10]
+
+    debut    [label="début",                      shape=Mdiamond, fillcolor="#e8e8e8"]
+    fin      [label="fin",                        shape=Mdiamond, fillcolor="#e8e8e8"]
+    lecture  [label="Lire L, S, N\nConcaténer les L lignes de code\nStocke les N entrées", fillcolor="#e8e8e8"]
+    init     [label="Initialisation mémoire\ncells[S]=0 · pointeur sur cellule 0", fillcolor="#cce5ff"]
+    lire_cmd [label="Lire l'instruction courante\ncmd = prog[ip]", fillcolor="#e8e8e8"]
+    incr_ip  [label="Passer à l'instruction suivante\nip++", fillcolor="#e8e8e8"]
+    affichage[label="Afficher la sortie accumulée", fillcolor="#d4edda"]
+
+    syntax   [label="Crochets équilibrés ?",           shape=diamond, fillcolor="#e0d7f7"]
+    boucle   [label="Fin du programme ?",              shape=diamond, fillcolor="#e0d7f7"]
+    dispatch [label="Quelle instruction ?",            shape=diamond, fillcolor="#e0d7f7"]
+    ptr_ok   [label="Pointeur hors du tableau ?",      shape=diamond, fillcolor="#e0d7f7"]
+    val_ok   [label="Valeur hors de [0, 255] ?",       shape=diamond, fillcolor="#e0d7f7"]
+
+    op_ptr   [label="Déplacer le pointeur\nptr++ ou ptr--",                       fillcolor="#cce5ff"]
+    op_cell  [label="Modifier la cellule courante\ncells[ptr]++ ou cells[ptr]--", fillcolor="#cce5ff"]
+    op_aff   [label="Afficher la cellule courante\nen ASCII",                     fillcolor="#cce5ff"]
+    op_lire  [label="Lire la prochaine entrée\net la stocker dans cells[ptr]",    fillcolor="#cce5ff"]
+    op_saut  [label="Saut de boucle\navancer ou reculer avec compteur d",         fillcolor="#cce5ff"]
+
+    err_syntax  [label="SYNTAX ERROR",          shape=ellipse, fillcolor="#f5c6cb"]
+    err_bounds  [label="POINTER OUT OF BOUNDS", shape=ellipse, fillcolor="#f5c6cb"]
+    err_value   [label="INCORRECT VALUE",       shape=ellipse, fillcolor="#f5c6cb"]
+
+    debut       -> lecture
+    lecture     -> syntax
+    syntax      -> err_syntax  [label="non", color=red]
+    syntax      -> init        [label="oui", color=darkgreen]
+    err_syntax  -> fin
+
+    init        -> boucle
+    boucle      -> affichage   [label="oui", color=darkgreen]
+    boucle      -> lire_cmd    [label="non", color=red]
+    affichage   -> fin
+
+    lire_cmd    -> dispatch
+
+    dispatch    -> op_ptr   [label="'<' ou '>'"]
+    dispatch    -> op_cell  [label="'+' ou '-'"]
+    dispatch    -> op_aff   [label="'.'"]
+    dispatch    -> op_lire  [label="','"]
+    dispatch    -> op_saut  [label="'[' ou ']'"]
+
+    op_ptr      -> ptr_ok
+    ptr_ok      -> err_bounds  [label="oui", color=red]
+    ptr_ok      -> incr_ip     [label="non", color=darkgreen]
+    err_bounds  -> fin
+
+    op_cell     -> val_ok
+    val_ok      -> err_value   [label="oui", color=red]
+    val_ok      -> incr_ip     [label="non", color=darkgreen]
+    err_value   -> fin
+
+    op_aff      -> incr_ip
+    op_lire     -> incr_ip
+    op_saut     -> incr_ip
+
+    incr_ip     -> boucle
+}
+#+END_SRC
+
+
+La vérification syntaxique repose sur un simple compteur de profondeur. On
+parcourt le programme une première fois : chaque =[= incrémente le compteur,
+chaque =]= le décrémente. Si le compteur passe sous zéro, c'est qu'on a un
+=]= sans =[= précédent. S'il n'est pas retombé à zéro à la fin, des =[= n'ont
+pas été fermés. Dans les deux cas : =SYNTAX ERROR=.
+
+Pour les sauts =[= et =]=, on applique le même principe à l'exécution, mais
+cette fois en avançant ou en reculant dans le programme jusqu'à ce que le
+compteur retombe à zéro, ce qui garantit de tomber sur le bon crochet même
+en cas d'imbrication.
+
+-----
+
+* Code commenté
+
+#+BEGIN_SRC c
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdbool.h>
+
+int main()
+{
+    int L, S, N;
+    /* L = nombre de lignes de code, S = taille mémoire, N = nombre d'entrées */
+    scanf("%d%d%d", &L, &S, &N);
+    fgetc(stdin); /* consomme le '\n' laissé par scanf pour ne pas bloquer la lecture suivante */
+
+    /* --- Lecture du programme Brainfuck --- */
+    /* Le code est réparti sur L lignes, on les colle bout à bout en une seule chaîne */
+    char prog[L * 1025 + 1];
+    prog[0] = '\0';
+    for (int i = 0; i < L; i++) {
+        char r[1025] = "";
+        scanf("%[^\n]", r); /* lit toute la ligne sauf le '\n' */
+        fgetc(stdin);       /* consomme le '\n' */
+        strcat(prog, r);    /* ajoute la ligne au programme */
+    }
+
+    /* --- Lecture des valeurs d'entrée (utilisées par l'instruction ',') --- */
+    int inputs[N];
+    for (int i = 0; i < N; i++)
+        scanf("%d", &inputs[i]);
+
+    int plen = strlen(prog); /* longueur totale du programme */
+
+    /* --- Vérification syntaxique AVANT toute exécution --- */
+    /* On parcourt le programme et on compte les crochets ouverts/fermés.
+     * Si depth passe sous 0 : un ']' sans '[' précédent.
+     * Si depth != 0 à la fin : des '[' non fermés. */
+    int depth = 0;
+    for (int i = 0; i < plen; i++) {
+        if      (prog[i] == '[') depth++;
+        else if (prog[i] == ']') depth--;
+        if (depth < 0) { printf("SYNTAX ERROR\n"); return 0; }
+    }
+    if (depth != 0) { printf("SYNTAX ERROR\n"); return 0; }
+
+    /* --- Initialisation de la mémoire Brainfuck --- */
+    /* S cellules, toutes à 0 au départ */
+    int cells[S];
+    memset(cells, 0, sizeof(int) * S);
+
+    int ptr = 0; /* pointeur mémoire  : indice de la cellule courante */
+    int ip  = 0; /* pointeur d'instruction : position dans prog[]     */
+    int inp = 0; /* index de la prochaine valeur à lire dans inputs[] */
+
+    /* Buffer de sortie : on accumule les caractères avant d'afficher */
+    char output[100000];
+    int  out_len = 0;
+
+    /* --- Boucle principale d'interprétation --- */
+    while (ip < plen) {
+        char cmd = prog[ip]; /* instruction courante */
+
+        if (cmd == '>') {
+            /* Déplace le pointeur d'une cellule vers la droite */
+            ptr++;
+            if (ptr >= S) { printf("POINTER OUT OF BOUNDS\n"); return 0; }
+        }
+        else if (cmd == '<') {
+            /* Déplace le pointeur d'une cellule vers la gauche */
+            ptr--;
+            if (ptr < 0) { printf("POINTER OUT OF BOUNDS\n"); return 0; }
+        }
+        else if (cmd == '+') {
+            /* Incrémente la valeur de la cellule courante */
+            cells[ptr]++;
+            if (cells[ptr] > 255) { printf("INCORRECT VALUE\n"); return 0; }
+        }
+        else if (cmd == '-') {
+            /* Décrémente la valeur de la cellule courante */
+            cells[ptr]--;
+            if (cells[ptr] < 0) { printf("INCORRECT VALUE\n"); return 0; }
+        }
+        else if (cmd == '.') {
+            /* Affiche la cellule courante comme caractère ASCII */
+            output[out_len++] = (char)cells[ptr];
+        }
+        else if (cmd == ',') {
+            /* Stocke la prochaine valeur d'entrée dans la cellule courante.
+             * Si toutes les entrées ont déjà été consommées, on met 0. */
+            cells[ptr] = (inp < N) ? inputs[inp++] : 0;
+        }
+        else if (cmd == '[') {
+            /* Si la cellule courante vaut 0, on saute après le ']' correspondant.
+             * Le compteur d = 1 gère l'imbrication : on avance jusqu'à ce que
+             * tous les '[' ouverts en chemin aient été refermés (d revient à 0). */
+            if (cells[ptr] == 0) {
+                int d = 1;
+                while (d > 0) {
+                    ip++;
+                    if      (prog[ip] == '[') d++;
+                    else if (prog[ip] == ']') d--;
+                }
+                /* ip est maintenant sur le ']' correspondant */
+            }
+        }
+        else if (cmd == ']') {
+            /* Si la cellule courante est non nulle, on retourne après le '[' correspondant.
+             * Même principe qu'au-dessus mais en reculant dans le programme. */
+            if (cells[ptr] != 0) {
+                int d = 1;
+                while (d > 0) {
+                    ip--;
+                    if      (prog[ip] == ']') d++;
+                    else if (prog[ip] == '[') d--;
+                }
+                /* ip est maintenant sur le '[' correspondant */
+            }
+        }
+        /* Tout autre caractère est ignoré (commentaires Brainfuck) */
+
+        ip++; /* passe à l'instruction suivante */
+    }
+
+    /* --- Affichage de la sortie accumulée --- */
+    output[out_len] = '\0';
+    printf("%s\n", output);
+    return 0;
+}
+#+END_SRC
+
+-----
+
+* Exemples de programmes Brainfuck
+
+** Hello World
+
+#+BEGIN_EXAMPLE
+++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]
+>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++.
+#+END_EXAMPLE
+
+Sortie : Hello World!
+
+Des boucles imbriquées construisent les valeurs ASCII lettre par lettre. Par
+exemple, H vaut 72 : on calcule 8×9 avec des boucles plutôt que de faire 72
+fois +.
+
+** Afficher un caractère simple
+
+#+BEGIN_EXAMPLE
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.
+#+END_EXAMPLE
+
+Sortie : A (ASCII 65)
+
+On incrémente 65 fois la cellule 0 puis on affiche. 
+
+** Doubler la valeur d'entrée
+
+#+BEGIN_EXAMPLE
+,[->++<]>.
+#+END_EXAMPLE
+
+La boucle =[->++<]= décrémente cells[0] et incrémente cells[1] de 2 à chaque
+tour. À la fin, cells[1] vaut 2n.
+
+** Addition de deux entrées
+
+#+BEGIN_EXAMPLE
+,>,[-<+>]<.
+#+END_EXAMPLE
+
+La boucle transfère la valeur de cells[1] vers cells[0] en les additionnant.
+
+
+*  Solution alternative - PewPewBewn
+
+- [[https://www.codingame.com/training/medium/what-the-brainfuck/solution?id=22957693][Lien vers la solution de PewPewBewn sur CodingGame]]
+
+La solution de PewPewBewn prend une approche complètement différente : au lieu
+d'interpréter le Brainfuck instruction par instruction comme on le fait, elle
+le compile directement.
+
+
+#+BEGIN_SRC c
+#include <sys/mman.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+typedef unsigned char u8;
+typedef unsigned int  u32;
+
+static u8 *EXECUTE;
+static u8  bin[1 << 22];
+
+/* Émet un octet dans le buffer de code machine */
+#define EMIT(x) (*ptr++ = (x))
+
+/* Émet une valeur 32 bits (little-endian) */
+static void emit32(u8 **p, u32 v) {
+    (*p)[0] = v & 0xFF; (*p)[1] = (v >> 8) & 0xFF;
+    (*p)[2] = (v >> 16) & 0xFF; (*p)[3] = (v >> 24) & 0xFF;
+    *p += 4;
+}
+
+void COMPILE(const char *bf, int S, int N) {
+    u8 *ptr = bin;
+    u8 *stack[1024];
+    int sp = 0;
+
+    /* Header : sauvegarde des registres + initialisation
+     * r12 = base du tableau mémoire, rdx = pointeur courant (=0)
+     * r13 = entrées, r14/r15 = buffer de sortie */
+    u8 header[] = {
+        0x41,0x54, 0x41,0x55, 0x41,0x56, 0x41,0x57,  /* push r12-r15 */
+        0x53,                                          /* push rbx     */
+        0x49,0x89,0xFC,                               /* mov r12, rdi */
+        0x31,0xD2,                                    /* xor edx, edx */
+        0x49,0x89,0xF5,                               /* mov r13, rsi */
+        0x4D,0x89,0xC7,                               /* mov r15, r8  */
+        0x4D,0x89,0xC6,                               /* mov r14, r8  */
+    };
+    memcpy(ptr, header, sizeof(header)); ptr += sizeof(header);
+
+    /* Parcours du programme Brainfuck et émission du code x86 */
+    for (; *bf; bf++) {
+        switch (*bf) {
+        case '+': /* add BYTE PTR [r12+rdx], 1 */
+            EMIT(0x41); EMIT(0x80); EMIT(0x04); EMIT(0x14); EMIT(0x01);
+            break;
+        case '-': /* sub BYTE PTR [r12+rdx], 1 */
+            EMIT(0x41); EMIT(0x80); EMIT(0x2C); EMIT(0x14); EMIT(0x01);
+            break;
+        case '>': /* inc rdx */
+            EMIT(0x48); EMIT(0xFF); EMIT(0xC2);
+            break;
+        case '<': /* dec rdx */
+            EMIT(0x48); EMIT(0xFF); EMIT(0xCA);
+            break;
+        case '.': /* mov [r14], BYTE PTR [r12+rdx] ; inc r14 */
+            EMIT(0x43); EMIT(0x8A); EMIT(0x04); EMIT(0x14);
+            EMIT(0x41); EMIT(0x88); EMIT(0x06);
+            EMIT(0x49); EMIT(0xFF); EMIT(0xC6);
+            break;
+        case '[':
+            /* cmp BYTE PTR [r12+rdx], 0 ; je (adresse à remplir plus tard) */
+            EMIT(0x41); EMIT(0x80); EMIT(0x3C); EMIT(0x14); EMIT(0x00);
+            EMIT(0x0F); EMIT(0x84);
+            stack[sp++] = ptr;  /* on sauvegarde la position pour patcher */
+            ptr += 4;           /* réserve 4 octets pour l'adresse de saut */
+            break;
+        case ']':
+            /* Patch du '[' correspondant avec l'adresse courante */
+            { u8 *open = stack[--sp];
+              u32 fwd = (u32)(ptr - open - 4 + 5);
+              emit32(&open, fwd);
+              /* jmp retour */
+              EMIT(0xE9); emit32(&ptr, (u32)(open - ptr - 4 - 5)); }
+            break;
+        }
+    }
+
+    /* Épilogue : écriture du buffer de sortie + ret */
+    u8 footer[] = { 0x5B, 0x41,0x5F, 0x41,0x5E, 0x41,0x5D, 0x41,0x5C, 0xC3 };
+    memcpy(ptr, footer, sizeof(footer)); ptr += sizeof(footer);
+
+    /* Copie dans une zone mémoire exécutable */
+    EXECUTE = mmap(0, sizeof(bin), PROT_READ|PROT_WRITE|PROT_EXEC,
+                   MAP_PRIVATE|MAP_ANONYMOUS, -1, 0);
+    memcpy(EXECUTE, bin, ptr - bin);
+}
+#+END_SRC
+
+Au lieu d'interpréter le Brainfuck instruction par instruction comme on le
+fait, PewPewBewn le traduit directement comme du vrai code machine, en le compilant directement et en allouant la 
+ mémoire avec =mmap(PROT_EXEC)= . En plus, les séquences
+répétées comme =++++= sont fusionnés en une seule instruction, ce qu'on ne
+fait pas du tout. C'est ~350 lignes contre ~80 pour nous. Impressionnant, mais clairement BEAUCOUP trop pour du Braifuck.
+
+-----
+
+* Bilan
+
+Cet exercice était moins compliqué algorithmiquement que les précedents, mais il
+permet de comprendre ce qu'est un interpréteur. Le point clef
+à retenir est le compteur de profondeur pour la gestion des crochet, en prenant bien en compte l'imbrication. La
+solution JIT de PewPewBewn était intéressante à analyser même si pas mal de
+détails dépassent mes connaissances .
+
+-----

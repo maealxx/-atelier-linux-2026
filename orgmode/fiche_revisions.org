@@ -1,0 +1,361 @@
+#+SETUPFILE: https://fniessen.github.io/org-html-themes/org/html-theme-readtheorg.setup
+
+#+TITLE: Fiche de révision — Org-mode
+#+AUTHOR: Maé
+#+DATE: <2026-03-24 mar.>
+#+LANGUAGE: fr
+#+DESCRIPTION: Fiche de révision personnelle sur Org-mode
+#+OPTIONS: toc:3 num:t ^:nil
+
+
+
+[[file:mot_de_passe.html][Retour vers l'exposé]]
+[[file:../index.html][Retour vers l'acceuil]]
+
+
+#+BEGIN_CENTER
+/Ce document a été actualisé au fil de l'année, au fur et à mesure de mes découvertes sur Org-mode — qu'elles soient personnelles ou issues des cours.
+Il constitue une fiche de révision vivante de mes connaissances./
+#+END_CENTER
+
+-----
+
+* Formatage du texte
+
+
+| Effet      | Syntaxe    |
+|------------+------------|
+| *Gras*     | ~*texte*~  |
+| /Italique/ | ~/texte/~  |
+| _Souligné_ | ~_texte_~  |
+| =Code=     | ~=code=~   |
+| ~Verbatim~ | ~~~texte~~ |
+| +Barré+    | ~+texte+~  |
+
+* Listes
+
+** Liste non ordonnée
+
+- Premier élément
+- Deuxième élément
+  - Sous élément
+
+** Liste ordonnée
+
+1. Premier élément
+   1. Sous élément
+2. Deuxième élément
+3. Troisième élément
+
+** Liste avec cases à cocher
+
+- [ ] À faire
+- [X] Fait
+- [-] Partiellement fait
+
+#+BEGIN_EXAMPLE
+Raccourci : C-c C-c  →  cocher / décocher une case
+#+END_EXAMPLE
+
+* Gestion des tâches (TODO)
+
+** Raccourcis essentiels
+
+| Raccourci        | Action                              |
+|------------------+-------------------------------------|
+| ~C-c C-t~        | Changer l'état TODO                 |
+| ~C-c C-s~        | Ajouter une date SCHEDULED          |
+| ~C-c C-d~        | Ajouter une DEADLINE                |
+| ~C-c .~          | Ouvrir le mini-calendrier           |
+
+** Exemples d'états
+
+*** TODO Acheter du pain
+SCHEDULED: <2026-02-26 jeu.>
+
+*** DONE Manger
+DEADLINE: <2026-02-26 jeu.>
+
+*** TODO Projet [1/3]
+- [X] Tâche 1
+- [ ] Tâche 2
+- [ ] Tâche 3
+
+* Tableaux
+
+** Création rapide
+
+Taper ~|col1|col2|col3|~ puis ~TAB~ pour créer le tableau.
+Taper ~|-~ puis ~TAB~ pour insérer une ligne de séparation horizontale.
+
+| Raccourci     | Action                         |
+|---------------+--------------------------------|
+| ~TAB~         | Cellule suivante / nouvelle ligne |
+| ~S-TAB~       | Cellule précédente             |
+| ~C-c C-c~     | Recalculer / actualiser        |
+| ~M-↑/↓~       | Déplacer une ligne             |
+| ~M-←/→~       | Déplacer une colonne           |
+| ~M-S-↑/↓~     | Supprimer / insérer une ligne  |
+| ~M-S-←/→~     | Supprimer / insérer une colonne |
+
+** Exemple avec alignement des colonnes
+
+~<l>~, ~<c>~, ~<r>~ force l'alignement d'une colonne :
+
+| <l>  |  <c>   | <r> |
+| Nom  | Prénom | Âge |
+|------+--------+-----|
+| Alex |  Maé   |  18 |
+
+* Liens
+
+** Syntaxe générale
+
+#+BEGIN_EXAMPLE
+[[cible][description]]
+#+END_EXAMPLE
+
+** Types de liens
+
+#+BEGIN_EXAMPLE
+[[*listes][Aller à la section Listes]]
+[[https://example.com][Site web]]
+[[file:~/document.pdf][Mon PDF]]
+#+END_EXAMPLE
+
+** Lien vers une figure nommée
+
+#+BEGIN_EXAMPLE
+#+CAPTION: Légende de la figure
+#+NAME: fig
+[[file:fig.png]]
+
+See figure [[fig]].
+#+END_EXAMPLE
+
+** Lien vers un bloc nommé
+
+#+BEGIN_EXAMPLE
+[[bloc1][Voir le code]]    ← renvoie vers un #+name: bloc1
+#+END_EXAMPLE
+
+| Raccourci   | Action                        |
+|-------------+-------------------------------|
+| ~C-c C-l~   | Insérer ou éditer un lien     |
+| ~C-c C-o~   | Ouvrir le lien sous le curseur |
+
+* Blocs spéciaux
+
+** Note, Warning, Tip
+
+
+#+begin_note
+Ceci est une note utile.
+#+end_note
+
+#+begin_warning
+Attention ! Vérifier que...
+#+end_warning
+
+#+begin_tip
+Essayer de cette façon...
+#+end_tip
+
+** Citation
+
+#+BEGIN_QUOTE
+«Le débogage, c'est deux fois plus difficile qu'écrire le code.»
+— Brian Kernighan
+#+END_QUOTE
+
+* Blocs de code (Babel)
+
+** Créer un bloc
+
+Raccourci : ~<s TAB~ puis préciser le langage.
+
+#+BEGIN_EXAMPLE
+#+NAME: mon_bloc
+#+BEGIN_SRC C :results raw
+#include <stdio.h>
+int main(){ printf("Hello\n"); }
+#+END_SRC
+#+END_EXAMPLE
+
+** Options importantes des blocs
+
+| Option          | Effet                                          |
+|-----------------+------------------------------------------------|
+| ~:results raw~  | Affiche le résultat sans les ~:~ devant        |
+| ~:results output~ | Capture le stdout (nécessaire pour print)    |
+| ~:eval no~      | Ne pas exécuter ce bloc                        |
+| ~:var x=42~     | Définit une variable avec une valeur prédéfinie |
+| ~:tangle nom.c~ | Exporte le code vers un fichier externe        |
+| ~:session nom~  | Partage un processus entre plusieurs blocs     |
+
+~C-c C-c~ pour compiler et afficher le résultat.
+
+** Exemple : variable prédéfinie et tangle
+
+#+NAME: code2
+#+BEGIN_SRC C :var toto=42 :tangle test2.c
+#include <stdio.h>
+int main(){
+  printf("Hello je suis %d\n", toto);
+}
+#+END_SRC
+
+#+RESULTS: code2
+: Hello je suis 42
+
+Pour exporter le code vers le fichier ~.c~ : ~C-c C-v C-t~
+
+* Graphviz (DOT)
+
+** Intégration avec Babel
+
+Spécifier le langage ~dot~ avec les options ~:results file :file nom.png~ pour générer une image :
+
+#+BEGIN_EXAMPLE
+#+BEGIN_SRC dot :results file :file mon_graphe.png
+digraph {
+  a -> b
+  b -> c
+}
+#+END_SRC
+#+END_EXAMPLE
+
+** Paramètres de mise en forme des nœuds
+
+#+BEGIN_EXAMPLE
+rankdir=TB   (orientation : TB/BT/LR/RL)
+
+A [label="Mon nœud" shape=box style=filled fillcolor=lightblue color=blue]
+#+END_EXAMPLE
+
+*Formes disponibles (shape) :*
+
+| Valeur         | Description                        |
+|----------------+------------------------------------|
+| ~box~          | Rectangle classique                |
+| ~circle~       | Cercle                             |
+| ~ellipse~      | Ellipse (défaut)                   |
+| ~diamond~      | Losange                            |
+| ~doublecircle~ | Double cercle (états acceptants)   |
+| ~point~        | Point                              |
+| ~plaintext~    | Texte sans contour                 |
+
+*Styles disponibles (style) :*
+
+| Valeur    | Description              |
+|-----------+--------------------------|
+| ~filled~  | Remplissage avec fillcolor |
+| ~dashed~  | Contour en tirets        |
+| ~dotted~  | Contour en pointillés    |
+| ~bold~    | Contour épais            |
+| ~rounded~ | Coins arrondis           |
+
+*Styles d'arcs :*
+
+| Valeur   | Description                                  |
+|----------+----------------------------------------------|
+| ~dashed~ | Tirets                                       |
+| ~dotted~ | Pointillés                                   |
+| ~bold~   | Trait épais                                  |
+| ~invis~  | Invisible (utile pour forcer le layout)      |
+
+** Exemple de graphe simple
+
+#+NAME: affiche1
+#+BEGIN_SRC dot :results file :file im2.png
+digraph {
+  rankdir=BT
+  A [label="A" shape=circle style=filled fillcolor=lightblue color=blue]
+  B [label="B" shape=circle style=filled fillcolor=lightblue color=blue]
+  A -> B [label="arc" color=green style=bold]
+}
+#+END_SRC
+
+** Générer un graphe depuis du code C
+
+Le code C produit du texte DOT via ~:results output~, puis un bloc ~dot~ le récupère via ~:var~ :
+
+#+BEGIN_EXAMPLE
+#+NAME: c1
+#+BEGIN_SRC C :results output
+#include <stdio.h>
+int main(){
+  printf("a -> b\n");
+  printf("a -> c");
+  return 0;
+}
+#+END_SRC
+
+#+NAME: affiche_graphe
+#+BEGIN_SRC dot :results file :file sortie1.png :var contenu=c1
+digraph {
+  $contenu
+}
+#+END_SRC
+#+END_EXAMPLE
+
+** Réutiliser un bloc avec ~#+CALL~
+
+~#+CALL~ permet d'appeler un bloc nommé comme une fonction, en lui passant des arguments :
+
+#+BEGIN_EXAMPLE
+#+CALL: affiche_graphe(c2) :file gv3.png
+#+END_EXAMPLE
+
+On peut aussi concaténer plusieurs résultats avec bash puis les passer au graphe :
+
+#+BEGIN_EXAMPLE
+#+NAME: concat
+#+BEGIN_SRC bash :results output :var txt1=c1 txt2=c2
+echo ${txt1} ${txt2}
+#+END_SRC
+
+#+NAME: fusion
+#+CALL: concat()
+
+#+CALL: affiche_graphe(fusion) :file gv4.png
+#+END_EXAMPLE
+
+* Exportation
+
+** Commandes principales
+
+| Raccourci       | Action                          |
+|-----------------+---------------------------------|
+| ~C-c C-e~       | Ouvrir le menu d'export         |
+| ~C-c C-e h o~   | Exporter en HTML et ouvrir      |
+| ~C-c C-e l p~   | Exporter en PDF via LaTeX       |
+| ~C-c C-e m m~   | Exporter en Markdown            |
+
+** Exclure un titre de l'export
+
+#+BEGIN_EXAMPLE
+* Brouillon                                               :noexport:
+Ce contenu n'apparaîtra pas dans le document exporté.
+#+END_EXAMPLE
+
+** Options en-tête du document
+
+#+BEGIN_EXAMPLE
+#+OPTIONS: toc:2      ← table des matières jusqu'au niveau 2
+           num:t      ← numéroter les titres
+           ^:nil      ← désactiver l'interprétation de _ et ^
+#+END_EXAMPLE
+
+* Commandes diverses
+
+| Raccourci     | Action                                      |
+|---------------+---------------------------------------------|
+| ~C-c C-/~     | Recherche de texte (vue sparse)             |
+| ~C-c .~       | Insérer / ouvrir le mini-calendrier         |
+| ~TAB~         | Plier / déplier un titre                    |
+| ~S-TAB~       | Plier / déplier tout le document            |
+| ~C-c C-n~     | Aller au titre suivant                      |
+| ~C-c C-p~     | Aller au titre précédent                    |
+| ~C-x n s~     | Zoomer sur le sous-arbre courant            |
+| ~C-x n w~     | Revenir à la vue globale                    |

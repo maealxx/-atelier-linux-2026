@@ -1,0 +1,936 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr" xml:lang="fr">
+<head>
+<!-- 2026-05-07 jeu. 01:06 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Rapport - The Labyrinth</title>
+<meta name="author" content="ALEXANDRE Maé - Prep'ISIMA 1" />
+<meta name="generator" content="Org Mode" />
+<style type="text/css">
+  #content { max-width: 60em; margin: auto; }
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    background-color: #f2f2f2;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: auto;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    top: -8px;
+    right: 12px;
+    padding: 3px;
+    color: #555;
+    background-color: #f2f2f299;
+  }
+  pre.src:hover:before { display: inline; margin-top: 14px;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-authinfo::before { content: 'Authinfo'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { }
+</style>
+<link rel="stylesheet" href="../css/org.css">
+<script defer src="../css/nav.js"></script>
+</head>
+<body>
+<div id="content" class="content">
+<h1 class="title">Rapport - The Labyrinth</h1>
+<div id="table-of-contents" role="doc-toc">
+<h2>Table des matières</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#org6198732">1. Introduction</a></li>
+<li><a href="#org5528a2c">2. Analyse du problème</a></li>
+<li><a href="#orgbce63df">3. Méthode de résolution</a></li>
+<li><a href="#org50f11d0">4. Code commenté</a></li>
+<li><a href="#orgd11737d">5. Résultats et tests, débogage avec GDB</a></li>
+<li><a href="#org70da839">6. Solution alternative</a></li>
+<li><a href="#org35182f6">7. Bilan</a></li>
+</ul>
+</div>
+</div>
+<p>
+<a href="https://www.codingame.com/training/medium/the-labyrinth"><i>Lien vers l&rsquo;exercice sur CodingGame</i></a>
+</p>
+
+
+<div id="orgc7ef1b1" class="figure">
+<p><img src="../images/maze1.gif" alt="maze1.gif" width="50%" />
+</p>
+</div>
+<hr />
+<div id="outline-container-org6198732" class="outline-2">
+<h2 id="org6198732"><span class="section-number-2">1.</span> Introduction</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+<i>The Labyrinth</i> est un problème de difficulté <i>Medium</i> disponible sur
+coding game
+</p>
+
+<p>
+Rick  est téléporté dans une structure rectangulaire qu&rsquo;il doit explorer. La mission se
+décompose en deux phases. D&rsquo;abord trouver la salle de commande <code>C</code> pour
+désactiver le champs de force, puis revenir à sa postion de départ <code>T</code> avant
+que l&rsquo;alarme ne s&rsquo;active.
+</p>
+
+<p>
+La vraie difficulté vient du fait que la carte est découverte progressivement.
+À chaque tour, Rick ne voit que les cases dans un carré de 5×5 centré sur lui,
+le reste est <code>?</code> (inconnu). On ne peut donc pas calculer le chemin optimal en
+une seule fois dès le départ, il faut explorer intelligemment, puis se déplacer
+une fois la carte suffisamment révélée.
+</p>
+
+<hr />
+</div>
+</div>
+<div id="outline-container-org5528a2c" class="outline-2">
+<h2 id="org5528a2c"><span class="section-number-2">2.</span> Analyse du problème</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+Le programme reçoit en initialisation trois entiers <code>R C A</code> (lignes, colonnes,
+compte-à-rebours de l&rsquo;alarme). Puis à chaque tour : la position <code>KR KC</code> de
+Rick, suivie de <code>R</code> lignes ASCII représentant l&rsquo;état visible de la grille. On
+répond par une des quatre chaînes <code>UP</code>, <code>DOWN</code>, <code>LEFT</code>, <code>RIGHT</code>.
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Symbole</th>
+<th scope="col" class="org-left">Signification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left"><code>#</code></td>
+<td class="org-left">Mur infranchissable</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>.</code></td>
+<td class="org-left">Couloir libre</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>T</code></td>
+<td class="org-left">Position de départ de Rick</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>C</code></td>
+<td class="org-left">Salle de commande (objectif)</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>?</code></td>
+<td class="org-left">Zone non encore scannée (inconnue)</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+La contrainte critique : une fois Rick posé sur <code>C</code>, l&rsquo;alarme se déclenche et
+il n&rsquo;a plus que <code>A</code> tours pour rentrer. Il faut donc vérifier <i>avant de
+s&rsquo;engager</i> que <code>bfs_distance(C, T) &lt;</code> A=. De même, voir <code>C</code> sur la carte ne
+suffit pas : le chemin peut encore traverser des zones <code>?</code> infranchissables.
+On attend un chemin entièrement libre (sans <code>?</code> ni <code>#</code>) avant de foncer.
+</p>
+
+<hr />
+</div>
+</div>
+<div id="outline-container-orgbce63df" class="outline-2">
+<h2 id="orgbce63df"><span class="section-number-2">3.</span> Méthode de résolution</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+Tout repose sur le parcours en largeur (BFS). Le parcours en profondeur (DFS)
+ne convient pas : on veut les chemins les plus courts, pas juste n&rsquo;importe quel
+chemin.
+</p>
+
+<p>
+La logique principale est une machine à trois états :
+</p>
+
+<ul class="org-ul">
+<li><b>Exploration</b> : la salle de commande n&rsquo;est pas encore visible, ou le chemin
+vers elle traverse encore des zones inconnues. On se dirige vers la frontière
+inconnue la plus proche.</li>
+<li><b>Aller</b> : la salle de commande est accessible et la distance de retour rentre
+dans le budget de tours. On fonce.</li>
+<li><b>Retour</b> : Rick vient de poser le pied sur la commande. On joue le chemin
+préenregistré pas à pas jusqu&rsquo;au départ.</li>
+</ul>
+
+<p>
+La carte est stockée en mémoire globale et mise à jour à chaque tour. Un
+caractère connu n&rsquo;est jamais écrasé par une zone inconnue, donc la carte ne
+fait que progresser.
+</p>
+
+<p>
+Le code a quatre BFS distincts :
+</p>
+
+<ul class="org-ul">
+<li><b>Calcul de distance</b> : compte les cases entre deux points sans construire de
+chemin. Utilisé uniquement pour vérifier que le retour rentre dans le budget.</li>
+<li><b>Premier pas vers une cible</b> : retourne la direction à prendre pour rejoindre
+un caractère précis. Tolère les zones inconnues comme filet de sécurité une
+fois qu&rsquo;on s&rsquo;est engagé vers la commande.</li>
+<li><b>Exploration de frontière</b> : cherche non pas une case précise mais la
+première limite avec l&rsquo;inconnu. Se propage uniquement sur du terrain certifié,
+puis détecte les cases inconnues adjacentes sans les traverser.</li>
+<li><b>Construction du chemin de retour</b> : construit le chemin complet vers le
+départ et le stocke dans un tableau. Le BFS remonte naturellement à l&rsquo;envers,
+donc on inverse le tableau à la fin.</li>
+</ul>
+
+
+<div id="orgf614302" class="figure">
+<p><img src="labyrinth_flow.png" alt="labyrinth_flow.png" />
+</p>
+</div>
+
+<hr />
+
+<p>
+<a href="file:///home/maealx/atelier/labyrinthe/html/labyrinthe_8c.html">Voir la documentation au format Doxygen</a>
+</p>
+</div>
+</div>
+<div id="outline-container-org50f11d0" class="outline-2">
+<h2 id="org50f11d0"><span class="section-number-2">4.</span> Code commenté</h2>
+<div class="outline-text-2" id="text-4">
+<div class="org-src-container">
+<pre class="src src-c"><span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdlib.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdio.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;string.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdbool.h&gt;</span>
+
+<span style="color: #83898d;">/** </span><span style="color: #a9a1e1;">@defgroup</span><span style="color: #83898d;"> config Constantes de configuration
+ *  @{ */</span>
+<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">MAXR</span>    100    <span style="color: #83898d;">/**&lt; Nombre maximum de lignes de la grille */</span>
+<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">MAXC</span>    200    <span style="color: #83898d;">/**&lt; Nombre maximum de colonnes de la grille */</span>
+<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">MAXPATH</span> 20000  <span style="color: #83898d;">/**&lt; Taille maximale du chemin de retour stock&#233; */</span>
+<span style="color: #83898d;">/** @} */</span>
+
+<span style="color: #83898d;">/** </span><span style="color: #a9a1e1;">@defgroup</span><span style="color: #83898d;"> globals Variables globales
+ *  @{ */</span>
+<span style="color: #ECBE7B;">int</span>  <span style="color: #dcaeea;">R</span>;               <span style="color: #83898d;">/**&lt; Nombre r&#233;el de lignes (lu en entr&#233;e) */</span>
+<span style="color: #ECBE7B;">int</span>  <span style="color: #dcaeea;">C</span>;               <span style="color: #83898d;">/**&lt; Nombre r&#233;el de colonnes (lu en entr&#233;e) */</span>
+<span style="color: #ECBE7B;">int</span>  <span style="color: #dcaeea;">A</span>;               <span style="color: #83898d;">/**&lt; Budget de tours pour revenir apr&#232;s avoir atteint C */</span>
+<span style="color: #ECBE7B;">char</span> <span style="color: #dcaeea;">grille</span>[MAXR][MAXC]; <span style="color: #83898d;">/**&lt; Carte persistante du labyrinthe, '?' = inconnu */</span>
+
+<span style="color: #83898d;">/** Deltas de d&#233;placement pour les 4 directions : haut, bas, gauche, droite */</span>
+<span style="color: #ECBE7B;">int</span>   <span style="color: #dcaeea;">deltaLigne</span>[4]  = {-1,     1,      0,       0};
+<span style="color: #ECBE7B;">int</span>   <span style="color: #dcaeea;">deltaCol</span>[4]    = { 0,     0,     -1,       1};
+<span style="color: #83898d;">/** Noms des directions, index&#233;s comme deltaLigne/deltaCol */</span>
+<span style="color: #ECBE7B;">char</span> *<span style="color: #dcaeea;">nomDir</span>[4] = {<span style="color: #98be65;">"UP"</span>, <span style="color: #98be65;">"DOWN"</span>, <span style="color: #98be65;">"LEFT"</span>, <span style="color: #98be65;">"RIGHT"</span>};
+<span style="color: #83898d;">/** @} */</span>
+
+<span style="color: #83898d;">/**
+ * </span><span style="color: #a9a1e1;">@brief</span><span style="color: #83898d;"> N&#339;ud repr&#233;sentant une case de la grille.
+ */</span>
+<span style="color: #51afef;">typedef</span> <span style="color: #51afef;">struct</span> {
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">r</span>; <span style="color: #83898d;">/**&lt; Ligne */</span>
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">c</span>; <span style="color: #83898d;">/**&lt; Colonne */</span>
+} <span style="color: #ECBE7B;">Node</span>;
+
+<span style="color: #83898d;">/**
+ * </span><span style="color: #a9a1e1;">@brief</span><span style="color: #83898d;"> V&#233;rifie qu'une case est dans les limites de la grille.
+ * </span><span style="color: #a9a1e1;">@param</span><span style="color: #83898d;"> r Ligne &#224; tester.
+ * </span><span style="color: #a9a1e1;">@param</span><span style="color: #83898d;"> c Colonne &#224; tester.
+ * </span><span style="color: #a9a1e1;">@return</span><span style="color: #83898d;"> true si (r, c) est dans [0, R[ x [0, C[, false sinon.
+ */</span>
+<span style="color: #ECBE7B;">bool</span> <span style="color: #c678dd;">inBounds</span>(<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">r</span>, <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">c</span>) {
+    <span style="color: #51afef;">return</span> r &gt;= 0 &amp;&amp; r &lt; R &amp;&amp; c &gt;= 0 &amp;&amp; c &lt; C;
+}
+
+<span style="color: #83898d;">/**
+ * </span><span style="color: #a9a1e1;">@brief</span><span style="color: #83898d;"> Calcule la distance BFS entre deux cases en &#233;vitant '#' et '?'.
+ *
+ * Utilis&#233;e exclusivement pour v&#233;rifier que </span><span style="color: #a9a1e1;">@c</span><span style="color: #83898d;"> distBack &lt;= A avant de
+ * s'engager vers la salle de commande.
+ *
+ * </span><span style="color: #a9a1e1;">@param</span><span style="color: #83898d;"> ligneDepart Ligne source.
+ * </span><span style="color: #a9a1e1;">@param</span><span style="color: #83898d;"> colDepart Colonne source.
+ * </span><span style="color: #a9a1e1;">@param</span><span style="color: #83898d;"> ligneCible Ligne cible.
+ * </span><span style="color: #a9a1e1;">@param</span><span style="color: #83898d;"> colCible Colonne cible.
+ * </span><span style="color: #a9a1e1;">@return</span><span style="color: #83898d;"> Distance en nombre de cases, ou -1 si aucun chemin n'existe.
+ */</span>
+<span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">bfs_distance</span>(<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">ligneDepart</span>, <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">colDepart</span>, <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">ligneCible</span>, <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">colCible</span>) {
+    <span style="color: #ECBE7B;">int</span>  <span style="color: #dcaeea;">dejaVu</span>[MAXR][MAXC] = {0};
+    <span style="color: #ECBE7B;">int</span>  <span style="color: #dcaeea;">distTab</span>[MAXR][MAXC];
+    <span style="color: #ECBE7B;">Node</span> <span style="color: #dcaeea;">file</span>[MAXR * MAXC];
+    <span style="color: #ECBE7B;">int</span>  <span style="color: #dcaeea;">debut</span> = 0, <span style="color: #dcaeea;">fin</span> = 0;
+
+    file[fin++]                     = (Node){ligneDepart, colDepart};
+    dejaVu[ligneDepart][colDepart]  = 1;
+    distTab[ligneDepart][colDepart] = 0;
+
+    <span style="color: #51afef;">while</span> (debut &lt; fin) {
+        <span style="color: #ECBE7B;">Node</span> <span style="color: #dcaeea;">courant</span> = file[debut++];
+
+        <span style="color: #51afef;">if</span> (courant.r == ligneCible &amp;&amp; courant.c == colCible)
+            <span style="color: #51afef;">return</span> distTab[courant.r][courant.c];
+
+        <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 0; i &lt; 4; i++) {
+            <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">nouvLigne</span> = courant.r + deltaLigne[i];
+            <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">nouvCol</span>   = courant.c + deltaCol[i];
+
+            <span style="color: #51afef;">if</span> (inBounds(nouvLigne, nouvCol) &amp;&amp; <span style="color: #51afef; font-weight: bold;">!</span>dejaVu[nouvLigne][nouvCol] &amp;&amp;
+                grille[nouvLigne][nouvCol] != <span style="color: #98be65;">'#'</span> &amp;&amp; grille[nouvLigne][nouvCol] != <span style="color: #98be65;">'?'</span>) {
+                dejaVu[nouvLigne][nouvCol]  = 1;
+                distTab[nouvLigne][nouvCol] = distTab[courant.r][courant.c] + 1;
+                file[fin++]                 = (Node){nouvLigne, nouvCol};
+            }
+        }
+    }
+    <span style="color: #51afef;">return</span> -1;
+}
+
+<span style="color: #83898d;">/**
+ * </span><span style="color: #a9a1e1;">@brief</span><span style="color: #83898d;"> Renvoie la direction du premier pas BFS vers une case cible.
+ *
+ * Parcourt la carte en autorisant les cases '?' (filet de s&#233;curit&#233;
+ * une fois </span><span style="color: #a9a1e1;">@c</span><span style="color: #83898d;"> goingToC valid&#233;). Remonte le tableau </span><span style="color: #a9a1e1;">@c</span><span style="color: #83898d;"> parent[] pour
+ * identifier le voisin direct de la source, puis d&#233;duit la direction.
+ *
+ * </span><span style="color: #a9a1e1;">@param</span><span style="color: #83898d;"> ligneDepart     Ligne source (position actuelle de Rick).
+ * </span><span style="color: #a9a1e1;">@param</span><span style="color: #83898d;"> colDepart     Colonne source.
+ * </span><span style="color: #a9a1e1;">@param</span><span style="color: #83898d;"> cible Caract&#232;re cible &#224; atteindre (ex. </span><span style="color: #a9a1e1;">@c</span><span style="color: #83898d;"> 'C').
+ * </span><span style="color: #a9a1e1;">@return</span><span style="color: #83898d;"> Cha&#238;ne de direction ("UP", "DOWN", "LEFT", "RIGHT"),
+ *         ou NULL si la cible est inaccessible.
+ */</span>
+<span style="color: #ECBE7B;">char</span>* <span style="color: #c678dd;">bfs_move</span>(<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">ligneDepart</span>, <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">colDepart</span>, <span style="color: #ECBE7B;">char</span> <span style="color: #dcaeea;">cible</span>) {
+    <span style="color: #ECBE7B;">int</span>  <span style="color: #dcaeea;">dejaVu</span>[MAXR][MAXC] = {0};
+    <span style="color: #ECBE7B;">Node</span> <span style="color: #dcaeea;">parentTab</span>[MAXR][MAXC];
+    <span style="color: #ECBE7B;">Node</span> <span style="color: #dcaeea;">file</span>[MAXR * MAXC];
+    <span style="color: #ECBE7B;">int</span>  <span style="color: #dcaeea;">debut</span> = 0, <span style="color: #dcaeea;">fin</span> = 0;
+
+    file[fin++]                    = (Node){ligneDepart, colDepart};
+    dejaVu[ligneDepart][colDepart] = 1;
+
+    <span style="color: #51afef;">while</span> (debut &lt; fin) {
+        <span style="color: #ECBE7B;">Node</span> <span style="color: #dcaeea;">courant</span> = file[debut++];
+
+        <span style="color: #51afef;">if</span> (grille[courant.r][courant.c] == cible) {
+            <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">on remonte le chemin pour trouver le premier pas depuis la source</span><span style="color: #5B6268;"> */</span>
+            <span style="color: #ECBE7B;">Node</span> <span style="color: #dcaeea;">retour</span> = courant;
+            <span style="color: #51afef;">while</span> (<span style="color: #51afef; font-weight: bold;">!</span>(parentTab[retour.r][retour.c].r == ligneDepart &amp;&amp;
+                     parentTab[retour.r][retour.c].c == colDepart)) {
+                retour = parentTab[retour.r][retour.c];
+            }
+            <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 0; i &lt; 4; i++) {
+                <span style="color: #51afef;">if</span> (ligneDepart + deltaLigne[i] == retour.r &amp;&amp;
+                    colDepart   + deltaCol[i]   == retour.c)
+                    <span style="color: #51afef;">return</span> nomDir[i];
+            }
+        }
+
+        <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 0; i &lt; 4; i++) {
+            <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">nouvLigne</span> = courant.r + deltaLigne[i];
+            <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">nouvCol</span>   = courant.c + deltaCol[i];
+            <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">on autorise les '?' ici puisqu'on sait d&#233;j&#224; o&#249; est la cible</span><span style="color: #5B6268;"> */</span>
+            <span style="color: #51afef;">if</span> (inBounds(nouvLigne, nouvCol) &amp;&amp; <span style="color: #51afef; font-weight: bold;">!</span>dejaVu[nouvLigne][nouvCol] &amp;&amp;
+                grille[nouvLigne][nouvCol] != <span style="color: #98be65;">'#'</span>) {
+                dejaVu[nouvLigne][nouvCol]    = 1;
+                parentTab[nouvLigne][nouvCol] = courant;
+                file[fin++]                   = (Node){nouvLigne, nouvCol};
+            }
+        }
+    }
+    <span style="color: #51afef;">return</span> <span style="color: #a9a1e1;">NULL</span>;
+}
+
+<span style="color: #83898d;">/**
+ * </span><span style="color: #a9a1e1;">@brief</span><span style="color: #83898d;"> Renvoie la direction vers la zone inconnue ('?') la plus proche.
+ *
+ * Effectue un BFS sur le terrain connu uniquement (sans '#' ni '?').
+ * Pour chaque case visit&#233;e, inspecte ses voisins imm&#233;diats : d&#232;s qu'un
+ * voisin est '?', on se dirige vers lui (sans le traverser).
+ *
+ * </span><span style="color: #a9a1e1;">@param</span><span style="color: #83898d;"> ligneDepart Ligne source.
+ * </span><span style="color: #a9a1e1;">@param</span><span style="color: #83898d;"> colDepart Colonne source.
+ * </span><span style="color: #a9a1e1;">@return</span><span style="color: #83898d;"> Cha&#238;ne de direction vers la fronti&#232;re inconnue,
+ *         ou NULL si aucune zone '?' n'est atteignable.
+ */</span>
+<span style="color: #ECBE7B;">char</span>* <span style="color: #c678dd;">bfs_explore</span>(<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">ligneDepart</span>, <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">colDepart</span>) {
+    <span style="color: #ECBE7B;">int</span>  <span style="color: #dcaeea;">dejaVu</span>[MAXR][MAXC] = {0};
+    <span style="color: #ECBE7B;">Node</span> <span style="color: #dcaeea;">parentTab</span>[MAXR][MAXC];
+    <span style="color: #ECBE7B;">Node</span> <span style="color: #dcaeea;">file</span>[MAXR * MAXC];
+    <span style="color: #ECBE7B;">int</span>  <span style="color: #dcaeea;">debut</span> = 0, <span style="color: #dcaeea;">fin</span> = 0;
+
+    file[fin++]                    = (Node){ligneDepart, colDepart};
+    dejaVu[ligneDepart][colDepart] = 1;
+
+    <span style="color: #51afef;">while</span> (debut &lt; fin) {
+        <span style="color: #ECBE7B;">Node</span> <span style="color: #dcaeea;">courant</span> = file[debut++];
+
+        <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">on regarde si y'a une case inconnue &#224; c&#244;t&#233;</span><span style="color: #5B6268;"> */</span>
+        <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 0; i &lt; 4; i++) {
+            <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">nouvLigne</span> = courant.r + deltaLigne[i];
+            <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">nouvCol</span>   = courant.c + deltaCol[i];
+
+            <span style="color: #51afef;">if</span> (inBounds(nouvLigne, nouvCol) &amp;&amp; grille[nouvLigne][nouvCol] == <span style="color: #98be65;">'?'</span>) {
+                <span style="color: #ECBE7B;">Node</span> <span style="color: #dcaeea;">retour</span> = courant;
+                <span style="color: #51afef;">while</span> (<span style="color: #51afef; font-weight: bold;">!</span>(parentTab[retour.r][retour.c].r == ligneDepart &amp;&amp;
+                         parentTab[retour.r][retour.c].c == colDepart)) {
+                    retour = parentTab[retour.r][retour.c];
+                }
+                <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 0; i &lt; 4; i++) {
+                    <span style="color: #51afef;">if</span> (ligneDepart + deltaLigne[i] == retour.r &amp;&amp;
+                        colDepart   + deltaCol[i]   == retour.c)
+                        <span style="color: #51afef;">return</span> nomDir[i];
+                }
+            }
+        }
+
+        <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">on avance seulement sur les cases connues et pas des murs</span><span style="color: #5B6268;"> */</span>
+        <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 0; i &lt; 4; i++) {
+            <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">nouvLigne</span> = courant.r + deltaLigne[i];
+            <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">nouvCol</span>   = courant.c + deltaCol[i];
+            <span style="color: #51afef;">if</span> (inBounds(nouvLigne, nouvCol) &amp;&amp; <span style="color: #51afef; font-weight: bold;">!</span>dejaVu[nouvLigne][nouvCol] &amp;&amp;
+                grille[nouvLigne][nouvCol] != <span style="color: #98be65;">'#'</span> &amp;&amp; grille[nouvLigne][nouvCol] != <span style="color: #98be65;">'?'</span>) {
+                dejaVu[nouvLigne][nouvCol]    = 1;
+                parentTab[nouvLigne][nouvCol] = courant;
+                file[fin++]                   = (Node){nouvLigne, nouvCol};
+            }
+        }
+    }
+    <span style="color: #51afef;">return</span> <span style="color: #a9a1e1;">NULL</span>;
+}
+
+<span style="color: #83898d;">/** </span><span style="color: #a9a1e1;">@defgroup</span><span style="color: #83898d;"> retour Chemin de retour pr&#233;enregistr&#233;
+ *  Pr&#233;calcul&#233; une seule fois quand Rick arrive sur C, rejou&#233; pas &#224; pas.
+ *  @{ */</span>
+<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">cheminRetour</span>[MAXPATH]; <span style="color: #83898d;">/**&lt; Indices de direction (0=UP 1=DOWN 2=LEFT 3=RIGHT) */</span>
+<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">longueurChemin</span> = 0;    <span style="color: #83898d;">/**&lt; Nombre total de pas */</span>
+<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">indexChemin</span>    = 0;    <span style="color: #83898d;">/**&lt; Indice du prochain pas &#224; jouer */</span>
+<span style="color: #83898d;">/** @} */</span>
+
+<span style="color: #83898d;">/**
+ * </span><span style="color: #a9a1e1;">@brief</span><span style="color: #83898d;"> Construit le chemin BFS optimal de (sr,sc) &#224; (tr,tc) dans path[].
+ *
+ * Reconstruit le chemin &#224; rebours via le tableau </span><span style="color: #a9a1e1;">@c</span><span style="color: #83898d;"> parent[], puis
+ * l'inverse pour l'obtenir dans le bon sens (source -&gt; cible).
+ * Les cases '#' et '?' sont exclues du parcours.
+ *
+ * </span><span style="color: #a9a1e1;">@param</span><span style="color: #83898d;"> ligneDepart Ligne source (position sur C au moment de l'appel).
+ * </span><span style="color: #a9a1e1;">@param</span><span style="color: #83898d;"> colDepart Colonne source.
+ * </span><span style="color: #a9a1e1;">@param</span><span style="color: #83898d;"> ligneCible Ligne cible (startR, position de d&#233;part T).
+ * </span><span style="color: #a9a1e1;">@param</span><span style="color: #83898d;"> colCible Colonne cible (startC).
+ */</span>
+<span style="color: #ECBE7B;">void</span> <span style="color: #c678dd;">bfs_build_path</span>(<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">ligneDepart</span>, <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">colDepart</span>, <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">ligneCible</span>, <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">colCible</span>) {
+    <span style="color: #ECBE7B;">int</span>  <span style="color: #dcaeea;">dejaVu</span>[MAXR][MAXC] = {0};
+    <span style="color: #ECBE7B;">Node</span> <span style="color: #dcaeea;">parentTab</span>[MAXR][MAXC];
+    <span style="color: #ECBE7B;">Node</span> <span style="color: #dcaeea;">file</span>[MAXR * MAXC];
+    <span style="color: #ECBE7B;">int</span>  <span style="color: #dcaeea;">debut</span> = 0, <span style="color: #dcaeea;">fin</span> = 0;
+
+    file[fin++]                    = (Node){ligneDepart, colDepart};
+    dejaVu[ligneDepart][colDepart] = 1;
+
+    <span style="color: #51afef;">while</span> (debut &lt; fin) {
+        <span style="color: #ECBE7B;">Node</span> <span style="color: #dcaeea;">courant</span> = file[debut++];
+
+        <span style="color: #51afef;">if</span> (courant.r == ligneCible &amp;&amp; courant.c == colCible) {
+            <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">on reconstruit le chemin en partant de la fin</span><span style="color: #5B6268;"> */</span>
+            <span style="color: #ECBE7B;">Node</span> <span style="color: #dcaeea;">temp</span>      = courant;
+            longueurChemin = 0;
+            <span style="color: #51afef;">while</span> (<span style="color: #51afef; font-weight: bold;">!</span>(temp.r == ligneDepart &amp;&amp; temp.c == colDepart)) {
+                <span style="color: #ECBE7B;">Node</span> <span style="color: #dcaeea;">p</span> = parentTab[temp.r][temp.c];
+                <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 0; i &lt; 4; i++) {
+                    <span style="color: #51afef;">if</span> (p.r + deltaLigne[i] == temp.r &amp;&amp; p.c + deltaCol[i] == temp.c)
+                        cheminRetour[longueurChemin++] = i;
+                }
+                temp = p;
+            }
+            <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">le chemin est &#224; l'envers donc on le retourne</span><span style="color: #5B6268;"> */</span>
+            <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 0; i &lt; longueurChemin / 2; i++) {
+                <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">tmp</span>                              = cheminRetour[i];
+                cheminRetour[i]                      = cheminRetour[longueurChemin - i - 1];
+                cheminRetour[longueurChemin - i - 1] = tmp;
+            }
+            indexChemin = 0;
+            <span style="color: #51afef;">return</span>;
+        }
+
+        <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 0; i &lt; 4; i++) {
+            <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">nouvLigne</span> = courant.r + deltaLigne[i];
+            <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">nouvCol</span>   = courant.c + deltaCol[i];
+            <span style="color: #51afef;">if</span> (inBounds(nouvLigne, nouvCol) &amp;&amp; <span style="color: #51afef; font-weight: bold;">!</span>dejaVu[nouvLigne][nouvCol] &amp;&amp;
+                grille[nouvLigne][nouvCol] != <span style="color: #98be65;">'#'</span> &amp;&amp; grille[nouvLigne][nouvCol] != <span style="color: #98be65;">'?'</span>) {
+                dejaVu[nouvLigne][nouvCol]    = 1;
+                parentTab[nouvLigne][nouvCol] = courant;
+                file[fin++]                   = (Node){nouvLigne, nouvCol};
+            }
+        }
+    }
+}
+
+<span style="color: #83898d;">/**
+ * </span><span style="color: #a9a1e1;">@brief</span><span style="color: #83898d;"> Point d'entr&#233;e  boucle principale du jeu.
+ *
+ * Lit les dimensions et le budget d'alarme, initialise la carte &#224; '?',
+ * puis tourne en boucle infinie. &#192; chaque tour, met &#224; jour la carte,
+ * &#233;value l'&#233;tat courant (exploration / aller / retour) et &#233;met une
+ * direction sur stdout.
+ *
+ * </span><span style="color: #a9a1e1;">@return</span><span style="color: #83898d;"> 0 (jamais atteint en pratique).
+ */</span>
+<span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">main</span>() {
+    scanf(<span style="color: #98be65;">"%d%d%d"</span>, &amp;R, &amp;C, &amp;A);
+
+    <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">au d&#233;but on ne conna&#238;t rien</span><span style="color: #5B6268;"> */</span>
+    <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 0; i &lt; R; i++)
+        <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">j</span> = 0; j &lt; C; j++)
+            grille[i][j] = <span style="color: #98be65;">'?'</span>;
+
+    <span style="color: #ECBE7B;">int</span>  <span style="color: #dcaeea;">ligneStart</span> = -1, <span style="color: #dcaeea;">colStart</span> = -1; <span style="color: #83898d;">/**&lt; Position de d&#233;part, m&#233;moris&#233;e d&#232;s que 'T' est vu */</span>
+    <span style="color: #ECBE7B;">bool</span> <span style="color: #dcaeea;">goingToC</span>   = <span style="color: #a9a1e1;">false</span>;             <span style="color: #83898d;">/**&lt; true quand on s'engage vers C */</span>
+    <span style="color: #ECBE7B;">bool</span> <span style="color: #dcaeea;">onRentre</span>   = <span style="color: #a9a1e1;">false</span>;             <span style="color: #83898d;">/**&lt; true quand l'alarme est d&#233;clench&#233;e et qu'on rentre */</span>
+
+    <span style="color: #51afef;">while</span> (1) {
+        <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">ligneRick</span>, <span style="color: #dcaeea;">colRick</span>;
+        scanf(<span style="color: #98be65;">"%d%d"</span>, &amp;ligneRick, &amp;colRick);
+
+        <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">on met &#224; jour la grille avec ce que Rick voit ce tour-ci</span><span style="color: #5B6268;"> */</span>
+        <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 0; i &lt; R; i++) {
+            <span style="color: #ECBE7B;">char</span> <span style="color: #dcaeea;">rangee</span>[C + 1];
+            scanf(<span style="color: #98be65;">"%s"</span>, rangee);
+            <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">j</span> = 0; j &lt; C; j++) {
+                <span style="color: #51afef;">if</span> (rangee[j] != <span style="color: #98be65;">'?'</span>)
+                    grille[i][j] = rangee[j];
+                <span style="color: #51afef;">if</span> (grille[i][j] == <span style="color: #98be65;">'T'</span>) {
+                    ligneStart = i;
+                    colStart   = j;
+                }
+            }
+        }
+
+        <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">on cherche o&#249; est C sur la grille</span><span style="color: #5B6268;"> */</span>
+        <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">ligneC</span> = -1, <span style="color: #dcaeea;">colC</span> = -1;
+        <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 0; i &lt; R; i++)
+            <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">j</span> = 0; j &lt; C; j++)
+                <span style="color: #51afef;">if</span> (grille[i][j] == <span style="color: #98be65;">'C'</span>) { ligneC = i; colC = j; }
+
+        <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">si on est en mode retour on joue juste le chemin d&#233;j&#224; calcul&#233;</span><span style="color: #5B6268;"> */</span>
+        <span style="color: #51afef;">if</span> (onRentre) {
+            printf(<span style="color: #98be65;">"%s\n"</span>, nomDir[cheminRetour[indexChemin++]]);
+            <span style="color: #51afef;">continue</span>;
+        }
+
+        <span style="color: #ECBE7B;">char</span>* <span style="color: #dcaeea;">mouvement</span> = <span style="color: #a9a1e1;">NULL</span>;
+
+        <span style="color: #51afef;">if</span> (ligneC != -1) {
+            <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">C est visible, on v&#233;rifie si on a le temps de rentrer apr&#232;s</span><span style="color: #5B6268;"> */</span>
+            <span style="color: #51afef;">if</span> (<span style="color: #51afef; font-weight: bold;">!</span>goingToC) {
+                <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">distVersC</span>  = bfs_distance(ligneRick, colRick, ligneC, colC);
+                <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">distRetour</span> = bfs_distance(ligneC, colC, ligneStart, colStart);
+                <span style="color: #51afef;">if</span> (distVersC != -1 &amp;&amp; distRetour != -1 &amp;&amp; distRetour &lt;= A)
+                    goingToC = <span style="color: #a9a1e1;">true</span>;
+            }
+
+            <span style="color: #51afef;">if</span> (goingToC) {
+                <span style="color: #51afef;">if</span> (ligneRick == ligneC &amp;&amp; colRick == colC) {
+                    <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">Rick est sur C, l'alarme se d&#233;clenche, on calcule le chemin retour</span><span style="color: #5B6268;"> */</span>
+                    onRentre = <span style="color: #a9a1e1;">true</span>;
+                    bfs_build_path(ligneRick, colRick, ligneStart, colStart);
+                    printf(<span style="color: #98be65;">"%s\n"</span>, nomDir[cheminRetour[indexChemin++]]);
+                    <span style="color: #51afef;">continue</span>;
+                } <span style="color: #51afef;">else</span> {
+                    mouvement = bfs_move(ligneRick, colRick, <span style="color: #98be65;">'C'</span>);
+                }
+            } <span style="color: #51afef;">else</span> {
+                <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">pas encore s&#251;r de pouvoir rentrer, on continue d'explorer</span><span style="color: #5B6268;"> */</span>
+                mouvement = bfs_explore(ligneRick, colRick);
+            }
+        } <span style="color: #51afef;">else</span> {
+            <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">C pas encore trouv&#233;, on explore</span><span style="color: #5B6268;"> */</span>
+            mouvement = bfs_explore(ligneRick, colRick);
+        }
+
+        <span style="color: #51afef;">if</span> (mouvement == <span style="color: #a9a1e1;">NULL</span>) mouvement = <span style="color: #98be65;">"UP"</span>; <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">au cas o&#249; y'a plus rien &#224; explorer</span><span style="color: #5B6268;"> */</span>
+        printf(<span style="color: #98be65;">"%s\n"</span>, mouvement);
+    }
+
+    <span style="color: #51afef;">return</span> 0;
+}
+</pre>
+</div>
+
+<hr />
+</div>
+</div>
+<div id="outline-container-orgd11737d" class="outline-2">
+<h2 id="orgd11737d"><span class="section-number-2">5.</span> Résultats et tests, débogage avec GDB</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+On recompile avec <code>-g</code> pour inclure les infos de débogage, puis on lance GDB en lui donnant le fichier de <a href="teste_gdb.txt">teste</a> (qui est le teste numéro 1 de coding game) en entrée :
+</p>
+
+<div class="org-src-container">
+<pre class="src src-sh">gcc -g -Wall -Wextra -o labyrinthe labyrinthe.c
+gdb ./labyrinthe
+</pre>
+</div>
+
+<p>
+On pose un point d&rsquo;arrêt sur <code>bfs_build_path</code>, la fonction la plus importante à vérifier : c&rsquo;est elle qui construit le chemin de retour au moment où Rick pose le pied sur <code>C</code>. On lance avec <code>run &lt; test1.txt</code> et on attend que GDB s&rsquo;arrête :
+</p>
+
+<div class="org-src-container">
+<pre class="src src-gdb">(gdb) break bfs_build_path
+Breakpoint 1 at 0x2003: file labyrinthe.c, line 271.
+(gdb) run &lt; teste_gdb.txt
+
+RIGHT
+RIGHT
+RIGHT
+RIGHT
+RIGHT
+RIGHT
+RIGHT
+
+Breakpoint 1, bfs_build_path (ligneDepart=6, colDepart=12, ligneCible=6, colCible=5)
+    at labyrinthe.c:271
+
+(gdb) finish
+(gdb) print longueurChemin
+$1 = 7                   
+(gdb) print cheminRetour[0]
+$2 = 2                
+(gdb) print cheminRetour[6]
+$3 = 2                    
+
+</pre>
+</div>
+
+
+<hr />
+</div>
+</div>
+<div id="outline-container-org70da839" class="outline-2">
+<h2 id="org70da839"><span class="section-number-2">6.</span> Solution alternative</h2>
+<div class="outline-text-2" id="text-6">
+<p>
+<a href="https://www.codingame.com/training/hard/the-labyrinth/solution?id=2965691">Lien vers la solution sur CodingGame</a>
+</p>
+
+<div class="org-src-container">
+<pre class="src src-c"><span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdlib.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdio.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;string.h&gt;</span>
+
+<span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">main</span>()
+{
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">R</span>; <span style="color: #5B6268;">// </span><span style="color: #5B6268;">number of rows.
+</span>    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">C</span>; <span style="color: #5B6268;">// </span><span style="color: #5B6268;">number of columns.
+</span>    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">A</span>; <span style="color: #5B6268;">// </span><span style="color: #5B6268;">number of rounds between the time the alarm countdown is
+</span>           <span style="color: #5B6268;">// </span><span style="color: #5B6268;">activated and the time the alarm goes off.
+</span>    scanf(<span style="color: #98be65;">"%d%d%d"</span>, &amp;R, &amp;C, &amp;A);
+    fprintf(stderr, <span style="color: #98be65;">"R = %i, C = %i\n"</span>, R, C);
+    <span style="color: #ECBE7B;">char</span> <span style="color: #dcaeea;">target</span> = <span style="color: #98be65;">'?'</span>;
+
+    <span style="color: #51afef;">while</span> (1) {
+        <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">KR</span>; <span style="color: #5B6268;">// </span><span style="color: #5B6268;">row where Kirk is located.
+</span>        <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">KC</span>; <span style="color: #5B6268;">// </span><span style="color: #5B6268;">column where Kirk is located.
+</span>        scanf(<span style="color: #98be65;">"%d%d\n"</span>, &amp;KR, &amp;KC);
+        fprintf(stderr, <span style="color: #98be65;">"Kirk : R:%i C:%i\n"</span>, KR, KC);
+        <span style="color: #ECBE7B;">char</span> <span style="color: #dcaeea;">map</span>[R][C+1];
+        memset(map, 0, <span style="color: #51afef;">sizeof</span>(<span style="color: #ECBE7B;">char</span>)*R*(C));
+        <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 0; i &lt; R; i++) {
+            fgets(map[i], 10000, stdin);
+            map[i][C] = <span style="color: #98be65;">'\0'</span>;
+        }
+
+        <span style="color: #51afef;">if</span> (map[KR][KC] == <span style="color: #98be65;">'C'</span>)
+            target = <span style="color: #98be65;">'T'</span>;
+
+        <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 0; i &lt; R; i++) {
+            <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">j</span> = 0; j &lt; C; j++) {
+                <span style="color: #51afef;">if</span> (map[i][j] == <span style="color: #98be65;">'C'</span> &amp;&amp; target == <span style="color: #98be65;">'T'</span>)
+                    map[i][j] = <span style="color: #98be65;">'.'</span>;
+                <span style="color: #51afef;">if</span> (map[i][j] == <span style="color: #98be65;">'T'</span> &amp;&amp; target == <span style="color: #98be65;">'C'</span>)
+                    map[i][j] = <span style="color: #98be65;">'.'</span>;
+            }
+        }
+        map[KR][KC] = <span style="color: #98be65;">'@'</span>;
+        <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 0; i &lt; R; i++) {
+            fprintf(stderr, <span style="color: #98be65;">"%s\n"</span>, map[i]);
+        }
+        map[KR][KC] = <span style="color: #98be65;">'.'</span>;
+
+        <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">queue</span>[R*C];
+        <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">qprev</span>[R*C];
+        <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">qbegin</span> = 0; <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">qend</span> = 0;
+        <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">cur</span> = -1;
+        <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">cx</span>, <span style="color: #dcaeea;">cy</span>;
+
+<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #c678dd;">pop</span>(<span style="color: #dcaeea;">z</span>)  { (z) = queue[qbegin++]; }
+<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #c678dd;">push</span>(<span style="color: #dcaeea;">z</span>) { <span style="color: #51afef;">if</span> (<span style="color: #51afef; font-weight: bold;">!</span>vst[z]) { qprev[z] = cur; vst[z] = 1; \
+                                  queue[qend++] = (z); } }
+        <span style="color: #ECBE7B;">char</span> <span style="color: #dcaeea;">vst</span>[R*C];
+        memset(vst,    0, R*C);
+        memset(queue,  0, R*C*<span style="color: #51afef;">sizeof</span>(<span style="color: #ECBE7B;">int</span>));
+        memset(qprev, -1, R*C*<span style="color: #51afef;">sizeof</span>(<span style="color: #ECBE7B;">int</span>));
+
+        push(KR*C+KC);
+        <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">tgt</span> = -1;
+        <span style="color: #51afef;">while</span> (qbegin &lt; qend) {
+            pop(cur);
+            cx = cur % C;
+            cy = cur / C;
+            <span style="color: #51afef;">if</span> (map[cy][cx] == target) {
+                fprintf(stderr, <span style="color: #98be65;">"found target : %i %i : %c\n"</span>,
+                        cy, cx, map[cy][cx]);
+                tgt = cur;
+                <span style="color: #51afef;">break</span>;
+            }
+            <span style="color: #51afef;">if</span> (map[cy  ][cx+1] != <span style="color: #98be65;">'#'</span>) push(cy*C + cx + 1);
+            <span style="color: #51afef;">if</span> (map[cy  ][cx-1] != <span style="color: #98be65;">'#'</span>) push(cy*C + cx - 1);
+            <span style="color: #51afef;">if</span> (map[cy+1][cx  ] != <span style="color: #98be65;">'#'</span>) push((cy+1)*C + cx);
+            <span style="color: #51afef;">if</span> (map[cy-1][cx  ] != <span style="color: #98be65;">'#'</span>) push((cy-1)*C + cx);
+        }
+
+        <span style="color: #51afef;">if</span> (tgt &lt; 0) {
+            fprintf(stderr, <span style="color: #98be65;">"Nothing to explore\n"</span>);
+            target = <span style="color: #98be65;">'C'</span>;
+        } <span style="color: #51afef;">else</span> cur = tgt;
+
+        <span style="color: #51afef;">while</span> (qprev[qprev[cur]] &gt;= 0) cur = qprev[cur];
+        cy = cur / C;
+        cx = cur % C;
+        fprintf(stderr, <span style="color: #98be65;">"c : %i %i : %c\n"</span>, cy, cx, map[cy][cx]);
+        <span style="color: #51afef;">if</span> (cy == KR) {
+            <span style="color: #51afef;">if</span> (cx &lt; KC) fprintf(stdout, <span style="color: #98be65;">"LEFT\n"</span>);
+            <span style="color: #51afef;">else</span>         fprintf(stdout, <span style="color: #98be65;">"RIGHT\n"</span>);
+        } <span style="color: #51afef;">else</span> <span style="color: #51afef;">if</span> (cy &gt; KR) {
+            fprintf(stdout, <span style="color: #98be65;">"DOWN\n"</span>);
+        } <span style="color: #51afef;">else</span> fprintf(stdout, <span style="color: #98be65;">"UP\n"</span>);
+    }
+
+    <span style="color: #51afef;">return</span> 0;
+}
+</pre>
+</div>
+
+<p>
+La solution est beaucoup plus compacte (~80 lignes) mais sacrifie deux choses
+importantes. D&rsquo;abord la carte est recréée à chaque tour depuis l&rsquo;entrée
+courante, donc toute la mémoire inter-tours est perdue. Ensuite la gestion
+aller/retour se résume à une variable <code>target</code> qui bascule entre <code>'C'</code> et <code>'T'</code>
+sans jamais vérifier si le retour est faisable dans le budget <code>A</code>. Les cases
+sont aussi encodées comme des entiers <code>cy*C + cx</code> plutôt qu&rsquo;une <code>struct Node</code>,
+ce qui compacte mais nuit à la lisibilité. Sur les tests CodingGame avec des <code>A</code>
+généreux ça passe, mais sur un cas limite où le chemin de retour fait exactement
+<code>A</code> pas et n&rsquo;est pas encore entièrement découvert, cette solution échouerait.
+</p>
+
+<hr />
+</div>
+</div>
+<div id="outline-container-org35182f6" class="outline-2">
+<h2 id="org35182f6"><span class="section-number-2">7.</span> Bilan</h2>
+<div class="outline-text-2" id="text-7">
+<p>
+Le BFS en lui-même on connaissait, la vraie difficulté c&rsquo;était la gestion de
+l&rsquo;état entre les tours et savoir quand s&rsquo;engager. Avoir quatre BFS distincts
+n&rsquo;était pas évident au départ, surtout la fonction d&rsquo;exploration qui est
+contre-intuitive : on ne veut pas atteindre la zone inconnue, juste s&rsquo;en
+approcher.
+</p>
+
+<p>
+La vérification du budget de retour avant de foncer vers la commande c&rsquo;est
+typiquement le truc qu&rsquo;on oublie et qui plante sur les grands labyrinthes. Ça
+m&rsquo;a rappelé de lire l&rsquo;énoncé jusqu&rsquo;au bout avant de coder. Ce que je referais
+différemment : utiliser une pile pour la reconstruction du chemin plutôt que
+d&rsquo;inverser un tableau à la main.
+</p>
+
+<hr />
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="date">Date: 21 Avril 2026</p>
+<p class="author">Auteur: ALEXANDRE Maé - Prep&rsquo;ISIMA 1</p>
+<p class="date">Created: 2026-05-07 jeu. 01:06</p>
+</div>
+</body>
+</html>

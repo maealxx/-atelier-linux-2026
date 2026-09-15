@@ -1,0 +1,153 @@
+#+HTML_HEAD: <link rel="stylesheet" href="../css/org.css">
+#+HTML_HEAD_EXTRA: <script defer src="../css/nav.js"></script>
+#+OPTIONS: toc:t num:t html-style:nil html-scripts:nil H:4
+
+#+TITLE: Comment craque-t-on un mot de passe ?
+#+AUTHOR: ALEXANDRE Maé - Prep'ISIMA 1
+#+DATE: 13 Février 2026
+#+LANGUAGE: fr
+#+OPTIONS: toc:1
+
+
+
+* Introduction
+
+[[file:../images/password.GIF]]
+
+Un mot de passe est censé protéger nos données. Pourtant, chaque année, des millions
+de comptes sont compromis car les gens choisissent des mots de passe catastrophiques.
+
+#+begin_quote
+«Le maillon le plus faible d'une chaîne de sécurité, c'est presque toujours l'humain.»
+- Bruce Schneier, cryptographe
+#+end_quote
+
+Avant de voir comment on craque un mot de passe, petit tour sur ce que les
+gens utilisent réellement.
+
+* Les mots de passe les plus utilisés au monde
+
+Chaque année, des bases de données leaked sont analysée. Le résultat est... décourageant.
+
+| Rang | Mot de passe  | Temps pour le craquer |
+|------+---------------+-----------------------|
+|    1 | ~123456~      | moins d'1 seconde     |
+|    2 | ~password~    | moins d'1 seconde     |
+|    3 | ~123456789~   | moins d'1 seconde     |
+|    4 | ~azerty~      | moins d'1 seconde     |
+|    5 | ~iloveyou~    | moins d'1 seconde     |
+|    6 | ~admin~       | moins d'1 seconde     |
+|    7 | ~motdepasse~  | moins d'1 seconde     |
+|    8 | ~qwerty123~   | moins d'1 seconde     |
+
+
+
+* Les principales techniques d'attaque
+
+** Brute force
+
+La technique la plus simple : on essaie *toutes les combinaisons possibles*,
+une par une, jusqu'à trouver la bonne.
+
+- ~a~, ~b~, ~c~... ~z~
+- ~aa~, ~ab~, ~ac~...
+- ~aaa~, ~aab~...
+
+C'est lent, mais avec un bon ordinateur (ou un GPU), ça va très vite :
+
+| Longueur | Caractères utilisés                | Temps estimé        |
+|----------+------------------------------------+---------------------|
+| 6 car.   | minuscules seulement               | ~3 secondes~        |
+| 8 car.   | minuscules + chiffres              | ~7 heures~          |
+| 10 car.  | majuscules + minuscules + chiffres | ~8 ans~             |
+| 12 car.  | tous caractères                    | ~plusieurs siècles~ |
+
+** Attaque par dictionnaire
+
+Plutôt que toutes les combinaisons, on essaie une liste de mots courants :
+noms communs, prénoms, dates, mots de passe connus...
+
+#+begin_tip
+Les attaques par dictionnaire réussissent dans *la majorité des cas*,
+~Soleil1!~ ne trompe personne.
+#+end_tip
+
+
+* Un exemple de brute force en C
+
+Voici un programme minimaliste qui illustre le principe d'une attaque brute force
+sur un code à 4 chiffres :
+
+#+NAME: bruteforce
+#+BEGIN_SRC C :results output
+#include <stdio.h>
+
+int main() {
+    int cible = 1337;
+    int essais = 0;
+
+    for (int i = 0; i <= 9999; i++) {
+        essais++;
+        if (i == cible) {
+            printf("Mot de passe trouvé : %04d\n", i);
+            printf("Nombre d'essais    : %d\n", essais);
+            return 0;
+        }
+    }
+    return 0;
+}
+#+END_SRC
+
+en python :
+
+#+BEGIN_SRC python :results output
+cible = 1337
+essais = 0
+
+for i in range(10000):
+    essais += 1
+    if i == cible:
+        print(f"Mot de passe trouvé : {i:04d}")
+        print(f"Nombre d'essais     : {essais}")
+        break
+#+END_SRC
+
+
+
+#+BEGIN_SRC dot :file ../images/crack_time.png :cmdline -Tpng
+digraph crack {
+  rankdir=TB
+  node [fontname="Helvetica" fontsize=11 style=filled]
+  edge [color="#333333" penwidth=1.5 arrowsize=0.8]
+
+  a [shape=box label="6 caractères - minuscules seulement\n~ 3 secondes" fillcolor="#e74c3c" fontcolor="white" color="#c0392b"]
+  b [shape=box label="8 caractères - minuscules + chiffres\n~ 7 heures" fillcolor="#e67e22" fontcolor="white" color="#ca6f1e"]
+  c [shape=box label="10 caractères - maj. + min. + chiffres\n~ 8 ans" fillcolor="#f1c40f" fontcolor="#333333" color="#d4ac0d"]
+  d [shape=box label="12 caractères - tous caractères\n~ plusieurs siècles" fillcolor="#2ecc71" fontcolor="white" color="#27ae60"]
+  e [shape=box label="16 caractères - tous caractères\n~ milliards d'années" fillcolor="#27ae60" fontcolor="white" color="#1e8449"]
+
+  a -> b -> c -> d -> e
+}
+#+END_SRC
+* Ce qu'il reste à faire
+
+** TODO Activer la double authentification (2FA) sur ses comptes principaux
+La 2FA ajoute une deuxième couche de sécurité, meme si l'appareil est volé.
+
+** TODO Installer un gestionnaire de mots de passe
+Retenir 50 mots de passe différents, c'est impossible. 
+
+** TODO Vérifier ses comptes compromis
+[[https://haveibeenpwned.com][haveibeenpwned.com]] recense les bases de données leaked. S
+
+* Conclusion
+
+La meilleure défense reste simple :
+un mot de passe long, unique, et stocké dans un gestionnaire.
+
+#+begin_note
+*Recette d'un bon mot de passe :* une phrase dont tu te souviendras, avec
+quelques substitutions - ~MonChatMange3Souris!~ est bien plus solide que
+~P@ssw0rd~, et pourtant bien plus facile à retenir.
+#+end_note
+

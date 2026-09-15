@@ -1,0 +1,712 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr" xml:lang="fr">
+<head>
+<!-- 2026-05-07 jeu. 01:06 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Ultimate Tic-Tac-Toe</title>
+<meta name="author" content="ALEXANDRE Maé" />
+<meta name="generator" content="Org Mode" />
+<link rel="stylesheet" href="../css/org.css">
+<script defer src="../css/nav.js"></script>
+</head>
+<body>
+<div id="content" class="content">
+<h1 class="title">Ultimate Tic-Tac-Toe</h1>
+<div id="table-of-contents" role="doc-toc">
+<h2>Table des matières</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#org077e25a">1. Introduction</a></li>
+<li><a href="#org760316c">2. Analyse du problème</a></li>
+<li><a href="#orgf6ee4ec">3. Ligue Bois - Minimax pur</a></li>
+<li><a href="#org654a733">4. Ligue Argent - Minimax + Alpha-bêta</a></li>
+<li><a href="#org22aea58">5. Tests et résultats</a></li>
+<li><a href="#org6166f55">6. Bilan</a></li>
+</ul>
+</div>
+</div>
+<p>
+<a href="https://www.codingame.com/training/expert/tic-tac-toe">Lien vers l&rsquo;exercice CodingGame</a>
+</p>
+
+
+<div id="orgc215e56" class="figure">
+<p><img src="../images/tictac.png" alt="tictac.png" width="75%" />
+</p>
+</div>
+<hr />
+<div id="outline-container-org077e25a" class="outline-2">
+<h2 id="org077e25a"><span class="section-number-2">1.</span> Introduction</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+<i>Ultimate Tic-Tac-Toe</i> est un problème disponible sur le site <a href="https://www.codingame.com/training/expert/tic-tac-toe">CodingGame</a>.
+</p>
+
+<p>
+Le Tic-Tac-Toe, ou morpion, est un jeu classique entre deux joueurs sur une grille 3×3. Chaque joueur pose à tour de rôle son symbole (<code>X</code> ou <code>O</code>), et le premier à aligner trois symboles identiques (en ligne, colonne ou diagonale) gagne la partie.
+</p>
+
+<p>
+Ce challenge se fait en deux étapes. La ligue Bois se joue sur un morpion classique 3×3 où l&rsquo;arbre de jeu est assez petit, donc un Minimax suffit largement. La ligue Argent introduit l&rsquo;Ultimate Tic-Tac-Toe avec neuf morpions imbriqués dans une grande grille. L&rsquo;arbre explose et toute la stratégie doit être repensée.
+</p>
+
+<hr />
+</div>
+</div>
+<div id="outline-container-org760316c" class="outline-2">
+<h2 id="org760316c"><span class="section-number-2">2.</span> Analyse du problème</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+À chaque tour, le programme reçoit en entrée les coordonnées du dernier coup adverse (<code>opponentRow</code>, <code>opponentCol</code>), ou <code>-1 -1</code> si on commence. Ensuite vient le nombre de coups valides (<code>validActionsCount</code>), suivi des coordonnées (<code>row</code>, <code>col</code>) de chaque coup possible.
+</p>
+
+<p>
+En sortie, on renvoie juste les coordonnées de notre coup. Le temps imparti est de 1000ms au premier tour et 100ms pour les suivants.
+</p>
+
+<p>
+Exemple de grille gagnante pour <code>X</code> via la diagonale :
+</p>
+
+<pre class="example" id="org490fff7">
+X O X
+. X O
+O . X
+</pre>
+
+<p>
+Exemple d&rsquo;entrée au premier tour si on commence :
+</p>
+
+<pre class="example" id="org8b60479">
+-1 -1
+9
+0 0
+0 1
+0 2
+1 0
+1 1
+1 2
+2 0
+2 1
+2 2
+</pre>
+
+<p>
+La ligue Argent ajoute la règle de renvoi, qui est ce qui distingue vraiment l&rsquo;Ultimate du morpion classique :
+</p>
+
+<ol class="org-ol">
+<li>On joue dans une case d&rsquo;un sous-plateau actif.</li>
+<li>La position locale jouée impose à l&rsquo;adversaire dans quel sous-plateau il devra jouer au tour suivant.</li>
+<li>Gagner un petit plateau = aligner trois symboles dedans.</li>
+<li>Gagner la partie = aligner trois petits plateaux gagnés sur la grande grille.</li>
+<li>Si le sous-plateau imposé est déjà terminé, le joueur est libre de jouer n&rsquo;importe où.</li>
+</ol>
+
+<p>
+Il y a donc deux niveaux de victoire, local (un petit morpion) et global (aligner trois petits morpions gagnés). Gagner un petit plateau n&rsquo;est pas toujours une bonne idée car ça peut envoyer l&rsquo;adversaire dans une zone qui lui profite.
+</p>
+
+
+<div id="org64ba0e5" class="figure">
+<p><img src="uttt_structure.png" alt="uttt_structure.png" />
+</p>
+</div>
+
+<hr />
+</div>
+</div>
+<div id="outline-container-orgf6ee4ec" class="outline-2">
+<h2 id="orgf6ee4ec"><span class="section-number-2">3.</span> Ligue Bois - Minimax pur</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+Pour cette première étape, le bot joue au morpion classique avec l&rsquo;algorithme Minimax, qui explore toutes les positions possibles jusqu&rsquo;à la fin de partie.
+</p>
+
+<p>
+Le plateau est un tableau <code>board[3][3]</code> d&rsquo;entiers, <code>0</code> pour une case vide, <code>1</code> pour notre bot et <code>-1</code> pour l&rsquo;adversaire. 
+</p>
+
+<p>
+La fonction <code>check_winner()</code> vérifie si un joueur a aligné trois cases sur toutes les lignes, colonnes et diagonales. La condition <code>!= 0</code> en tête évite de détecter une &laquo;&nbsp;victoire&nbsp;&raquo; sur une ligne entièrement vide.
+</p>
+
+<p>
+La fonction <code>minimax()</code> est récursive. Elle joue alternativement pour nous (qui maximisons le score) et pour l&rsquo;adversaire (qui minimise). Les feuilles retournent un score pondéré par la profondeur (<code>10 - depth</code> en victoire) pour pousser l&rsquo;IA à conclure rapidement plutôt que de traîner. Sans cette pondération, l&rsquo;IA jouerait juste mais de façon &laquo;&nbsp;indifférente&nbsp;&raquo; et ne chercherait pas vraiment à gagner vite.
+</p>
+
+<p>
+La fonction <code>best_move()</code> est séparée de <code>minimax()</code> parce que celle-ci ne remonte que des scores, les coordonées du coup sont gardées au niveau racine.
+</p>
+
+
+<div id="orgacd62d5" class="figure">
+<p><img src="classic_bois.png" alt="classic_bois.png" />
+</p>
+</div>
+</div>
+<div id="outline-container-org33dd553" class="outline-3">
+<h3 id="org33dd553"><span class="section-number-3">3.1.</span> Code complet</h3>
+<div class="outline-text-3" id="text-3-1">
+<div class="org-src-container">
+<pre class="src src-c"><span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdlib.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdio.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;string.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdbool.h&gt;</span>
+
+<span style="color: #5B6268;">// </span><span style="color: #5B6268;">La grille du jeu. 1 = nous, -1 = adversaire, 0 = case vide
+</span><span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">board</span>[3][3];
+
+<span style="color: #5B6268;">// </span><span style="color: #5B6268;">V&#233;rifie si quelqu'un a gagn&#233; en alignant 3 cases
+</span><span style="color: #5B6268;">// </span><span style="color: #5B6268;">Retourne 1 si on gagne, -1 si l'adversaire gagne, 0 sinon
+</span><span style="color: #5B6268;">// </span><span style="color: #5B6268;">Le != 0 sert &#224; ne pas d&#233;tecter une victoire sur une ligne vide
+</span><span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">check_winner</span>() {
+    <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 0; i &lt; 3; i++) {
+        <span style="color: #5B6268;">// </span><span style="color: #5B6268;">on v&#233;rifie chaque ligne
+</span>        <span style="color: #51afef;">if</span> (board[i][0] != 0 &amp;&amp; board[i][0] == board[i][1] &amp;&amp; board[i][1] == board[i][2])
+            <span style="color: #51afef;">return</span> board[i][0];
+        <span style="color: #5B6268;">// </span><span style="color: #5B6268;">on v&#233;rifie chaque colonne
+</span>        <span style="color: #51afef;">if</span> (board[0][i] != 0 &amp;&amp; board[0][i] == board[1][i] &amp;&amp; board[1][i] == board[2][i])
+            <span style="color: #51afef;">return</span> board[0][i];
+    }
+    <span style="color: #5B6268;">// </span><span style="color: #5B6268;">diagonale principale
+</span>    <span style="color: #51afef;">if</span> (board[0][0] != 0 &amp;&amp; board[0][0] == board[1][1] &amp;&amp; board[1][1] == board[2][2])
+        <span style="color: #51afef;">return</span> board[0][0];
+    <span style="color: #5B6268;">// </span><span style="color: #5B6268;">diagonale secondaire
+</span>    <span style="color: #51afef;">if</span> (board[0][2] != 0 &amp;&amp; board[0][2] == board[1][1] &amp;&amp; board[1][1] == board[2][0])
+        <span style="color: #51afef;">return</span> board[0][2];
+    <span style="color: #51afef;">return</span> 0;
+}
+
+<span style="color: #5B6268;">// </span><span style="color: #5B6268;">Retourne true si toutes les cases sont remplies (match nul)
+</span><span style="color: #ECBE7B;">bool</span> <span style="color: #c678dd;">is_full</span>() {
+    <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">r</span> = 0; r &lt; 3; r++)
+        <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">c</span> = 0; c &lt; 3; c++)
+            <span style="color: #51afef;">if</span> (board[r][c] == 0) <span style="color: #51afef;">return</span> <span style="color: #a9a1e1;">false</span>;
+    <span style="color: #51afef;">return</span> <span style="color: #a9a1e1;">true</span>;
+}
+
+<span style="color: #5B6268;">// </span><span style="color: #5B6268;">Minimax r&#233;cursif : explore tous les coups possibles
+</span><span style="color: #5B6268;">// </span><span style="color: #5B6268;">is_my_turn = true si c'est notre tour (on maximise), false si c'est l'adversaire (il minimise)
+</span><span style="color: #5B6268;">// </span><span style="color: #5B6268;">depth = profondeur actuelle, on l'utilise pour pr&#233;f&#233;rer gagner vite
+</span><span style="color: #5B6268;">// </span><span style="color: #5B6268;">score = 10 - depth : plus on gagne rapidement, plus le score est &#233;lev&#233;
+</span><span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">minimax</span>(<span style="color: #ECBE7B;">bool</span> <span style="color: #dcaeea;">is_my_turn</span>, <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">depth</span>) {
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">winner</span> = check_winner();
+    <span style="color: #51afef;">if</span> (winner ==  1) <span style="color: #51afef;">return</span> 10 - depth;  <span style="color: #5B6268;">// </span><span style="color: #5B6268;">on gagne, le plus t&#244;t c'est mieux
+</span>    <span style="color: #51afef;">if</span> (winner == -1) <span style="color: #51afef;">return</span> depth - 10;  <span style="color: #5B6268;">// </span><span style="color: #5B6268;">on perd, on r&#233;siste le plus longtemps possible
+</span>    <span style="color: #51afef;">if</span> (is_full())    <span style="color: #51afef;">return</span> 0;           <span style="color: #5B6268;">// </span><span style="color: #5B6268;">match nul
+</span>
+    <span style="color: #51afef;">if</span> (is_my_turn) {
+        <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">best</span> = -100;
+        <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">r</span> = 0; r &lt; 3; r++) {
+            <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">c</span> = 0; c &lt; 3; c++) {
+                <span style="color: #51afef;">if</span> (board[r][c] == 0) {
+                    board[r][c] = 1;                        <span style="color: #5B6268;">// </span><span style="color: #5B6268;">on essaie ce coup
+</span>                    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">score</span> = minimax(<span style="color: #a9a1e1;">false</span>, depth + 1);
+                    board[r][c] = 0;                        <span style="color: #5B6268;">// </span><span style="color: #5B6268;">on annule pour tester le suivant
+</span>                    <span style="color: #51afef;">if</span> (score &gt; best) best = score;
+                }
+            }
+        }
+        <span style="color: #51afef;">return</span> best;
+    } <span style="color: #51afef;">else</span> {
+        <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">best</span> = 100;
+        <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">r</span> = 0; r &lt; 3; r++) {
+            <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">c</span> = 0; c &lt; 3; c++) {
+                <span style="color: #51afef;">if</span> (board[r][c] == 0) {
+                    board[r][c] = -1;                       <span style="color: #5B6268;">// </span><span style="color: #5B6268;">l'adversaire essaie ce coup
+</span>                    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">score</span> = minimax(<span style="color: #a9a1e1;">true</span>, depth + 1);
+                    board[r][c] = 0;                        <span style="color: #5B6268;">// </span><span style="color: #5B6268;">on annule
+</span>                    <span style="color: #51afef;">if</span> (score &lt; best) best = score;
+                }
+            }
+        }
+        <span style="color: #51afef;">return</span> best;
+    }
+}
+
+<span style="color: #5B6268;">// </span><span style="color: #5B6268;">Cherche le meilleur coup possible en testant toutes les cases libres
+</span><span style="color: #5B6268;">// </span><span style="color: #5B6268;">On fait &#231;a ici et pas dans minimax parce que minimax remonte juste un score,
+</span><span style="color: #5B6268;">// </span><span style="color: #5B6268;">pas les coordonn&#233;es du coup
+</span><span style="color: #ECBE7B;">void</span> <span style="color: #c678dd;">best_move</span>(<span style="color: #ECBE7B;">int</span> *<span style="color: #dcaeea;">best_row</span>, <span style="color: #ECBE7B;">int</span> *<span style="color: #dcaeea;">best_col</span>) {
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">best_score</span> = -100;
+    *best_row = -1;
+    *best_col = -1;
+    <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">r</span> = 0; r &lt; 3; r++) {
+        <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">c</span> = 0; c &lt; 3; c++) {
+            <span style="color: #51afef;">if</span> (board[r][c] == 0) {
+                board[r][c] = 1;
+                <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">score</span> = minimax(<span style="color: #a9a1e1;">false</span>, 0);  <span style="color: #5B6268;">// </span><span style="color: #5B6268;">l'adversaire joue apr&#232;s nous
+</span>                board[r][c] = 0;
+                <span style="color: #51afef;">if</span> (score &gt; best_score) {
+                    best_score = score;
+                    *best_row = r;
+                    *best_col = c;
+                }
+            }
+        }
+    }
+}
+
+<span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">main</span>() {
+    <span style="color: #5B6268;">// </span><span style="color: #5B6268;">on initialise la grille &#224; vide
+</span>    <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">r</span> = 0; r &lt; 3; r++)
+        <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">c</span> = 0; c &lt; 3; c++)
+            board[r][c] = 0;
+
+    <span style="color: #51afef;">while</span> (1) {
+        <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">opp_row</span>, <span style="color: #dcaeea;">opp_col</span>;
+        scanf(<span style="color: #98be65;">"%d%d"</span>, &amp;opp_row, &amp;opp_col);
+
+        <span style="color: #5B6268;">// </span><span style="color: #5B6268;">CodingGame envoie -1 -1 au premier tour quand on commence
+</span>        <span style="color: #51afef;">if</span> (opp_row != -1)
+            board[opp_row][opp_col] = -1;
+
+        <span style="color: #5B6268;">// </span><span style="color: #5B6268;">on lit les coups valides mais on ne les utilise pas,
+</span>        <span style="color: #5B6268;">// </span><span style="color: #5B6268;">minimax explore la grille tout seul
+</span>        <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">valid_action_count</span>;
+        scanf(<span style="color: #98be65;">"%d"</span>, &amp;valid_action_count);
+        <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 0; i &lt; valid_action_count; i++) {
+            <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">row</span>, <span style="color: #dcaeea;">col</span>;
+            scanf(<span style="color: #98be65;">"%d%d"</span>, &amp;row, &amp;col);
+        }
+
+        <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">my_row</span>, <span style="color: #dcaeea;">my_col</span>;
+        best_move(&amp;my_row, &amp;my_col);
+        board[my_row][my_col] = 1;
+        printf(<span style="color: #98be65;">"%d %d\n"</span>, my_row, my_col);
+    }
+
+    <span style="color: #51afef;">return</span> 0;
+}
+</pre>
+</div>
+
+<hr />
+</div>
+</div>
+</div>
+<div id="outline-container-org654a733" class="outline-2">
+<h2 id="org654a733"><span class="section-number-2">4.</span> Ligue Argent - Minimax + Alpha-bêta</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+Le jeu change et se complique. L&rsquo;arbre devient trop grand pour être exploré entierement, il peut y avoir jusqu&rsquo;à 81 coups posibles au premier tour. Il faut donc couper la recherche à une certaine profondeur, évaluer les positions intermédiaires avec une fonction de score, accélérer la recherche avec un algo alpha-bêta, et gérer les deux niveaux de victoire.
+</p>
+
+<p>
+Le plateau est maintenant une grille <code>board[9][9]</code>. Un tableau <code>small_winner[3][3]</code> sers de cache pour les vainqueurs de chaque sous-plateau, mis à jour après chaque coup pour éviter de tout recalculer à chaque nœud de l&rsquo;arbre.
+</p>
+
+<p>
+La profondeur est adaptée par <code>choose_depth()</code> selon le nombre de cases restantes. Plus la partie avance, moins il y a de coups possibles et plus on peut chercher loin. Les positions non terminales sont évaluées par <code>evaluate()</code>, qui combine trois niveaux : victoire finale, alignements de sous-plateaux gagnés sur la grande grille (×50), et score local de chaque sous-plateau.
+</p>
+
+<p>
+L&rsquo;élagage alpha-bêta maintient deux bornes (<code>alpha</code> pour MAX et <code>beta</code> pour MIN) et coupe les branches dès que <code>beta &lt;</code> alpha=.
+</p>
+
+
+<div id="org78467ba" class="figure">
+<p><img src="argent_architecture.png" alt="argent_architecture.png" />
+</p>
+</div>
+</div>
+<div id="outline-container-org34bb760" class="outline-3">
+<h3 id="org34bb760"><span class="section-number-3">4.1.</span> Code complet</h3>
+<div class="outline-text-3" id="text-4-1">
+<div class="org-src-container">
+<pre class="src src-c"><span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdlib.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdio.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;string.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdbool.h&gt;</span>
+
+<span style="color: #5B6268;">// </span><span style="color: #5B6268;">La grille compl&#232;te 9x9 de l'Ultimate TicTacToe
+</span><span style="color: #5B6268;">// </span><span style="color: #5B6268;">Le sous-plateau (gr, gc) correspond aux cases board[gr*3 .. gr*3+2][gc*3 .. gc*3+2]
+</span><span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">board</span>[9][9];
+
+<span style="color: #5B6268;">// </span><span style="color: #5B6268;">Cache qui m&#233;morise le vainqueur de chaque sous-plateau
+</span><span style="color: #5B6268;">// </span><span style="color: #5B6268;">Mis &#224; jour apr&#232;s chaque coup pour &#233;viter de tout recalculer
+</span><span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">small_winner</span>[3][3];
+
+<span style="color: #5B6268;">// </span><span style="color: #5B6268;">V&#233;rifie si quelqu'un a gagn&#233; dans le sous-plateau (gr, gc)
+</span><span style="color: #5B6268;">// </span><span style="color: #5B6268;">On copie dans un tableau b[3][3] pour simplifier les v&#233;rifications
+</span><span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">check_small</span>(<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">gr</span>, <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">gc</span>) {
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">b</span>[3][3];
+    <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">r</span> = 0; r &lt; 3; r++)
+        <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">c</span> = 0; c &lt; 3; c++)
+            b[r][c] = board[gr*3+r][gc*3+c];
+    <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 0; i &lt; 3; i++) {
+        <span style="color: #51afef;">if</span> (b[i][0] != 0 &amp;&amp; b[i][0] == b[i][1] &amp;&amp; b[i][1] == b[i][2]) <span style="color: #51afef;">return</span> b[i][0];
+        <span style="color: #51afef;">if</span> (b[0][i] != 0 &amp;&amp; b[0][i] == b[1][i] &amp;&amp; b[1][i] == b[2][i]) <span style="color: #51afef;">return</span> b[0][i];
+    }
+    <span style="color: #51afef;">if</span> (b[0][0] != 0 &amp;&amp; b[0][0] == b[1][1] &amp;&amp; b[1][1] == b[2][2]) <span style="color: #51afef;">return</span> b[0][0];
+    <span style="color: #51afef;">if</span> (b[0][2] != 0 &amp;&amp; b[0][2] == b[1][1] &amp;&amp; b[1][1] == b[2][0]) <span style="color: #51afef;">return</span> b[0][2];
+    <span style="color: #51afef;">return</span> 0;
+}
+
+<span style="color: #5B6268;">// </span><span style="color: #5B6268;">V&#233;rifie si quelqu'un a gagn&#233; la grande grille
+</span><span style="color: #5B6268;">// </span><span style="color: #5B6268;">M&#234;me logique que check_small mais appliqu&#233;e &#224; small_winner
+</span><span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">check_big</span>() {
+    <span style="color: #ECBE7B;">int</span> (*<span style="color: #dcaeea;">b</span>)[3] = small_winner;
+    <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 0; i &lt; 3; i++) {
+        <span style="color: #51afef;">if</span> (b[i][0] != 0 &amp;&amp; b[i][0] == b[i][1] &amp;&amp; b[i][1] == b[i][2]) <span style="color: #51afef;">return</span> b[i][0];
+        <span style="color: #51afef;">if</span> (b[0][i] != 0 &amp;&amp; b[0][i] == b[1][i] &amp;&amp; b[1][i] == b[2][i]) <span style="color: #51afef;">return</span> b[0][i];
+    }
+    <span style="color: #51afef;">if</span> (b[0][0] != 0 &amp;&amp; b[0][0] == b[1][1] &amp;&amp; b[1][1] == b[2][2]) <span style="color: #51afef;">return</span> b[0][0];
+    <span style="color: #51afef;">if</span> (b[0][2] != 0 &amp;&amp; b[0][2] == b[1][1] &amp;&amp; b[1][1] == b[2][0]) <span style="color: #51afef;">return</span> b[0][2];
+    <span style="color: #51afef;">return</span> 0;
+}
+
+<span style="color: #5B6268;">// </span><span style="color: #5B6268;">V&#233;rifie si le sous-plateau (gr, gc) est compl&#232;tement rempli
+</span><span style="color: #5B6268;">// </span><span style="color: #5B6268;">Si c'est plein et non gagn&#233;, le joueur peut jouer o&#249; il veut
+</span><span style="color: #ECBE7B;">bool</span> <span style="color: #c678dd;">small_full</span>(<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">gr</span>, <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">gc</span>) {
+    <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">r</span> = 0; r &lt; 3; r++)
+        <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">c</span> = 0; c &lt; 3; c++)
+            <span style="color: #51afef;">if</span> (board[gr*3+r][gc*3+c] == 0) <span style="color: #51afef;">return</span> <span style="color: #a9a1e1;">false</span>;
+    <span style="color: #51afef;">return</span> <span style="color: #a9a1e1;">true</span>;
+}
+
+<span style="color: #5B6268;">// </span><span style="color: #5B6268;">Donne un score &#224; une ligne de 3 cases
+</span><span style="color: #5B6268;">// </span><span style="color: #5B6268;">2 cases &#224; nous sans adversaire = +10 (menace), 1 case = +1
+</span><span style="color: #5B6268;">// </span><span style="color: #5B6268;">2 cases adverses = -10 (danger), 1 case = -1
+</span><span style="color: #5B6268;">// </span><span style="color: #5B6268;">Si la ligne est mixte (les deux joueurs dedans), personne peut la gagner &#8594; 0
+</span><span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">score_line</span>(<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">a</span>, <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">b</span>, <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">c</span>) {
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">mine</span> = (a==1) + (b==1) + (c==1);
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">his</span>  = (a==-1) + (b==-1) + (c==-1);
+    <span style="color: #51afef;">if</span> (mine &gt; 0 &amp;&amp; his &gt; 0) <span style="color: #51afef;">return</span> 0;
+    <span style="color: #51afef;">if</span> (mine == 2) <span style="color: #51afef;">return</span> 10;
+    <span style="color: #51afef;">if</span> (mine == 1) <span style="color: #51afef;">return</span> 1;
+    <span style="color: #51afef;">if</span> (his  == 2) <span style="color: #51afef;">return</span> -10;
+    <span style="color: #51afef;">if</span> (his  == 1) <span style="color: #51afef;">return</span> -1;
+    <span style="color: #51afef;">return</span> 0;
+}
+
+<span style="color: #5B6268;">// </span><span style="color: #5B6268;">&#201;value un sous-plateau qui n'est pas encore termin&#233;
+</span><span style="color: #5B6268;">// </span><span style="color: #5B6268;">Si d&#233;j&#224; gagn&#233;, valeur forte (sup&#233;rieur ou egale a 100)
+</span><span style="color: #5B6268;">// </span><span style="color: #5B6268;">Sinon, on additionne score_line sur toutes les lignes, colonnes et diagonales
+</span><span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">eval_small</span>(<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">gr</span>, <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">gc</span>) {
+    <span style="color: #51afef;">if</span> (small_winner[gr][gc] ==  1) <span style="color: #51afef;">return</span>  100;
+    <span style="color: #51afef;">if</span> (small_winner[gr][gc] == -1) <span style="color: #51afef;">return</span> -100;
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">score</span> = 0;
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">r0</span> = gr*3, <span style="color: #dcaeea;">c0</span> = gc*3;
+    <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">r</span> = 0; r &lt; 3; r++)
+        score += score_line(board[r0+r][c0], board[r0+r][c0+1], board[r0+r][c0+2]);
+    <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">c</span> = 0; c &lt; 3; c++)
+        score += score_line(board[r0][c0+c], board[r0+1][c0+c], board[r0+2][c0+c]);
+    score += score_line(board[r0][c0],   board[r0+1][c0+1], board[r0+2][c0+2]);
+    score += score_line(board[r0][c0+2], board[r0+1][c0+1], board[r0+2][c0]);
+    <span style="color: #51afef;">return</span> score;
+}
+
+<span style="color: #5B6268;">// </span><span style="color: #5B6268;">Score global de toute la position
+</span><span style="color: #5B6268;">// </span><span style="color: #5B6268;">On combine 3 niveaux par ordre d'importance :
+</span><span style="color: #5B6268;">// </span><span style="color: #5B6268;">1. Victoire finale (sup&#233;rieur ou &#233;gale a 100 000), tellement grand qu'aucun autre score ne peut d&#233;passer
+</span><span style="color: #5B6268;">// </span><span style="color: #5B6268;">2. Alignements de sous-plateaux gagn&#233;s sur la grande grille (&#215;50)
+</span><span style="color: #5B6268;">// </span><span style="color: #5B6268;">3. Score local de chaque sous-plateau avec eval_small
+</span><span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">evaluate</span>() {
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">big</span> = check_big();
+    <span style="color: #51afef;">if</span> (big ==  1) <span style="color: #51afef;">return</span>  100000;
+    <span style="color: #51afef;">if</span> (big == -1) <span style="color: #51afef;">return</span> -100000;
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">score</span> = 0;
+    <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 0; i &lt; 3; i++) {
+        score += score_line(small_winner[i][0], small_winner[i][1], small_winner[i][2]) * 50;
+        score += score_line(small_winner[0][i], small_winner[1][i], small_winner[2][i]) * 50;
+    }
+    score += score_line(small_winner[0][0], small_winner[1][1], small_winner[2][2]) * 50;
+    score += score_line(small_winner[0][2], small_winner[1][1], small_winner[2][0]) * 50;
+    <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">gr</span> = 0; gr &lt; 3; gr++)
+        <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">gc</span> = 0; gc &lt; 3; gc++)
+            score += eval_small(gr, gc);
+    <span style="color: #51afef;">return</span> score;
+}
+
+<span style="color: #5B6268;">// </span><span style="color: #5B6268;">Compte toutes les cases libres dans les sous-plateaux pas encore gagn&#233;s
+</span><span style="color: #5B6268;">// </span><span style="color: #5B6268;">&#199;a sert &#224; choisir la profondeur de recherche
+</span><span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">count_free_total</span>() {
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">count</span> = 0;
+    <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">r</span> = 0; r &lt; 9; r++)
+        <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">c</span> = 0; c &lt; 9; c++) {
+            <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">gr</span> = r/3, <span style="color: #dcaeea;">gc</span> = c/3;
+            <span style="color: #51afef;">if</span> (board[r][c] == 0 &amp;&amp; small_winner[gr][gc] == 0)
+                count++;
+        }
+    <span style="color: #51afef;">return</span> count;
+}
+
+<span style="color: #5B6268;">// </span><span style="color: #5B6268;">Choisit la profondeur de recherche selon l'avancement de la partie
+</span><span style="color: #5B6268;">// </span><span style="color: #5B6268;">Moins il reste de coups possibles, plus on peut chercher loin
+</span><span style="color: #5B6268;">// </span><span style="color: #5B6268;">Les seuils ont &#233;t&#233; ajust&#233;s en regardant les logs sur CodingGame
+</span><span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">choose_depth</span>(<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">free_total</span>) {
+    <span style="color: #51afef;">if</span> (free_total &lt;= 6)  <span style="color: #51afef;">return</span> 6;
+    <span style="color: #51afef;">if</span> (free_total &lt;= 10) <span style="color: #51afef;">return</span> 5;
+    <span style="color: #51afef;">if</span> (free_total &lt;= 20) <span style="color: #51afef;">return</span> 4;
+    <span style="color: #51afef;">if</span> (free_total &lt;= 40) <span style="color: #51afef;">return</span> 3;
+    <span style="color: #51afef;">return</span> 2;
+}
+
+<span style="color: #5B6268;">// </span><span style="color: #5B6268;">Minimax avec &#233;lagage alpha-b&#234;ta
+</span><span style="color: #5B6268;">// </span><span style="color: #5B6268;">next_gr, next_gc = sous-plateau o&#249; on doit jouer (-1,-1 si on est libre)
+</span><span style="color: #5B6268;">// </span><span style="color: #5B6268;">alpha = meilleur score garanti pour MAX, beta = meilleur score garanti pour MIN
+</span><span style="color: #5B6268;">// </span><span style="color: #5B6268;">On coupe la branche d&#232;s que beta &lt;= alpha, inutile d'aller plus loin
+</span><span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">minimax</span>(<span style="color: #ECBE7B;">bool</span> <span style="color: #dcaeea;">is_my_turn</span>, <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">depth</span>, <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">alpha</span>, <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">beta</span>,
+            <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">next_gr</span>, <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">next_gc</span>) {
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">big</span> = check_big();
+    <span style="color: #51afef;">if</span> (big != 0)   <span style="color: #51afef;">return</span> big * 100000;  <span style="color: #5B6268;">// </span><span style="color: #5B6268;">partie termin&#233;e
+</span>    <span style="color: #51afef;">if</span> (depth == 0) <span style="color: #51afef;">return</span> evaluate();    <span style="color: #5B6268;">// </span><span style="color: #5B6268;">profondeur max atteinte, on estime la position
+</span>
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">player</span> = is_my_turn ? 1 : -1;
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">best</span>   = is_my_turn ? -200000 : 200000;
+    <span style="color: #ECBE7B;">bool</span> <span style="color: #dcaeea;">any_move</span> = <span style="color: #a9a1e1;">false</span>;
+
+    <span style="color: #5B6268;">// </span><span style="color: #5B6268;">on explore d'abord le centre, puis les coins, puis les bords
+</span>    <span style="color: #5B6268;">// </span><span style="color: #5B6268;">&#231;a permet &#224; l'alpha-b&#234;ta de couper plus t&#244;t
+</span>    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">order</span>[9] = {4, 0, 2, 6, 8, 1, 3, 5, 7};
+
+    <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">gi</span> = 0; gi &lt; 9; gi++) {
+        <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">idx</span>     = order[gi];
+        <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">r_local</span> = idx / 3, <span style="color: #dcaeea;">c_local</span> = idx % 3;
+
+        <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">gr</span> = 0; gr &lt; 3; gr++) {
+            <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">gc</span> = 0; gc &lt; 3; gc++) {
+                <span style="color: #5B6268;">// </span><span style="color: #5B6268;">si un sous-plateau est impos&#233;, on ignore les autres
+</span>                <span style="color: #51afef;">if</span> (next_gr != -1 &amp;&amp; (gr != next_gr || gc != next_gc)) <span style="color: #51afef;">continue</span>;
+                <span style="color: #51afef;">if</span> (small_winner[gr][gc] != 0) <span style="color: #51afef;">continue</span>;  <span style="color: #5B6268;">// </span><span style="color: #5B6268;">sous-plateau d&#233;j&#224; gagn&#233;, on skip
+</span>
+                <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">r</span> = gr*3 + r_local;
+                <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">c</span> = gc*3 + c_local;
+                <span style="color: #51afef;">if</span> (board[r][c] != 0) <span style="color: #51afef;">continue</span>;  <span style="color: #5B6268;">// </span><span style="color: #5B6268;">case d&#233;j&#224; occup&#233;e
+</span>
+                any_move = <span style="color: #a9a1e1;">true</span>;
+                board[r][c] = player;  <span style="color: #5B6268;">// </span><span style="color: #5B6268;">on joue ce coup
+</span>
+                <span style="color: #5B6268;">// </span><span style="color: #5B6268;">on sauvegarde le vainqueur du sg avant de le modifier
+</span>                <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">prev_small</span> = small_winner[gr][gc];
+                <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">w</span> = check_small(gr, gc);
+                <span style="color: #51afef;">if</span> (w != 0) small_winner[gr][gc] = w;
+
+                <span style="color: #5B6268;">// </span><span style="color: #5B6268;">la case locale jou&#233;e impose le prochain sous-plateau &#224; l'adversaire
+</span>                <span style="color: #5B6268;">// </span><span style="color: #5B6268;">si ce sous-plateau est d&#233;j&#224; termin&#233;, il est libre de jouer o&#249; il veut
+</span>                <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">imposed_gr</span> = r_local, <span style="color: #dcaeea;">imposed_gc</span> = c_local;
+                <span style="color: #51afef;">if</span> (small_winner[imposed_gr][imposed_gc] != 0
+                    || small_full(imposed_gr, imposed_gc)) {
+                    imposed_gr = -1; imposed_gc = -1;
+                }
+
+                <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">score</span> = minimax(<span style="color: #51afef; font-weight: bold;">!</span>is_my_turn, depth - 1, alpha, beta,
+                                    imposed_gr, imposed_gc);
+
+                board[r][c] = 0;                   <span style="color: #5B6268;">// </span><span style="color: #5B6268;">on annule le coup (backtrack)
+</span>                small_winner[gr][gc] = prev_small;  <span style="color: #5B6268;">// </span><span style="color: #5B6268;">on remet le cache comme avant
+</span>
+                <span style="color: #51afef;">if</span> (is_my_turn) {
+                    <span style="color: #51afef;">if</span> (score &gt; best) best = score;
+                    <span style="color: #51afef;">if</span> (best &gt; alpha) alpha = best;
+                } <span style="color: #51afef;">else</span> {
+                    <span style="color: #51afef;">if</span> (score &lt; best) best = score;
+                    <span style="color: #51afef;">if</span> (best &lt; beta)  beta = best;
+                }
+
+                <span style="color: #5B6268;">// </span><span style="color: #5B6268;">coupure alpha-b&#234;ta : pas besoin d'explorer la suite
+</span>                <span style="color: #51afef;">if</span> (beta &lt;= alpha) <span style="color: #51afef;">goto</span> <span style="color: #a9a1e1;">done</span>;
+            }
+        }
+    }
+
+    <span style="color: #a9a1e1;">done</span>:
+    <span style="color: #51afef;">if</span> (<span style="color: #51afef; font-weight: bold;">!</span>any_move) <span style="color: #51afef;">return</span> evaluate();  <span style="color: #5B6268;">// </span><span style="color: #5B6268;">plus aucun coup possible
+</span>    <span style="color: #51afef;">return</span> best;
+}
+
+<span style="color: #5B6268;">// </span><span style="color: #5B6268;">Cherche le meilleur coup &#224; jouer depuis la racine
+</span><span style="color: #5B6268;">// </span><span style="color: #5B6268;">On g&#232;re ici la profondeur adaptative et le sous-plateau impos&#233;
+</span><span style="color: #ECBE7B;">void</span> <span style="color: #c678dd;">best_move</span>(<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">next_gr</span>, <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">next_gc</span>, <span style="color: #ECBE7B;">int</span> *<span style="color: #dcaeea;">best_r</span>, <span style="color: #ECBE7B;">int</span> *<span style="color: #dcaeea;">best_c</span>) {
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">free_total</span> = count_free_total();
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">depth</span> = choose_depth(free_total);
+    fprintf(stderr, <span style="color: #98be65;">"total=%d depth=%d\n"</span>, free_total, depth);  <span style="color: #5B6268;">// </span><span style="color: #5B6268;">log pour d&#233;boguer
+</span>
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">best_score</span> = -200000;
+    *best_r = -1; *best_c = -1;
+
+    <span style="color: #5B6268;">// </span><span style="color: #5B6268;">m&#234;me ordre d'exploration que dans minimax
+</span>    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">order</span>[9] = {4, 0, 2, 6, 8, 1, 3, 5, 7};
+
+    <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">gi</span> = 0; gi &lt; 9; gi++) {
+        <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">idx</span>     = order[gi];
+        <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">r_local</span> = idx / 3, <span style="color: #dcaeea;">c_local</span> = idx % 3;
+
+        <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">gr</span> = 0; gr &lt; 3; gr++) {
+            <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">gc</span> = 0; gc &lt; 3; gc++) {
+                <span style="color: #51afef;">if</span> (next_gr != -1 &amp;&amp; (gr != next_gr || gc != next_gc)) <span style="color: #51afef;">continue</span>;
+                <span style="color: #51afef;">if</span> (small_winner[gr][gc] != 0) <span style="color: #51afef;">continue</span>;
+                <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">r</span> = gr*3 + r_local, <span style="color: #dcaeea;">c</span> = gc*3 + c_local;
+                <span style="color: #51afef;">if</span> (board[r][c] != 0) <span style="color: #51afef;">continue</span>;
+
+                board[r][c] = 1;
+                <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">prev_small</span> = small_winner[gr][gc];
+                <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">w</span> = check_small(gr, gc);
+                <span style="color: #51afef;">if</span> (w != 0) small_winner[gr][gc] = w;
+
+                <span style="color: #5B6268;">// </span><span style="color: #5B6268;">on calcule quel sous-plateau sera impos&#233; &#224; l'adversaire
+</span>                <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">imposed_gr</span> = r_local, <span style="color: #dcaeea;">imposed_gc</span> = c_local;
+                <span style="color: #51afef;">if</span> (small_winner[imposed_gr][imposed_gc] != 0
+                    || small_full(imposed_gr, imposed_gc)) {
+                    imposed_gr = -1; imposed_gc = -1;
+                }
+
+                <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">score</span> = minimax(<span style="color: #a9a1e1;">false</span>, depth, -200000, 200000,
+                                    imposed_gr, imposed_gc);
+                board[r][c] = 0;
+                small_winner[gr][gc] = prev_small;
+
+                <span style="color: #5B6268;">// </span><span style="color: #5B6268;">on garde le coup avec le meilleur score
+</span>                <span style="color: #51afef;">if</span> (score &gt; best_score) {
+                    best_score = score;
+                    *best_r = r; *best_c = c;
+                }
+            }
+        }
+    }
+}
+
+<span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">main</span>() {
+    memset(board, 0, <span style="color: #51afef;">sizeof</span>(board));
+    memset(small_winner, 0, <span style="color: #51afef;">sizeof</span>(small_winner));
+
+    <span style="color: #51afef;">while</span> (1) {
+        <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">opp_row</span>, <span style="color: #dcaeea;">opp_col</span>;
+        scanf(<span style="color: #98be65;">"%d%d"</span>, &amp;opp_row, &amp;opp_col);
+
+        <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">next_gr</span> = -1, <span style="color: #dcaeea;">next_gc</span> = -1;
+
+        <span style="color: #51afef;">if</span> (opp_row != -1) {
+            board[opp_row][opp_col] = -1;  <span style="color: #5B6268;">// </span><span style="color: #5B6268;">on place le coup adverse sur la grille
+</span>            <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">gr</span> = opp_row/3, <span style="color: #dcaeea;">gc</span> = opp_col/3;
+            <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">w</span> = check_small(gr, gc);
+            <span style="color: #51afef;">if</span> (w != 0) small_winner[gr][gc] = w;  <span style="color: #5B6268;">// </span><span style="color: #5B6268;">on met &#224; jour le cache si le sg est gagn&#233;
+</span>
+            <span style="color: #5B6268;">// </span><span style="color: #5B6268;">la position locale du coup adverse nous impose notre prochain sous-plateau
+</span>            next_gr = opp_row % 3;
+            next_gc = opp_col % 3;
+            <span style="color: #5B6268;">// </span><span style="color: #5B6268;">si ce sous-plateau est d&#233;j&#224; fini, on est libre de jouer o&#249; on veut
+</span>            <span style="color: #51afef;">if</span> (small_winner[next_gr][next_gc] != 0 || small_full(next_gr, next_gc)) {
+                next_gr = -1; next_gc = -1;
+            }
+        }
+
+        <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">valid_action_count</span>;
+        scanf(<span style="color: #98be65;">"%d"</span>, &amp;valid_action_count);
+        <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 0; i &lt; valid_action_count; i++) {
+            <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">row</span>, <span style="color: #dcaeea;">col</span>; scanf(<span style="color: #98be65;">"%d%d"</span>, &amp;row, &amp;col);
+        }
+
+        <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">my_r</span>, <span style="color: #dcaeea;">my_c</span>;
+        best_move(next_gr, next_gc, &amp;my_r, &amp;my_c);
+        board[my_r][my_c] = 1;
+        <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">gr</span> = my_r/3, <span style="color: #dcaeea;">gc</span> = my_c/3;
+        <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">w</span> = check_small(gr, gc);
+        <span style="color: #51afef;">if</span> (w != 0) small_winner[gr][gc] = w;
+        printf(<span style="color: #98be65;">"%d %d\n"</span>, my_r, my_c);
+    }
+    <span style="color: #51afef;">return</span> 0;
+}
+</pre>
+</div>
+
+<hr />
+</div>
+</div>
+</div>
+<div id="outline-container-org22aea58" class="outline-2">
+<h2 id="org22aea58"><span class="section-number-2">5.</span> Tests et résultats</h2>
+<div class="outline-text-2" id="text-5">
+</div>
+<div id="outline-container-org7874856" class="outline-3">
+<h3 id="org7874856"><span class="section-number-3">5.1.</span> Ligue Bois</h3>
+<div class="outline-text-3" id="text-5-1">
+<p>
+Sur une grille vide, le bot joue en permier (<code>X</code>) et explore toutes les positions maximales. Il choisit toujour un coup optimal, dans le cas du morpion clasique un bot minimax parfait ne peut jamais perdre contre un adversaire humain.
+</p>
+
+<p>
+Exemple de séquence gagnante pour X avec un adversaire non optimal :
+</p>
+
+<pre class="example" id="orgd327398">
+Coup 1 (X) -&gt; centre : (1,1)
+Coup 2 (O) -&gt; (0,0)
+Coup 3 (X) -&gt; (2,2)   [prepare une diagonale et une colonne]
+
+# Etat du jeu actuelle
+O . .
+. X .
+. . X
+
+Coup 4 (O) -&gt; (0,1)
+Coup 5 (X) -&gt; (0,2)   [blocage ligne 0]
+
+# Etat du jeu
+O O X
+. X .
+. . X
+(on remarque que le joueur X si notre robot est bien programé va forcement gagner la partie)
+
+Coup 6 (O) -&gt; (2,1)   [blocage colonne 2]
+Coup 7 (X) -&gt; (2,0)   [diagonale: (0,2), (1,1), (2,0)]
+-&gt; Victoire X
+O O X
+. X O
+X . X
+</pre>
+
+<p>
+Sur une grille ou les deux joueurs jouent de facon optimale, minimax garanti toujour une égalité.
+</p>
+</div>
+</div>
+<div id="outline-container-org4f08126" class="outline-3">
+<h3 id="org4f08126"><span class="section-number-3">5.2.</span> Ligue Argent</h3>
+<div class="outline-text-3" id="text-5-2">
+<p>
+La profondeur adaptative passe de 2 en debut de partie jusqu&rsquo;a 6 en fin de partie quand il reste peu de coups. Grace a l&rsquo;alpha-bêta et a l&rsquo;ordonnancement centre puis coins puis bords, le bot reste dans les tems même avec 81 coups posibles au premier tour. La règle de renvoi est bien géré, le diagramme ci-dessous illustre un exemple concret ou le coup joué en (5,7) impose le sous-plateau (2,1) a l&rsquo;adversaire.
+</p>
+
+
+<div id="org53c8526" class="figure">
+<p><img src="renvoi.png" alt="renvoi.png" />
+</p>
+</div>
+
+<hr />
+</div>
+</div>
+</div>
+<div id="outline-container-org6166f55" class="outline-2">
+<h2 id="org6166f55"><span class="section-number-2">6.</span> Bilan</h2>
+<div class="outline-text-2" id="text-6">
+<p>
+Cet exercie était un des plus longs et difficle a réalsier.
+La ligue Bois etait une bonne mise en pratique de Minimax, un algo présenté rapidement en cours. 
+La ligue Argent était beaucoup plus dure. L&rsquo;alpha-bêta en lui-même s&rsquo;ajoute assez naturellement une fois Minimax bien compris. 
+</p>
+
+<p>
+Ce que je referais diferemment : les poids dans <code>evaluate()</code> ont été choisis un peu aléatoirement. 
+Une approche plus optimale serait de simuler des parties avec différents barèmes et de garder celui qui gagne le plus souvent.
+on pourrait ainsi réaliser les coups gagnants plus rapidement.
+</p>
+
+<hr />
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="date">Date: 2025-2026</p>
+<p class="author">Auteur: ALEXANDRE Maé</p>
+<p class="date">Created: 2026-05-07 jeu. 01:06</p>
+</div>
+</body>
+</html>

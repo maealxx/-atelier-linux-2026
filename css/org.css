@@ -1,0 +1,374 @@
+/* ============================================================
+   org.css — Thème végétation pour export Org-mode via Emacs ox-html
+   Options requises dans chaque .org :
+   #+HTML_HEAD: <link rel="stylesheet" href="../css/org.css">
+   #+OPTIONS: toc:t num:t html-style:nil html-scripts:nil
+   ============================================================ */
+
+
+   
+/* ── Mode clair (défaut) ── */
+:root {
+  --bg:           #f5f7f0;
+  --surface:      #ffffff;
+  --surface-deep: #edf0e8;
+  --border:       #c8d4b8;
+  --accent:       #4a7c3f;
+  --text:         #2c3a24;
+  --text-muted:   #6b7f5a;
+  --text-heading: #1e2d16;
+  --code-text:    #2d4a22;
+  --link:         #3d6e32;
+  --table-row:    #f0f4ea;
+}
+
+/* ── Mode sombre (classe .dark ajoutée par nav.html) ── */
+body.dark {
+  --bg:           #1a2214;
+  --surface:      #222e1a;
+  --surface-deep: #131a0e;
+  --border:       #2e4022;
+  --accent:       #7ab869;
+  --text:         #c8d9b8;
+  --text-muted:   #7a9668;
+  --text-heading: #e0ecce;
+  --code-text:    #a8d490;
+  --link:         #8fca7a;
+  --table-row:    #1e2a16;
+}
+
+/* ── Reset ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 1.7;
+  transition: background 0.3s, color 0.3s;
+}
+
+/* ── Wrapper — Emacs génère un #content ── */
+#content {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 2rem 2.5rem 3rem;
+}
+
+/* ── Bannière titre — Emacs génère h1.title, p.author, p.date dans #content ── */
+#content h1.title,
+#content p.author,
+#content p.date {
+  background: var(--surface);
+  margin-left: -2.5rem;
+  margin-right: -2.5rem;
+  padding-left: 2.5rem;
+  padding-right: 2.5rem;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+#content h1.title {
+  padding-top: 2rem;
+  padding-bottom: 0.6rem;
+  font-size: 1.9rem;
+  font-weight: 700;
+  color: var(--text-heading);
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+
+#content p.author {
+  padding-top: 0.3rem;
+  padding-bottom: 0.1rem;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-align: left;
+}
+
+#content p.date {
+  padding-top: 0.1rem;
+  padding-bottom: 1.4rem;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-align: left;
+  border-bottom: 2px solid var(--accent);
+  margin-bottom: 1.8rem;
+}
+
+#content p.author::before { content: '▸ '; color: var(--accent); }
+#content p.date::before   { content: '▸ '; color: var(--accent); }
+
+/* ── Table des matières — Emacs génère un #table-of-contents ── */
+#table-of-contents {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 1rem 1.5rem;
+  margin-bottom: 2rem;
+  font-size: 0.88rem;
+}
+
+#table-of-contents h2 {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  border: none;
+  margin: 0 0 0.6rem;
+  padding: 0;
+}
+
+#table-of-contents ul { list-style: none; padding-left: 0; margin: 0; }
+#table-of-contents li { margin: 0.2rem 0; }
+#table-of-contents ul ul { padding-left: 1rem; }
+#table-of-contents a { color: var(--link); border-bottom: none; }
+#table-of-contents a:hover { color: var(--accent); }
+
+/* ── Titres ── */
+h1, h2, h3, h4, h5 {
+  font-weight: 600;
+  color: var(--text-heading);
+  line-height: 1.4;
+  margin-top: 2.2rem;
+  margin-bottom: 1rem;
+}
+
+/* Emacs numérote les sections : span.section-number-N */
+span.section-number-2,
+span.section-number-3,
+span.section-number-4 {
+  color: var(--text-muted);
+  margin-right: 0.4rem;
+  font-weight: 400;
+}
+
+h2 {
+  font-size: 1.35rem;
+  color: var(--accent);
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--border);
+  margin-top: 2.5rem;
+}
+
+h3 { font-size: 1.1rem; margin-top: 1.8rem; }
+
+h4 {
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+
+/* ── Texte ── */
+p { margin-bottom: 0.9rem; text-align: justify; }
+strong, b { font-weight: 600; color: var(--text-heading); }
+em, i     { font-style: italic; }
+
+a {
+  color: var(--link);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+}
+a:hover { border-bottom-color: var(--link); }
+
+/* ── Code inline — Emacs génère <code> ── */
+code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85em;
+  background: var(--surface-deep);
+  color: var(--code-text);
+  padding: 0.12em 0.4em;
+  border-radius: 3px;
+  border: 1px solid var(--border);
+}
+
+/* ── Blocs de code — Emacs génère div.org-src-container > pre.src ── */
+div.org-src-container {
+  max-width: 860px;
+  margin: 1.2rem auto;
+  background: var(--surface-deep);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 5px;
+  overflow-x: auto;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+pre.src {
+  margin: 0;
+  padding: 1rem 1.3rem;
+  background: transparent;
+  border: none;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  color: var(--code-text);
+  line-height: 1.7;
+  overflow-x: auto;
+}
+
+/* Label du langage généré par Emacs (ex: #+BEGIN_SRC python) */
+pre.src::before {
+  display: block;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.5rem;
+}
+
+pre.src-python::before  { content: 'Python'; }
+pre.src-c::before       { content: 'C'; }
+pre.src-bash::before    { content: 'Bash'; }
+pre.src-sql::before     { content: 'SQL'; }
+pre.src-dot::before     { content: 'Graphviz'; }
+
+/* Blocs EXAMPLE (#+BEGIN_EXAMPLE) */
+pre.example {
+  max-width: 860px;
+  margin: 1.2rem auto;
+  padding: 1rem 1.3rem;
+  background: var(--surface-deep);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--text-muted);
+  border-radius: 5px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.84rem;
+  color: var(--text-muted);
+  line-height: 1.65;
+  overflow-x: auto;
+}
+
+/* ── Coloration syntaxique Emacs (org-html-htmlize) ── */
+.org-keyword    { color: #5a8a3a; font-weight: 600; }
+.org-type       { color: #3a7a5a; }
+.org-string     { color: #7a6a2a; }
+.org-comment, .org-comment-delimiter { color: var(--text-muted); font-style: italic; }
+.org-constant   { color: #7a4a2a; }
+.org-function-name { color: #3a6a8a; }
+.org-variable-name { color: var(--code-text); }
+.org-builtin    { color: #5a8a6a; }
+
+/* ── Listes ── */
+ul, ol { padding-left: 1.6rem; margin-bottom: 0.9rem; }
+li { margin-bottom: 0.3rem; }
+ul li::marker, ol li::marker { color: var(--accent); }
+li > ul, li > ol { margin-top: 0.3rem; margin-bottom: 0.3rem; }
+
+/* ── Tableaux — Emacs génère table.org-table ── */
+table, table.org-table {
+  width: 100%;
+  max-width: 860px;
+  margin: 1.2rem auto;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  display: table;
+}
+
+thead tr, tr.org-table-header {
+  background: var(--surface);
+  border-bottom: 2px solid var(--accent);
+}
+
+th {
+  font-weight: 600;
+  color: var(--accent);
+  text-align: left;
+  padding: 0.6rem 0.9rem;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+td { padding: 0.5rem 0.9rem; border-bottom: 1px solid var(--border); }
+tbody tr:nth-child(even) { background: var(--table-row); }
+
+/* Ligne de séparation Org (|----|) */
+tr.org-table-separator td { border-top: 2px solid var(--accent); padding: 0; }
+
+/* ── Blockquote ── */
+blockquote {
+  background: var(--surface);
+  border-left: 3px solid var(--accent);
+  padding: 0.8rem 1.3rem;
+  margin: 1.2rem auto;
+  border-radius: 0 4px 4px 0;
+}
+blockquote p { margin: 0; font-style: italic; color: var(--text-muted); }
+
+/* ── Blocs spéciaux ReadTheOrg (#+begin_note etc.) ── */
+div.note, div.warning, div.tip {
+  padding: 0.8rem 1.2rem;
+  margin: 1rem 0;
+  border-radius: 4px;
+  border-left: 3px solid var(--accent);
+  background: var(--surface-deep);
+  font-size: 0.9rem;
+}
+div.warning { border-left-color: #c88a3a; }
+
+/* ── Séparateur ── */
+hr { border: none; border-top: 1px solid var(--border); margin: 2rem auto; }
+
+/* ── Images ── */
+img { max-width: 100%; border-radius: 5px; display: block; margin: 1.2rem auto; }
+
+/* Légende image générée par Emacs */
+p.caption, figcaption {
+  text-align: center;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  font-style: italic;
+  margin-top: -0.6rem;
+  margin-bottom: 1rem;
+}
+
+/* ── Postamble — Emacs génère un #postamble ── */
+#postamble {
+  display: none;
+}
+
+/* ── Nav bar (injectée par nav.html) ── */
+#nav-bar {
+  position: fixed;
+  top: 1rem;
+  right: 1.5rem;
+  display: flex;
+  gap: 0.5rem;
+  z-index: 100;
+}
+
+#nav-bar a,
+#nav-bar button {
+  display: inline-block;
+  padding: 0.35rem 0.85rem;
+  background: var(--surface);
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s, color 0.2s;
+}
+
+#nav-bar a:hover,
+#nav-bar button:hover {
+  background: var(--accent);
+  color: var(--surface);
+}
+
+/* ── Print ── */
+@media print {
+  body { background: white; color: black; }
+  div.org-src-container, pre.example { border: 1px solid #ccc; box-shadow: none; }
+  #nav-bar, #postamble { display: none; }
+}

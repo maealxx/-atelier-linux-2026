@@ -1,0 +1,538 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr" xml:lang="fr">
+<head>
+<!-- 2026-05-07 jeu. 01:06 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Mise en couleur dans un terminal : C et Bash</title>
+<meta name="author" content="ALEXANDRE Maé - Prep'ISIMA 1" />
+<meta name="generator" content="Org Mode" />
+<link rel="stylesheet" href="../css/org.css">
+<script defer src="../css/nav.js"></script>
+</head>
+<body>
+<div id="content" class="content">
+<h1 class="title">Mise en couleur dans un terminal : C et Bash</h1>
+<div id="table-of-contents" role="doc-toc">
+<h2>Table des matières</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#org4f8cfd2">1. Introduction</a></li>
+<li><a href="#orgf3dc157">2. Les Couleurs en C</a></li>
+<li><a href="#org8a0dfd0">3. Les Couleurs en Bash</a></li>
+</ul>
+</div>
+</div>
+
+<div id="org153d20a" class="figure">
+<p><img src="../images/color.png" alt="color.png" />
+</p>
+</div>
+<div id="outline-container-org4f8cfd2" class="outline-2">
+<h2 id="org4f8cfd2"><span class="section-number-2">1.</span> Introduction</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+L&rsquo;affichage en couleur dans un terminal est quelque chose qu&rsquo;on remarque pas forcément
+au début, mais qui devient vite utile dès qu&rsquo;on commence à écrire des programmes
+un peu sérieux. 
+</p>
+
+<p>
+Ce rapport présente deux façons d&rsquo;utiliser les couleurs dans un terminal : en langage C,
+en insérant des séquences spéciales dans les chaînes passées à <code>printf</code>, et en Bash, en
+modifiant l&rsquo;invite de commande via la variable <code>PS1</code>.
+</p>
+</div>
+</div>
+<div id="outline-container-orgf3dc157" class="outline-2">
+<h2 id="orgf3dc157"><span class="section-number-2">2.</span> Les Couleurs en C</h2>
+<div class="outline-text-2" id="text-2">
+</div>
+<div id="outline-container-org9f3b4e3" class="outline-3">
+<h3 id="org9f3b4e3"><span class="section-number-3">2.1.</span> Principe</h3>
+<div class="outline-text-3" id="text-2-1">
+<p>
+Pour afficher du texte en couleur en C, on utilise des <b>séquences d&rsquo;échappement ANSI</b>.
+Ce sont des chaînes de caractères spéciales que le terminal intercepte et interprète
+comme des instructions de mise en forme, plutôt que de les afficher directement.
+</p>
+
+<p>
+La forme générale est la suivante :
+</p>
+
+<div class="org-src-container">
+<pre class="src src-nil">\033[CODE_STYLE;CODE_COULEURm
+</pre>
+</div>
+
+<ul class="org-ul">
+<li><code>\033</code> est le caractère ESC (code ASCII 27, en octal 033),</li>
+<li><code>[</code> ouvre la séquence de contrôle,</li>
+<li><code>CODE_STYLE</code> est optionnel (gras, souligné, italique…),</li>
+<li><code>CODE_COULEUR</code> définit la couleur du texte ou du fond,</li>
+<li><code>m</code> termine la séquence.</li>
+</ul>
+
+<blockquote>
+<p>
+<b>Important :</b> il faut toujours terminer une zone colorée avec la séquence <code>\033[0m</code>.
+Sans ça, la couleur reste active pour tout ce qui suit dans le terminal, même après
+la fin du programme, ce qui peut être assez perturbant.
+</p>
+</blockquote>
+
+<p>
+Voici les principaux codes de couleur pour le texte (on ajoute 10 pour avoir la couleur de fond) :
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-right">Code</th>
+<th scope="col" class="org-left">Couleur</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-right">30</td>
+<td class="org-left">Noir</td>
+</tr>
+
+<tr>
+<td class="org-right">31</td>
+<td class="org-left">Rouge</td>
+</tr>
+
+<tr>
+<td class="org-right">32</td>
+<td class="org-left">Vert</td>
+</tr>
+
+<tr>
+<td class="org-right">33</td>
+<td class="org-left">Jaune</td>
+</tr>
+
+<tr>
+<td class="org-right">34</td>
+<td class="org-left">Bleu</td>
+</tr>
+
+<tr>
+<td class="org-right">35</td>
+<td class="org-left">Magenta</td>
+</tr>
+
+<tr>
+<td class="org-right">36</td>
+<td class="org-left">Cyan</td>
+</tr>
+
+<tr>
+<td class="org-right">37</td>
+<td class="org-left">Gris clair</td>
+</tr>
+
+<tr>
+<td class="org-right">90</td>
+<td class="org-left">Gris foncé</td>
+</tr>
+
+<tr>
+<td class="org-right">91</td>
+<td class="org-left">Rouge clair</td>
+</tr>
+
+<tr>
+<td class="org-right">92</td>
+<td class="org-left">Vert clair</td>
+</tr>
+
+<tr>
+<td class="org-right">97</td>
+<td class="org-left">Blanc</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+Et les codes de style :
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-right">Code</th>
+<th scope="col" class="org-left">Style</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-right">0</td>
+<td class="org-left">Normal (reset)</td>
+</tr>
+
+<tr>
+<td class="org-right">1</td>
+<td class="org-left">Gras</td>
+</tr>
+
+<tr>
+<td class="org-right">2</td>
+<td class="org-left">Intensité réduite</td>
+</tr>
+
+<tr>
+<td class="org-right">3</td>
+<td class="org-left">Italique</td>
+</tr>
+
+<tr>
+<td class="org-right">4</td>
+<td class="org-left">Souligné</td>
+</tr>
+
+<tr>
+<td class="org-right">5/6</td>
+<td class="org-left">Clignotement</td>
+</tr>
+
+<tr>
+<td class="org-right">7</td>
+<td class="org-left">Inversion encre/fond</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="outline-container-org890552b" class="outline-3">
+<h3 id="org890552b"><span class="section-number-3">2.2.</span> Exemples progressifs</h3>
+<div class="outline-text-3" id="text-2-2">
+</div>
+<div id="outline-container-orge6889ae" class="outline-4">
+<h4 id="orge6889ae"><span class="section-number-4">2.2.1.</span> Exemple 1 : Hello World en couleur</h4>
+<div class="outline-text-4" id="text-2-2-1">
+<p>
+Le premier exemple est le plus basique : on affiche un message en rouge et en gras.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-c"><span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdio.h&gt;</span>
+
+<span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">main</span>() {
+    printf(<span style="color: #98be65;">"\033[1;31mHello, World !\033[0m\n"</span>);
+    <span style="color: #51afef;">return</span> 0;
+}
+</pre>
+</div>
+
+
+<div id="org62bdd50" class="figure">
+<p><img src="../images/screen1.png" alt="screen1.png" />
+</p>
+<p><span class="figure-number">Figure&nbsp;1&nbsp;: </span>Résultat de l&rsquo;exemple 1</p>
+</div>
+</div>
+</div>
+<div id="outline-container-org7f579f7" class="outline-4">
+<h4 id="org7f579f7"><span class="section-number-4">2.2.2.</span> Exemple 2 : messages de statut</h4>
+<div class="outline-text-4" id="text-2-2-2">
+<p>
+On peut enchaîner plusieurs couleurs pour simuler des niveaux de sévérité : rouge
+pour une erreur, jaune pour un avertissement, vert pour un succès. 
+</p>
+
+<div class="org-src-container">
+<pre class="src src-c"><span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdio.h&gt;</span>
+
+<span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">main</span>() {
+    printf(<span style="color: #98be65;">"\033[1;31m[ERREUR]  \033[0m Segmentation fault detectee\n"</span>);
+    printf(<span style="color: #98be65;">"\033[1;33m[WARN]    \033[0m Valeur hors plage, utilisation du defaut\n"</span>);
+    printf(<span style="color: #98be65;">"\033[1;32m[OK]      \033[0m Fichier charge avec succes\n"</span>);
+    <span style="color: #51afef;">return</span> 0;
+}
+</pre>
+</div>
+
+
+<div id="org77eb187" class="figure">
+<p><img src="../images/screen2.png" alt="screen2.png" />
+</p>
+<p><span class="figure-number">Figure&nbsp;2&nbsp;: </span>Résultat de l&rsquo;exemple 2</p>
+</div>
+</div>
+</div>
+<div id="outline-container-org7500935" class="outline-4">
+<h4 id="org7500935"><span class="section-number-4">2.2.3.</span> Exemple 3 : compteur coloré</h4>
+<div class="outline-text-4" id="text-2-2-3">
+<p>
+Affiche une suite de nombres avec une couleur unique.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-c">
+<span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">main</span>() {
+    <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 1; i &lt;= 5; i++) {
+        printf(<span style="color: #98be65;">"\033[34m%d \033[0m"</span>, i);
+    }
+    printf(<span style="color: #98be65;">"\n"</span>);
+    <span style="color: #51afef;">return</span> 0;
+}
+</pre>
+</div>
+
+
+<div id="org283fd72" class="figure">
+<p><img src="../images/screen3.png" alt="screen3.png" />
+</p>
+<p><span class="figure-number">Figure&nbsp;3&nbsp;: </span>Résultat de l&rsquo;exemple 3</p>
+</div>
+</div>
+</div>
+<div id="outline-container-orgd77a9b9" class="outline-4">
+<h4 id="orgd77a9b9"><span class="section-number-4">2.2.4.</span> Exemple 4 : logo ASCII art en couleur</h4>
+<div class="outline-text-4" id="text-2-2-4">
+<p>
+On affiche un logo ASCII art en colorisant chaque ligne avec une couleur différente,
+en cyclant sur un tableau de codes via le modulo. 
+</p>
+
+<div class="org-src-container">
+<pre class="src src-c"><span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdio.h&gt;</span>
+
+<span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">main</span>() {
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">couleurs</span>[] = {31, 33, 32, 36, 34, 35};
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">nb_couleurs</span> = 6;
+
+    <span style="color: #ECBE7B;">char</span> *<span style="color: #dcaeea;">lignes</span>[] = {
+        <span style="color: #98be65;">"  _____ "</span>,
+        <span style="color: #98be65;">" / ____|"</span>,
+        <span style="color: #98be65;">"| |     "</span>,
+        <span style="color: #98be65;">"| |     "</span>,
+        <span style="color: #98be65;">"| |____ "</span>,
+        <span style="color: #98be65;">" \\_____|"</span>,
+    };
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">nb_lignes</span> = 6;
+
+    <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 0; i &lt; nb_lignes; i++) {
+        printf(<span style="color: #98be65;">"\033[1;%dm%s\033[0m\n"</span>, couleurs[i % nb_couleurs], lignes[i]);
+    }
+    <span style="color: #51afef;">return</span> 0;
+}
+</pre>
+</div>
+
+
+<div id="org8bc0ca0" class="figure">
+<p><img src="../images/screen4.png" alt="screen4.png" />
+</p>
+<p><span class="figure-number">Figure&nbsp;4&nbsp;: </span>Résultat de l&rsquo;exemple 4</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-org8a0dfd0" class="outline-2">
+<h2 id="org8a0dfd0"><span class="section-number-2">3.</span> Les Couleurs en Bash</h2>
+<div class="outline-text-2" id="text-3">
+</div>
+<div id="outline-container-org9795748" class="outline-3">
+<h3 id="org9795748"><span class="section-number-3">3.1.</span> Principe</h3>
+<div class="outline-text-3" id="text-3-1">
+<p>
+En Bash, les couleurs servent principalement à personnalisé l&rsquo;<b>invite de commande</b>,
+aussi appelée prompt. C&rsquo;est le texte affiché avant chaque commande dans le terminal,
+et il est définit par le contenu de la variable <code>PS1</code>. On peut voir sa valeur actuelle
+avec :
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash"><span style="color: #ECBE7B;">echo</span> $<span style="color: #dcaeea;">PS1</span>
+</pre>
+</div>
+
+<p>
+La syntaxe des séquences ANSI est la même qu&rsquo;en C, mais avec une particularité
+importante : les séquences non imprimables doivent être encadrées par <code>\[</code> et <code>\]</code>
+pour que Bash calcule correctement la longueur de la ligne et gère le curseur sans
+décalage.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash"><span style="color: #dcaeea;">PS1</span>=<span style="color: #98be65;">'\[\033[CODE;COULEURm\]texte\[\033[0m\]'</span>
+</pre>
+</div>
+
+<blockquote>
+<p>
+<b>Attention :</b> il faut impérativement utiliser des guillemets simples <code>''</code> autour
+de la valeur de <code>PS1</code>. Avec des guillemets doubles, les codes comme <code>\u</code> ou <code>\h</code>
+ne fonctionnes pas correctement.
+</p>
+</blockquote>
+
+<p>
+Bash propose aussi des codes spéciaux pour insérer des informations dynamiques
+dans l&rsquo;invite :
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Code</th>
+<th scope="col" class="org-left">Résultat</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left"><code>\u</code></td>
+<td class="org-left">Nom de l&rsquo;utilisateur courant</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>\h</code></td>
+<td class="org-left">Nom de la machine (hostname)</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>\w</code></td>
+<td class="org-left">Répertoire courant (HOME = ~)</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>\W</code></td>
+<td class="org-left">Dernier composant du chemin</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>\t</code></td>
+<td class="org-left">Heure au format 24h (HH:MM:SS)</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>\d</code></td>
+<td class="org-left">Date (ex : Tue May 26)</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>\$</code></td>
+<td class="org-left"># si root, $ sinon</td>
+</tr>
+
+<tr>
+<td class="org-left"><code>\n</code></td>
+<td class="org-left">Saut de ligne</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+Pour que la configuration soit permanente, il suffit d&rsquo;ajouter la ligne <code>PS1</code>&#x2026;= à
+la fin du fichier <code>~/.bashrc</code>, qui est lu automatiquement à chaque ouverture d&rsquo;un terminal.
+</p>
+</div>
+</div>
+<div id="outline-container-org30879ae" class="outline-3">
+<h3 id="org30879ae"><span class="section-number-3">3.2.</span> Exemples progressifs</h3>
+<div class="outline-text-3" id="text-3-2">
+</div>
+<div id="outline-container-orga0fda78" class="outline-4">
+<h4 id="orga0fda78"><span class="section-number-4">3.2.1.</span> Exemple 1 : utilisateur, machine et répertoire</h4>
+<div class="outline-text-4" id="text-3-2-1">
+<p>
+On complète l&rsquo;invite avec le nom de la machine en bleu et le répertoire courant en
+jaune. 
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash"><span style="color: #dcaeea;">PS1</span>=<span style="color: #98be65;">'\[\033[1;32m\]\u\[\033[0;97m\]@\[\033[1;34m\]\h\[\033[0;97m\]:\[\033[1;33m\]\W\[\033[0m\]\$ '</span>
+</pre>
+</div>
+
+
+<div id="org3553964" class="figure">
+<p><img src="../images/screen5.png" alt="screen5.png" />
+</p>
+<p><span class="figure-number">Figure&nbsp;5&nbsp;: </span>Résultat de l&rsquo;exemple 1</p>
+</div>
+</div>
+</div>
+<div id="outline-container-orgff5a8be" class="outline-4">
+<h4 id="orgff5a8be"><span class="section-number-4">3.2.2.</span> Exemple 2 : prompt avec compteur de commandes</h4>
+<div class="outline-text-4" id="text-3-2-2">
+<p>
+Ce prompt affiche le numéro de la commande en cours dans la session. 
+Cela permet de suivre facilement combien de commandes ont été exécutées, 
+ce qui peut être utile pour se repérer ou pour du débogage.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash"><span style="color: #dcaeea;">PS1</span>=<span style="color: #98be65;">'\[\033[1;35m\][\#] \[\033[1;36m\]\W \[\033[1;32m\]$ \[\033[0m\]'</span>
+</pre>
+</div>
+
+
+
+<div id="orgcb229b1" class="figure">
+<p><img src="../images/screen6.png" alt="screen6.png" />
+</p>
+<p><span class="figure-number">Figure&nbsp;6&nbsp;: </span>Résultat de l&rsquo;exemple 2</p>
+</div>
+</div>
+</div>
+<div id="outline-container-orge73eb6f" class="outline-4">
+<h4 id="orge73eb6f"><span class="section-number-4">3.2.3.</span> Exemple 3 : prompt &laquo;&nbsp;humeur du terminal&nbsp;&raquo;</h4>
+<div class="outline-text-4" id="text-3-2-3">
+<p>
+Ce prompt change d&rsquo;apparence selon le résultat de la dernière commande.
+Si la commande réussit, un symbole positif s’affiche.
+Sinon, un symbole indique une erreur. 
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash"><span style="color: #dcaeea;">PS1</span>=<span style="color: #98be65;">'\[\033[1;32m\]$(</span><span style="color: #51afef; font-weight: bold;">if [ $? -eq 0 ]; then echo ":</span><span style="color: #98be65;">)"; else </span><span style="color: #98be65;">echo</span><span style="color: #98be65;"> ":("; fi) \[\033[1;34m\]\W \[\033[1;33m\]$ \[\033[0m\]'</span>
+</pre>
+</div>
+
+
+<div id="orgabd736c" class="figure">
+<p><img src="../images/screen7.png" alt="screen7.png" />
+</p>
+<p><span class="figure-number">Figure&nbsp;7&nbsp;: </span>Résultat de l&rsquo;exemple 3</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="date">Date: 26 Mars 2026</p>
+<p class="author">Auteur: ALEXANDRE Maé - Prep&rsquo;ISIMA 1</p>
+<p class="date">Created: 2026-05-07 jeu. 01:06</p>
+</div>
+</body>
+</html>

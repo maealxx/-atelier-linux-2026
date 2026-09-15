@@ -1,0 +1,265 @@
+/* ============================================================
+   rapport-nature.css — Thème végétation, clair par défaut
+   Usage : pandoc rapport.md -o rapport.html --css rapport-nature.css --standalone
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap');
+
+/* ── Mode clair (défaut) ── */
+:root {
+  --bg:           #f5f7f0;
+  --surface:      #ffffff;
+  --surface-deep: #edf0e8;
+  --border:       #c8d4b8;
+  --accent:       #4a7c3f;
+  --text:         #2c3a24;
+  --text-muted:   #6b7f5a;
+  --text-heading: #1e2d16;
+  --code-text:    #2d4a22;
+  --link:         #3d6e32;
+  --table-row:    #f0f4ea;
+}
+
+/* ── Mode sombre ── */
+body.dark {
+  --bg:           #1a2214;
+  --surface:      #222e1a;
+  --surface-deep: #131a0e;
+  --border:       #2e4022;
+  --accent:       #7ab869;
+  --text:         #c8d9b8;
+  --text-muted:   #7a9668;
+  --text-heading: #e0ecce;
+  --code-text:    #a8d490;
+  --link:         #8fca7a;
+  --table-row:    #1e2a16;
+}
+
+/* ── Reset ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 1.7;
+  transition: background 0.3s, color 0.3s;
+}
+
+/* ── Wrapper centré ── */
+body > * {
+  max-width: 860px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 2.5rem;
+  padding-right: 2.5rem;
+}
+
+/* ── Barre de boutons fixe en haut à droite ── */
+#nav-bar {
+  position: fixed;
+  top: 1rem;
+  right: 1.5rem;
+  display: flex;
+  gap: 0.5rem;
+  z-index: 100;
+  max-width: none;
+  padding: 0;
+}
+
+#nav-bar a,
+#nav-bar button {
+  display: inline-block;
+  padding: 0.35rem 0.85rem;
+  background: var(--surface);
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s, color 0.2s;
+}
+
+#nav-bar a:hover,
+#nav-bar button:hover {
+  background: var(--accent);
+  color: var(--surface);
+}
+
+/* ── Bannière titre ── */
+header#title-block-header {
+  background: var(--surface);
+  border-bottom: 2px solid var(--accent);
+  padding-top: 2rem;
+  padding-bottom: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.title {
+  font-size: 1.9rem;
+  font-weight: 700;
+  color: var(--text-heading);
+  letter-spacing: -0.02em;
+  margin-bottom: 0.7rem;
+  line-height: 1.25;
+}
+
+.author, .date {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-top: 0.25rem;
+}
+
+.author::before, .date::before {
+  content: '▸ ';
+  color: var(--accent);
+}
+
+/* ── Titres ── */
+h1, h2, h3, h4 {
+  font-weight: 600;
+  color: var(--text-heading);
+  line-height: 1.4;
+  margin-top: 2.2rem;
+  margin-bottom: 1rem;
+}
+
+h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+h2 {
+  font-size: 1.35rem;
+  color: var(--accent);
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--border);
+  margin-top: 2.5rem;
+}
+
+h3 { font-size: 1.1rem; margin-top: 1.8rem; }
+
+h4 {
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+
+/* ── Texte ── */
+p { margin-bottom: 0.9rem; text-align: justify; }
+strong { font-weight: 600; color: var(--text-heading); }
+em     { font-style: italic; }
+
+a {
+  color: var(--link);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+}
+a:hover { border-bottom-color: var(--link); }
+
+/* ── Code inline ── */
+code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85em;
+  background: var(--surface-deep);
+  color: var(--code-text);
+  padding: 0.12em 0.4em;
+  border-radius: 3px;
+  border: 1px solid var(--border);
+}
+
+/* ── Blocs de code ── */
+pre, div.sourceCode {
+  max-width: 860px;
+  margin: 1.2rem auto;
+  background: var(--surface-deep);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 5px;
+  overflow-x: auto;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+div.sourceCode pre {
+  margin: 0; border: none; border-radius: 0;
+  box-shadow: none; background: transparent; max-width: none;
+}
+
+pre { padding: 1rem 1.3rem; }
+
+pre code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  background: none;
+  color: var(--code-text);
+  padding: 0; border: none;
+  line-height: 1.7;
+}
+
+/* Coloration syntaxique Pandoc */
+code span.kw { color: #5a8a3a; font-weight: 600; }
+code span.dt { color: #3a7a5a; }
+code span.st { color: #7a6a2a; }
+code span.co { color: var(--text-muted); font-style: italic; }
+code span.dv { color: #7a4a2a; }
+code span.fu { color: #3a6a8a; }
+
+/* ── Listes ── */
+ul, ol { padding-left: 1.6rem; margin-bottom: 0.9rem; }
+li { margin-bottom: 0.3rem; }
+ul li::marker, ol li::marker { color: var(--accent); }
+li > ul, li > ol { margin-top: 0.3rem; margin-bottom: 0.3rem; }
+
+/* ── Tableaux ── */
+table {
+  width: 100%; max-width: 860px;
+  margin: 1.2rem auto;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  display: table;
+}
+
+thead tr { background: var(--surface); border-bottom: 2px solid var(--accent); }
+
+th {
+  font-weight: 600; color: var(--accent);
+  text-align: left; padding: 0.6rem 0.9rem;
+  font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;
+}
+
+td { padding: 0.5rem 0.9rem; border-bottom: 1px solid var(--border); }
+tbody tr:nth-child(even) { background: var(--table-row); }
+
+/* ── Blockquote ── */
+blockquote {
+  background: var(--surface);
+  border-left: 3px solid var(--accent);
+  padding: 0.8rem 1.3rem;
+  margin: 1.2rem auto;
+  border-radius: 0 4px 4px 0;
+}
+
+blockquote p { margin: 0; font-style: italic; color: var(--text-muted); }
+
+/* ── Séparateur ── */
+hr { border: none; border-top: 1px solid var(--border); margin: 2rem auto; }
+
+/* ── Images ── */
+img { max-width: 100%; border-radius: 5px; display: block; margin: 1.2rem auto; }
+
+/* ── Print ── */
+@media print {
+  body { background: white; color: black; }
+  pre, div.sourceCode { border: 1px solid #ccc; box-shadow: none; }
+  #nav-bar { display: none; }
+}

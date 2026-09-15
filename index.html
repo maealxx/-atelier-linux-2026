@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portfolio — ALEXANDRE Maé</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:#f5f7f0; --surface:#fff; --border:#c8d4b8; --accent:#4a7c3f;
+      --text:#2c3a24; --muted:#6b7f5a; --heading:#1e2d16; --edge:#aac09a;
+      --nf:#d4ead6; --ns:#2e7d35; --nt:#1a4d1f;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:15px;min-height:100vh}
+    header{border-bottom:2px solid var(--accent);background:var(--surface);padding:2rem 3rem;display:flex;align-items:center;gap:2rem}
+    header .ht{flex:1}
+    header h1{font-size:1.9rem;font-weight:700;color:var(--heading);letter-spacing:-.02em;margin-bottom:.5rem}
+    header .meta{color:var(--muted);font-size:.82rem;text-transform:uppercase;letter-spacing:.06em;margin-top:.25rem}
+    header .meta span{color:var(--accent);margin-right:.3rem}
+    header .welcome{color:var(--text);font-size:.95rem;margin-top:.75rem;font-weight:300}
+    header .logo img{height:64px;display:block;opacity:.9}
+    main{max-width:1100px;margin:0 auto;padding:2rem 1.5rem}
+    svg{width:100%;overflow:visible}
+    a.nd{text-decoration:none;cursor:pointer}
+    a.nd:hover rect{filter:brightness(.91)}
+    .n{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600}
+    .t{font-family:'Inter',sans-serif;font-size:17px;font-weight:700}
+    .l{font-family:'JetBrains Mono',monospace;font-size:12px}
+    footer{text-align:center;padding:1.5rem;font-size:.75rem;color:var(--muted);border-top:1px solid var(--border);margin-top:1rem}
+  </style>
+</head>
+<body>
+<header>
+  <div class="ht">
+    <h1>Portfolio — ALEXANDRE Maé</h1>
+    <p class="meta"><span>▸</span> Classe Préparatoire ISIMA — 1ère année &nbsp;·&nbsp; 2026</p>
+    <p class="welcome">Bienvenue sur ma page ! Retrouvez ici mes rapports de projets CodingGame réalisés tout au long de l'année.</p>
+  </div>
+  <div class="logo"><img src="images/logo_isima.png" alt="Logo ISIMA"></div>
+</header>
+<main>
+<svg viewBox="0 0 1300 1000" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+  </defs>
+  <path d="M740 96 Q920 140 1100 162" fill="none" stroke="var(--edge)" stroke-width="1.5" marker-end="url(#arr)"/>
+  <path d="M560 96 Q380 140 200 162" fill="none" stroke="var(--edge)" stroke-width="1.5" marker-end="url(#arr)"/>
+  <path d="M650 96 Q650 130 650 162" fill="none" stroke="var(--edge)" stroke-width="1.5" marker-end="url(#arr)"/>
+  <path d="M128 306 Q110 354 100 386" fill="none" stroke="var(--edge)" stroke-width="1.5" marker-end="url(#arr)"/>
+  <path d="M272 306 Q350 352 418 386" fill="none" stroke="var(--edge)" stroke-width="1.5" marker-end="url(#arr)"/>
+  <path d="M678 306 Q698 352 710 386" fill="none" stroke="var(--edge)" stroke-width="1.5" marker-end="url(#arr)"/>
+  <path d="M1100 306 Q1100 352 1100 386" fill="none" stroke="var(--edge)" stroke-width="1.5" marker-end="url(#arr)"/>
+  <path d="M100 530 Q156 580 200 610" fill="none" stroke="var(--edge)" stroke-width="1.5" marker-end="url(#arr)"/>
+  <path d="M404 530 Q320 580 268 610" fill="none" stroke="var(--edge)" stroke-width="1.5" marker-end="url(#arr)"/>
+  <path d="M710 530 Q670 580 644 610" fill="none" stroke="var(--edge)" stroke-width="1.5" marker-end="url(#arr)"/>
+  <path d="M1080 530 Q1056 580 1040 610" fill="none" stroke="var(--edge)" stroke-width="1.5" marker-end="url(#arr)"/>
+  <path d="M620 754 Q620 810 620 834" fill="none" stroke="var(--edge)" stroke-width="1.5" marker-end="url(#arr)"/>
+  <g>
+    <rect x="530" y="18" width="240" height="60" rx="14" fill="var(--surface)" stroke="var(--accent)" stroke-width="2.5"/>
+    <text x="650" y="52" text-anchor="middle" dominant-baseline="central" font-family="Inter,sans-serif" font-size="22" font-weight="700" fill="var(--heading)">DevLinux</text>
+  </g>
+  <a class="nd" href="bishop/rapport_bishop.html"><rect x="980" y="162" width="240" height="96" rx="13" fill="var(--nf)" stroke="var(--ns)" stroke-width="1.8"/><text x="1100" y="186" text-anchor="middle" class="n" fill="var(--ns)">01</text><text x="1100" y="212" text-anchor="middle" class="t" fill="var(--nt)">Drunken Bishop</text><text x="1100" y="238" text-anchor="middle" class="l" fill="var(--ns)">C · Markdown · Python</text></a>
+  <a class="nd" href="otherside/rapport_other_side.html"><rect x="80" y="162" width="240" height="96" rx="13" fill="var(--nf)" stroke="var(--ns)" stroke-width="1.8"/><text x="200" y="186" text-anchor="middle" class="n" fill="var(--ns)">02</text><text x="200" y="212" text-anchor="middle" class="t" fill="var(--nt)">The Other Side</text><text x="200" y="238" text-anchor="middle" class="l" fill="var(--ns)">C · Markdown · Python</text></a>
+  <a class="nd" href="fractale/fractales.html"><rect x="530" y="162" width="240" height="96" rx="13" fill="var(--nf)" stroke="var(--ns)" stroke-width="1.8"/><text x="650" y="186" text-anchor="middle" class="n" fill="var(--ns)">03</text><text x="650" y="212" text-anchor="middle" class="t" fill="var(--nt)">Les Fractales</text><text x="650" y="238" text-anchor="middle" class="l" fill="var(--ns)">Markdown</text></a>
+  <a class="nd" href="orgmode/mot_de_passe.html"><rect x="-20" y="386" width="240" height="96" rx="13" fill="var(--nf)" stroke="var(--ns)" stroke-width="1.8"/><text x="100" y="410" text-anchor="middle" class="n" fill="var(--ns)">04</text><text x="100" y="436" text-anchor="middle" class="t" fill="var(--nt)">Mot de passe</text><text x="100" y="462" text-anchor="middle" class="l" fill="var(--ns)">Org-mode</text></a>
+  <a class="nd" href="pikachu/rapport_pikachu.html"><rect x="310" y="386" width="240" height="96" rx="13" fill="var(--nf)" stroke="var(--ns)" stroke-width="1.8"/><text x="430" y="410" text-anchor="middle" class="n" fill="var(--ns)">05</text><text x="430" y="436" text-anchor="middle" class="t" fill="var(--nt)">Pikaptcha EP1</text><text x="430" y="462" text-anchor="middle" class="l" fill="var(--ns)">Python · Org-mode</text></a>
+  <a class="nd" href="sudoku/rapport_sudoku.html"><rect x="600" y="386" width="240" height="96" rx="13" fill="var(--nf)" stroke="var(--ns)" stroke-width="1.8"/><text x="720" y="410" text-anchor="middle" class="n" fill="var(--ns)">06</text><text x="720" y="436" text-anchor="middle" class="t" fill="var(--nt)">Killer Sudoku</text><text x="720" y="462" text-anchor="middle" class="l" fill="var(--ns)">Org-mode · C</text></a>
+  <a class="nd" href="tictactoe/rapport_tictactoe.html"><rect x="980" y="386" width="240" height="96" rx="13" fill="var(--nf)" stroke="var(--ns)" stroke-width="1.8"/><text x="1100" y="410" text-anchor="middle" class="n" fill="var(--ns)">07</text><text x="1100" y="436" text-anchor="middle" class="t" fill="var(--nt)">TicTacToe</text><text x="1100" y="462" text-anchor="middle" class="l" fill="var(--ns)">Org-mode · C</text></a>
+  <a class="nd" href="brainfuck/rapport_brainfuck.html"><rect x="100" y="610" width="240" height="96" rx="13" fill="var(--nf)" stroke="var(--ns)" stroke-width="1.8"/><text x="220" y="634" text-anchor="middle" class="n" fill="var(--ns)">08</text><text x="220" y="660" text-anchor="middle" class="t" fill="var(--nt)">Brainfuck</text><text x="220" y="686" text-anchor="middle" class="l" fill="var(--ns)">Org-mode · C</text></a>
+  <a class="nd" href="coast/rapport_longuest_coast.html"><rect x="500" y="610" width="240" height="96" rx="13" fill="var(--nf)" stroke="var(--ns)" stroke-width="1.8"/><text x="620" y="634" text-anchor="middle" class="n" fill="var(--ns)">09</text><text x="620" y="660" text-anchor="middle" class="t" fill="var(--nt)">Longest Coast</text><text x="620" y="686" text-anchor="middle" class="l" fill="var(--ns)">Org-mode · C</text></a>
+  <a class="nd" href="couleurs/rapport_couleur.html"><rect x="900" y="610" width="240" height="96" rx="13" fill="var(--nf)" stroke="var(--ns)" stroke-width="1.8"/><text x="1020" y="634" text-anchor="middle" class="n" fill="var(--ns)">10</text><text x="1020" y="660" text-anchor="middle" class="t" fill="var(--nt)">Couleurs</text><text x="1020" y="686" text-anchor="middle" class="l" fill="var(--ns)">Org-mode · C · Bash</text></a>
+  <a class="nd" href="labyrinthe/rapport_labyrinthe.html"><rect x="500" y="834" width="240" height="96" rx="13" fill="var(--nf)" stroke="var(--ns)" stroke-width="1.8"/><text x="620" y="858" text-anchor="middle" class="n" fill="var(--ns)">11</text><text x="620" y="884" text-anchor="middle" class="t" fill="var(--nt)">Labyrinthe</text><text x="620" y="910" text-anchor="middle" class="l" fill="var(--ns)">Org-mode · C</text></a>
+</svg>
+</main>
+<footer>ALEXANDRE Maé · Prep'ISIMA 1 · 2026</footer>
+</body>
+</html>
