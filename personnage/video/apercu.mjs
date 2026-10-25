@@ -12,7 +12,7 @@ const composition = await selectComposition({serveUrl, id, browserExecutable});
 const fichiers = [];
 for (const frame of frames) {
   const output = `out/_${frame}.png`;
-  await renderStill({serveUrl, composition, frame: Number(frame), output, scale: 0.3, browserExecutable});
+  await renderStill({serveUrl, composition, frame: Number(frame), output, scale: Number(process.env.ECH || 0.3), browserExecutable});
   fichiers.push(output);
 }
 if (fichiers.length === 1) {

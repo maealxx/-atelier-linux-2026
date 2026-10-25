@@ -530,10 +530,10 @@ export const Telephone = ({f, messages = [], notif = null, echelle = 1, x = 540,
       <text x="-100" y="-392" fontSize="22" fill="#7ad48a" fontFamily="'DejaVu Sans', Arial">{ecrit ? 'écrit…' : 'en ligne'}</text>
       {/* bulles de messages (reçues, à gauche) */}
       {pile.map(({m, lignes, h, y: yy}, k) => {
-        const p = spring({frame: f - m.debut, fps: 30, config: {damping: 11, stiffness: 180}});
+        const p = m.alerte ? spring({frame: f - m.debut, fps: 30, config: {damping: 30, stiffness: 40}}) : spring({frame: f - m.debut, fps: 30, config: {damping: 11, stiffness: 180}});
         return (
           <g key={k} transform={`translate(-225 ${yy + h}) scale(${p}) translate(0 ${-h})`}>
-            <rect width="400" height={h} rx="30" fill="#262d3a" />
+            <rect width="400" height={h} rx="30" fill={m.alerte ? '#3a070c' : '#262d3a'} stroke={m.alerte ? '#ff2a3a' : 'none'} strokeWidth="5" />
             {m.photo && <PhotoGroupe f={f} />}
             {lignes.map((l, i) => (
               <text key={i} x="26" y={(m.photo ? 290 : 0) + 58 + i * 52} fontSize="38" fill="#eef2f8" fontFamily="'DejaVu Sans', Arial" fontWeight={m.gras ? 900 : 400}>
@@ -555,7 +555,7 @@ export const Telephone = ({f, messages = [], notif = null, echelle = 1, x = 540,
       </g>}
       {/* notification sur l'écran verrouillé */}
       {notif && f >= notif.debut && (
-        <g transform={`translate(0 ${-330 + (1 - spring({frame: f - notif.debut, fps: 30, config: {damping: 12}})) * -260})`}>
+        <g transform={`translate(0 ${-60 + (1 - spring({frame: f - notif.debut, fps: 30, config: {damping: 12}})) * -260})`}>
           <rect x="-235" y="-70" width="470" height="140" rx="30" fill="#e8ecf4" opacity="0.95" />
           <circle cx="-180" cy="0" r="30" fill="#3ad86a" />
           <text x="-130" y="-10" fontSize="28" fill="#111" fontWeight="900" fontFamily="'DejaVu Sans', Arial">{nom}</text>

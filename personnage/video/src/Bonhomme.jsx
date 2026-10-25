@@ -1,6 +1,6 @@
 // Le bonhomme, dessiné dans le repère du SVG d'origine (viewBox 0 0 600 1000, pieds en 300,922).
 // Les angles sont en degrés, autour des pivots du personnage.svg.
-const C = {
+const C0 = {
   peau: '#F2C3A0',
   peauO: '#E3A984',
   chev: '#2B2140',
@@ -32,7 +32,10 @@ export const Bonhomme = ({
   legG = 0, // 0 → 1 : jambe levée (marche / course vue de face)
   legD = 0,
   dos = false, // vu de dos
-}) => (
+  couleurs = null, // remplace une partie de la palette (ex. une veste de livreur)
+}) => {
+  const C = couleurs ? {...C0, ...couleurs} : C0;
+  return (
   <g>
     {/* jambe G */}
     <g transform={`translate(0 560) scale(1 ${1 - 0.2 * legG}) translate(0 -560)`}>
@@ -162,3 +165,4 @@ export const Bonhomme = ({
     </g>
   </g>
 );
+};
