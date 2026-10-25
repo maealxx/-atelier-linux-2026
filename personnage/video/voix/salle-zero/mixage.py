@@ -210,6 +210,6 @@ e = np.convolve(np.sqrt(np.mean(voix[: n * 480].reshape(n, 480) ** 2, axis=1)), 
 sfx[: n * 480] *= np.repeat(1 - 0.45 * np.clip(e / 0.08, 0, 1), 480)
 
 mix = (voix + sfx)[: int(DUREE * SR)]
-mix /= max(1.0, np.abs(mix).max() / 0.95)
+mix /= max(1.0, np.abs(mix).max() / 0.85)
 sf.write(sys.argv[1], np.stack([mix, mix], 1).astype(np.float32), SR)
 print("ok", round(DUREE, 2), "s", "crête voix", round(np.abs(voix).max(), 2), "crête bruitages", round(np.abs(sfx).max(), 2))
