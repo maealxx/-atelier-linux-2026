@@ -1,5 +1,7 @@
 """Prépare une voix off enregistrée (ex. ElevenLabs) et recale la vidéo dessus.
-Usage : python3 voix/caler_voix.py <voix_brute> [vitesse=1.1]
+Usage : python3 voix/caler_voix.py <voix_brute> [vitesse=1.1] [projet] [blanc_max=0.16]
+Sans projet : texte de voix/generer.py, sorties dans src/timeline.json et voix/ (« Le dernier bus »).
+Avec projet : texte de voix/<projet>/scenes.json, sorties dans src/<projet>/ et voix/<projet>/.
 1. raccourcit les blancs (sans les supprimer), 2. remonte les passages chuchotés,
 3. accélère sans changer la hauteur, 4. normalise le volume (≈ -15 LUFS),
 5. repère chaque bout de phrase grâce aux pauses et en déduit le minutage des mots,
@@ -11,14 +13,21 @@ import numpy as np, soundfile as sf
 ici = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, ici)
 SRC, VITESSE = sys.argv[1], float(sys.argv[2]) if len(sys.argv) > 2 else 1.1
+PROJET = sys.argv[3] if len(sys.argv) > 3 else ""
 FPS = 30
 DEBUT = 0.1  # la voix démarre 0,1 s après le début de la vidéo
 QUEUE = 0.8  # temps laissé après la dernière phrase
-BLANC_MAX = 0.16  # durée maximale d'un blanc après traitement (avant accélération)
+BLANC_MAX = float(sys.argv[4]) if len(sys.argv) > 4 else 0.16  # durée maximale d'un blanc (avant accélération)
 
 # texte de référence (sans importer kokoro)
-src = open(f"{ici}/generer.py").read()
-SCENES = eval(src[src.index("SCENES = [") + 9 : src.index("]\n\nici") + 1])
+if PROJET:
+    SCENES = [(nom, 0, texte) for nom, texte in json.load(open(f"{ici}/{PROJET}/scenes.json"))]
+else:
+    src = open(f"{ici}/generer.py").read()
+    SCENES = eval(src[src.index("SCENES = [") + 9 : src.index("]\n\nici") + 1])
+DOSSIER = f"{ici}/{PROJET}" if PROJET else ici
+SORTIE_TL = f"{ici}/../src/{PROJET}/timeline.json" if PROJET else f"{ici}/../src/timeline.json"
+NOM_VOIX = f"{PROJET}/voix_finale.wav" if PROJET else "voix_finale.wav"
 
 tmp = f"{ici}/eleven"
 os.makedirs(tmp, exist_ok=True)
@@ -73,10 +82,10 @@ sf.write(f"{tmp}/_niv.wav", v, sr)
 # ---------- 3-4. accélération + normalisation ----------
 subprocess.run(
     ["ffmpeg", "-loglevel", "error", "-y", "-i", f"{tmp}/_niv.wav", "-af",
-     f"atempo={VITESSE},acompressor=threshold=-24dB:ratio=3:attack=8:release=120,loudnorm=I=-15:TP=-1.5:LRA=7", "-ar", "44100", f"{ici}/voix_finale.wav"],
+     f"atempo={VITESSE},acompressor=threshold=-24dB:ratio=3:attack=8:release=120,loudnorm=I=-15:TP=-1.5:LRA=7", "-ar", "44100", f"{ici}/{NOM_VOIX}"],
     check=True,
 )
-vf, sr = sf.read(f"{ici}/voix_finale.wav")
+vf, sr = sf.read(f"{ici}/{NOM_VOIX}")
 duree = len(vf) / sr
 
 # ---------- 5. alignement texte ↔ pauses ----------
@@ -141,8 +150,8 @@ for i, (nom, _, texte) in enumerate(SCENES):
             reperes[cle] = int(round((x0 - t) * FPS))
     scenes.append({"nom": nom, "frames": fr, "texte": texte, "reperes": reperes})
     t += fr / FPS
-json.dump({"fps": FPS, "voix": "voix_finale.wav", "scenes": scenes}, open(f"{ici}/../src/timeline.json", "w"), ensure_ascii=False, indent=1)
-json.dump([m_[:3] for m_ in mots], open(f"{ici}/mots.json", "w"), ensure_ascii=False)
+json.dump({"fps": FPS, "voix": NOM_VOIX, "scenes": scenes}, open(SORTIE_TL, "w"), ensure_ascii=False, indent=1)
+json.dump([m_[:3] for m_ in mots], open(f"{DOSSIER}/mots.json", "w"), ensure_ascii=False)
 for f_ in ["_in.wav", "_niv.wav"]:
     os.remove(f"{tmp}/{f_}")
 print(f"voix {duree:.1f} s (brute {len(a) / 44100:.1f} s), vidéo {t:.1f} s, {len(segs)} morceaux de parole pour {len(morc)} bouts de phrase")

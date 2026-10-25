@@ -1,0 +1,14 @@
+[
+ ["reveil", "Dix-neuf heures douze. Tu te réveilles la tête sur ta table. Le cours de dix-huit heures est fini depuis longtemps."],
+ ["classeVide", "La salle est vide. Chaises sur les tables. Lumières éteintes. Et personne ne t'a réveillé."],
+ ["tableau", "Au tableau, une phrase à la craie que t'as jamais vue : ne cours pas dans les couloirs."],
+ ["couloir", "Tu sors. Le couloir est noir. Seuls les panneaux sortie brillent en vert… et ils pointent tous vers toi."],
+ ["casiers", "Derrière toi, les casiers s'ouvrent. Un par un. Clac. Clac. Clac. Tu marches plus vite."],
+ ["hautParleur", "Les haut-parleurs grésillent. Une voix : les élèves en retard sont priés de rejoindre la salle zéro."],
+ ["salleZero", "La salle zéro, ça n'existe pas. Pourtant, au bout du couloir, une porte rouge. Entrouverte."],
+ ["escalier", "Tu prends l'escalier. Tu descends… et tu reviens au même étage. Encore. Et encore."],
+ ["surveillant", "Au fond du couloir, le surveillant. De dos. Immobile. Enfin quelqu'un. Tu l'appelles."],
+ ["retourne", "Il se retourne. Lentement. Sa tête craque… et s'ouvre en deux. Des dents. Partout."],
+ ["charge", "Il tombe à quatre pattes. Le sifflet hurle. Et il fonce droit sur toi."],
+ ["dilemme", "T'as deux secondes. Tu cours vers la sortie ? Ou t'entres dans la salle zéro ? Dis-le en commentaire !"]
+]
