@@ -68,7 +68,7 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 """
 ev, layout = [], []
 for gi, g in enumerate(groups):
-    col = COLS[gi % 3]; lines = split_lines(g)
+    col = COLS[gi % len(COLS)]; lines = split_lines(g)
     nxt = groups[gi + 1][0][0] if gi + 1 < len(groups) else g[-1][1] + 0.5
     g_end = min(g[-1][1] + 0.3, nxt); layout.append((g[0][0], g_end, len(lines)))
     for i, (s, e, t) in enumerate(g):

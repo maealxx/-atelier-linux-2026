@@ -1,40 +1,38 @@
-# Le dernier bus — voix off (version 64 s)
+# Le dernier bus — voix off (version 2 : la ruelle, le post-it et la créature)
 
-**Voix** : jeune, française, chuchotée et posée, ton de narration POV « creepy », proche du micro.
-Débit lent au début, plus rapide pendant la course. Respirations audibles.
-**Voix seule** : pas de musique, pas d'effets, pas de bruit de fond.
+La vidéo utilise pour l'instant une **voix provisoire** (Kokoro, voix française « siwis »), générée par `video/voix/generer.py`.
+Pour mettre ta voix : envoie-la (voix seule, sans musique) et je recale les scènes et les sous-titres dessus.
 
-Les indications entre crochets marchent avec ElevenLabs v3 (sinon, les retirer).
-Le minutage est indicatif : la vidéo sera recalée sur la voix.
+**Voix conseillée** : jeune, française, chuchotée, ton de narration POV « creepy », proche du micro.
 
 | Scène | Temps | Texte |
 |---|---|---|
-| 1. Le bus part | 0 – 5 s | [whispers] Imagine. Tu rates le dernier bus pour rentrer chez toi. |
-| 2. Les horaires | 5 – 10 s | [sighs] Le prochain ? Dans six heures. |
-| 3. Le téléphone | 10 – 14 s | Ton téléphone ? Deux pour cent… [pause] Plus rien. |
-| 4. La rue vide | 14 – 20 s | Alors tu marches. La rue est vide. [whispers] Trop vide. |
-| 5. La balançoire | 20 – 26 s | Tu passes devant le parc. La balançoire bouge. [pause] Toute seule. Y'a pas de vent. |
-| 6. Les pas | 26 – 32 s | Puis t'entends des pas derrière toi. Tu t'arrêtes… [pause] ils s'arrêtent aussi. |
-| 7. Le souterrain | 32 – 39 s | Tu coupes par le passage souterrain. Sur le mur, quelqu'un a écrit… [whispers] « il est derrière toi ». |
-| 8. Les lampadaires | 39 – 45 s | Tu te retournes. Personne. [nervous] Mais les lampadaires s'éteignent. Un par un. Vers toi. |
-| 9. La course | 45 – 49 s | [fast, breathing] Tu cours. Tu cours. Tu cours ! |
-| 10. Le bus arrive | 49 – 55 s | [relieved] Et là… un bus arrive. [slow, whispers] Ligne zéro. Elle existe sur aucun plan. |
-| 11. Le chauffeur | 55 – 60 s | Les portes s'ouvrent. Le chauffeur te sourit. [whispers] Tu montes ? |
-| 12. Fin | 60 – 64 s | [normal voice] Abonne-toi pour savoir s'il est rentré. |
+| 1. busPart | 0.0 – 5.0 s | Imagine. Tu rates le dernier bus pour rentrer chez toi. |
+| 2. aPied | 5.0 – 9.5 s | Pas le choix. Tu rentres à pied. |
+| 3. ruelle | 9.5 – 14.5 s | Pour couper, tu prends une petite ruelle. Grosse erreur. |
+| 4. poussette | 14.5 – 20.5 s | Au fond, une poussette roule vers toi. Toute seule. |
+| 5. poubelles | 20.5 – 26.0 s | Entre les poubelles, deux yeux te fixent. Tu accélères. |
+| 6. arret | 26.0 – 31.0 s | Au bout de la ruelle, un vieil arrêt de bus. Abandonné. |
+| 7. postit | 31.0 – 36.0 s | Dessus, un post-it. Surtout, ne pas monter dans le bus. |
+| 8. busVieux | 36.0 – 42.0 s | Et là, un bus arrive. Vieux. Rouillé. Dégueulasse. |
+| 9. portes | 42.0 – 47.5 s | Les portes s'ouvrent. Personne au volant. Tu hésites. |
+| 10. souffle | 47.5 – 52.0 s | Puis tu sens un souffle chaud, dans ta nuque. |
+| 11. creature | 52.0 – 57.5 s | Derrière toi… quelque chose d'énorme. |
+| 12. dilemme | 57.5 – 64.0 s | Alors… tu montes dans le bus ? Ou tu restes là ? Dis-le en commentaire. |
 
-## Texte d'un seul bloc (à coller dans le générateur)
+## Texte d'un seul bloc
 
 ```
-[whispers] Imagine. Tu rates le dernier bus pour rentrer chez toi.
-[sighs] Le prochain ? Dans six heures.
-Ton téléphone ? Deux pour cent… [pause] Plus rien.
-Alors tu marches. La rue est vide. [whispers] Trop vide.
-Tu passes devant le parc. La balançoire bouge. [pause] Toute seule. Y'a pas de vent.
-Puis t'entends des pas derrière toi. Tu t'arrêtes… [pause] ils s'arrêtent aussi.
-Tu coupes par le passage souterrain. Sur le mur, quelqu'un a écrit… [whispers] « il est derrière toi ».
-Tu te retournes. Personne. [nervous] Mais les lampadaires s'éteignent. Un par un. Vers toi.
-[fast, breathing] Tu cours. Tu cours. Tu cours !
-[relieved] Et là… un bus arrive. [slow, whispers] Ligne zéro. Elle existe sur aucun plan.
-Les portes s'ouvrent. Le chauffeur te sourit. [whispers] Tu montes ?
-[normal voice] Abonne-toi pour savoir s'il est rentré.
+Imagine. Tu rates le dernier bus pour rentrer chez toi.
+Pas le choix. Tu rentres à pied.
+Pour couper, tu prends une petite ruelle. Grosse erreur.
+Au fond, une poussette roule vers toi. Toute seule.
+Entre les poubelles, deux yeux te fixent. Tu accélères.
+Au bout de la ruelle, un vieil arrêt de bus. Abandonné.
+Dessus, un post-it. Surtout, ne pas monter dans le bus.
+Et là, un bus arrive. Vieux. Rouillé. Dégueulasse.
+Les portes s'ouvrent. Personne au volant. Tu hésites.
+Puis tu sens un souffle chaud, dans ta nuque.
+Derrière toi… quelque chose d'énorme.
+Alors… tu montes dans le bus ? Ou tu restes là ? Dis-le en commentaire.
 ```
