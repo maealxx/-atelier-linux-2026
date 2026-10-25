@@ -62,6 +62,8 @@ const SURVEILLANT = {jambe: '#1c1d22', bras: '#4e545b', main: '#b9b2a8', gilet: 
 // « L'hôte » de la soirée : costume noir, peau blafarde, chapeau pointu et masque pailleté
 // Le faux livreur : tenue sombre, casque à visière noire, sac isotherme sur le dos
 const LIVREUR = {jambe: '#121416', bras: '#16201a', main: '#cfc6bc', gilet: '#18241c', gilet2: '#111a14', peau: '#1c3a26', peau2: '#14281a', cheveux: '#10201a', rouge: '#3a0505'};
+// Le vrai livreur (humain) : veste vert sombre, peau, casque vert, sac isotherme
+const VRAI = {jambe: '#1d2028', bras: '#2a3a30', main: '#e8b48c', gilet: '#2a3a30', gilet2: '#1f2c24', peau: '#e8b48c', peau2: '#d09a74', cheveux: '#2c9a5a', rouge: '#3a0505'};
 const HOTE = {jambe: '#121216', bras: '#16161b', main: '#d6cfc2', gilet: '#1b1b22', gilet2: '#121218', peau: '#d8d2c6', peau2: '#bdb6aa', cheveux: '#0c0c0e', rouge: '#3a0505'};
 
 // Boîte orientée : centre c, axes unitaires u, v, w (en unités), demi-tailles a, b, e. Faces cachées éliminées.
@@ -94,12 +96,14 @@ const boite = (vue, c, [u, v, w], [a, b, e], cols) => {
 // Options en plus pour l'hôte : tenue 'hote', y (sol sous ses pieds), masque 0 → 1 (posé sur le visage), ventre 0 → 1 (la bouche se déchire jusqu'au ventre)
 // tenue 'livreur' : cou (allongement du cou, en unités), penche (tête penchée, en degrés),
 // plafond : accroché au plafond la tête en bas (y = hauteur du plafond)
-export const surveillant3D = (cam, {x, z, y = SOL, angle = 0, ouvre = 0, pose = 0, f = 0, echelle = 1, tenue = 'surveillant', masque = 0, ventre = 0, cou = 0, penche = 0, plafond = false}) => {
-  const COUL = tenue === 'hote' ? HOTE : tenue === 'livreur' ? LIVREUR : SURVEILLANT;
+export const surveillant3D = (cam, {x, z, y = SOL, angle = 0, ouvre = 0, pose = 0, f = 0, echelle = 1, tenue = 'surveillant', masque = 0, ventre = 0, cou = 0, penche = 0, plafond = false, bras = null}) => {
+  const COUL = tenue === 'hote' ? HOTE : tenue === 'livreur' ? LIVREUR : tenue === 'vrai' ? VRAI : SURVEILLANT;
+  const humain = tenue === 'vrai';
   const base = [x, y, z * 1000];
   const P = debout(f);
   const Q = pattes(f);
   const J = Object.fromEntries(Object.keys(P).map((k) => [k, mix(P[k], Q[k], pose)]));
+  if (bras) Object.assign(J, bras);
   if (cou > 0) {
     const dn = norme(sub(J.tete, J.poitrine));
     J.tete = add(J.tete, mul(dn, cou));
@@ -135,14 +139,14 @@ export const surveillant3D = (cam, {x, z, y = SOL, angle = 0, ouvre = 0, pose = 
   os('poitrine', 'cou', 46, COUL.peau2, 'cou');
   if (cou > 0) os('cou', 'tete', 40, '#b9b2a8', 'cou2');
   // articulations noueuses
-  ['coudeG', 'coudeD', 'genouG', 'genouD'].forEach((k) => {
+  (humain ? [] : ['coudeG', 'coudeD', 'genouG', 'genouD']).forEach((k) => {
     const p = W[k];
     if (!vis(p)) return;
     const q = pr(p);
     morceaux.push({d: prof(p) - 0.5, el: <circle key={`a${k}`} cx={q[0]} cy={q[1]} r={Math.max(2, (k[0] === 'c' ? 34 : 40) * echelle * sc(p))} fill="#2b2e33" />});
   });
   // griffes au bout des mains
-  [['mainG', 'coudeG'], ['mainD', 'coudeD']].forEach(([m, c0]) => {
+  (humain ? [] : [['mainG', 'coudeG'], ['mainD', 'coudeD']]).forEach(([m, c0]) => {
     const p = W[m];
     const d = norme(sub(W[m], W[c0]));
     [-1, 0, 1].forEach((k) => {
@@ -173,7 +177,7 @@ export const surveillant3D = (cam, {x, z, y = SOL, angle = 0, ouvre = 0, pose = 
     morceaux.push({d: prof(fa.centre), el: <polygon key={`t${i}`} points={fa.coins.map((c) => pr(c).join(',')).join(' ')} fill={fa.col} stroke="#2b2f33" strokeWidth="1" />});
   });
   // le sac isotherme sur le dos du faux livreur
-  if (tenue === 'livreur') {
+  if (tenue === 'livreur' || humain) {
     const cs = add(centreT, mul(avant, -(62 + 125) * echelle));
     boite(vue, cs, [cote, mul(v, -1), avant], [150 * echelle, 150 * echelle, 125 * echelle], {devant: '#1f6a3c', derriere: '#2a8a4a', cote: '#1a5a32', dessus: '#14462a', dessous: '#14462a'}).forEach((fa, i) => {
       if (!fa.coins.every(vis)) return;
@@ -189,7 +193,7 @@ export const surveillant3D = (cam, {x, z, y = SOL, angle = 0, ouvre = 0, pose = 
       const n = pr(add(add(centreT, mul(avant, 66 * echelle)), mul(v, L * 0.92)));
       const s2 = sc(sifflet) * echelle;
       morceaux.push({d: prof(sifflet) - 2, el: <g key="noeud"><path d={`M${n[0]},${n[1]} l${-40 * s2},${-18 * s2} l0,${36 * s2} Z M${n[0]},${n[1]} l${40 * s2},${-18 * s2} l0,${36 * s2} Z`} fill="#8e1a2a" /><path d={`M${n[0]},${n[1]} L${n[0]},${n[1] + 300 * s2}`} stroke="#e8e4d8" strokeWidth={Math.max(1, 30 * s2)} opacity="0.9" /></g>});
-    } else if (tenue !== 'livreur') morceaux.push({d: prof(sifflet) - 2, el: <g key="sif"><path d={`M${q[0] - 40 * s},${q[1] - 130 * s} Q${q[0]},${q[1] + 10 * s} ${q[0] + 40 * s},${q[1] - 130 * s}`} stroke="#c41a1a" strokeWidth={Math.max(1, 6 * s)} fill="none" /><rect x={q[0] - 14 * s} y={q[1] - 10 * s} width={28 * s} height={40 * s} rx={6 * s} fill="#c9ccd1" /></g>});
+    } else if (tenue !== 'livreur' && !humain) morceaux.push({d: prof(sifflet) - 2, el: <g key="sif"><path d={`M${q[0] - 40 * s},${q[1] - 130 * s} Q${q[0]},${q[1] + 10 * s} ${q[0] + 40 * s},${q[1] - 130 * s}`} stroke="#c41a1a" strokeWidth={Math.max(1, 6 * s)} fill="none" /><rect x={q[0] - 14 * s} y={q[1] - 10 * s} width={28 * s} height={40 * s} rx={6 * s} fill="#c9ccd1" /></g>});
   }
 
   // tête : deux moitiés qui pivotent autour d'un axe vertical à l'arrière du crâne
@@ -217,7 +221,7 @@ export const surveillant3D = (cam, {x, z, y = SOL, angle = 0, ouvre = 0, pose = 
     const u = norme(sub(rot(add(T, mul(droite, c * 100))), rot(T)));
     const w = norme(sub(rot(add(T, mul(dir, 100))), rot(T)));
     const casque = tenue === 'livreur';
-    boite(vue, cM, [u, bas, w], [(casque ? 50 : 37) * echelle, (casque ? 100 : 90) * echelle, (casque ? 85 : 75) * echelle], {devant: casque ? '#050607' : c > 0 ? COUL.peau : COUL.peau2, derriere: COUL.cheveux, cote: COUL.peau2, coteInt: ouvre > 0.05 ? '#5a0a0a' : COUL.peau2, dessus: COUL.cheveux}).forEach((fa, i) => {
+    boite(vue, cM, [u, bas, w], [(casque ? 50 : 37) * echelle, (casque ? 100 : 90) * echelle, (casque ? 85 : 75) * echelle], {devant: casque ? '#050607' : humain || c > 0 ? COUL.peau : COUL.peau2, derriere: COUL.cheveux, cote: COUL.peau2, coteInt: ouvre > 0.05 ? '#5a0a0a' : COUL.peau2, dessus: COUL.cheveux}).forEach((fa, i) => {
       if (!fa.coins.every(vis)) return;
       morceaux.push({d: prof(fa.centre), el: <polygon key={`h${c}${i}`} points={fa.coins.map((q) => pr(q).join(',')).join(' ')} fill={fa.col} stroke="#6f685e" strokeWidth="1" />});
     });
@@ -326,6 +330,28 @@ export const surveillant3D = (cam, {x, z, y = SOL, angle = 0, ouvre = 0, pose = 
         });
       }
     }
+  }
+  // le vrai livreur : casque vert, yeux, chaussures
+  if (humain) {
+    const haut = mul(bas, -1);
+    boite(vue, add(add(T, mul(haut, 92 * echelle)), mul(dir, -8 * echelle)), [droite, bas, dir], [56 * echelle, 46 * echelle, 92 * echelle], {devant: '#2c9a5a', derriere: '#23804a', cote: '#257f4a', dessus: '#33b066', dessous: '#1e6a3e'}).forEach((fa, i) => {
+      if (!fa.coins.every(vis)) return;
+      morceaux.push({d: prof(fa.centre) - 4, el: <polygon key={`cq${i}`} points={fa.coins.map((q) => pr(q).join(',')).join(' ')} fill={fa.col} stroke="#145a30" strokeWidth="1" />});
+    });
+    if (dot(dir, sub(vue, T)) > 0)
+      [-1, 1].forEach((c) => {
+        const e = add(add(add(T, mul(dir, 78 * echelle)), mul(droite, c * 30 * echelle)), mul(bas, -2 * echelle));
+        if (!vis(e)) return;
+        const q = pr(e);
+        morceaux.push({d: prof(e) - 8, el: <circle key={`oe${c}`} cx={q[0]} cy={q[1]} r={Math.max(1.5, 9 * echelle * sc(e))} fill="#1e1e2a" />});
+      });
+    ['piedG', 'piedD'].forEach((k) => {
+      const p = W[k];
+      boite(vue, add(p, mul(regard, 30 * echelle)), [norme(rotY([1, 0, 0], angle)), [0, 1, 0], regard], [34 * echelle, 22 * echelle, 62 * echelle], {devant: '#121216', cote: '#18181c', dessus: '#202024'}).forEach((fa, i) => {
+        if (!fa.coins.every(vis)) return;
+        morceaux.push({d: prof(fa.centre), el: <polygon key={`p${k}${i}`} points={fa.coins.map((q) => pr(q).join(',')).join(' ')} fill={fa.col} />});
+      });
+    });
   }
   // ombre au sol
   const ombre = W.bassin;

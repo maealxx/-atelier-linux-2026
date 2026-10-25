@@ -1,6 +1,7 @@
 import {random} from 'remotion';
 import {Bonhomme} from './Bonhomme';
 import {plaque} from './Lycee';
+import {surveillant3D} from './Monstre3D';
 import {SOL} from './Rue';
 
 // ===================== « Le livreur » : l'appart, le palier de l'immeuble, la rue vue du 4e =====================
@@ -72,6 +73,10 @@ const Defs = () => (
       <stop offset="0" stopColor="#ffc27a" stopOpacity="0.6" />
       <stop offset="0.4" stopColor="#ff9a4a" stopOpacity="0.22" />
       <stop offset="1" stopColor="#ff9a4a" stopOpacity="0" />
+    </radialGradient>
+    <radialGradient id="ap-phare">
+      <stop offset="0" stopColor="#fff4d8" stopOpacity="0.75" />
+      <stop offset="1" stopColor="#fff4d8" stopOpacity="0" />
     </radialGradient>
     <radialGradient id="ap-rose">
       <stop offset="0" stopColor="#ff6ab8" stopOpacity="0.5" />
@@ -195,11 +200,11 @@ export const LivreurPerso = ({cam, id, x, z, y = SOL, lum = 1, teinte = [1, 1, 1
 };
 
 // ===================== L'APPART =====================
-const MUR = '#4a3e36';
-const MUR2 = '#43372f';
-const MUR3 = '#3d322b';
-const PARQUET = '#3a2a1f';
-const PLAFOND = '#2a2420';
+const MUR = '#24484a'; // mur du fond : bleu canard
+const MUR2 = '#6a5a4c'; // mur gauche : papier peint beige
+const MUR3 = '#4a5a4c'; // mur droit : vert sauge
+const PARQUET = '#6a4630';
+const PLAFOND = '#3e3834';
 
 // Le grand cadre du mur du fond (il tombe au moment du bruit)
 const CADRE = {x0: -380, y0: -500};
@@ -346,7 +351,9 @@ export const appart = (cam, f, {tv = 1, lampes = 1, choc = 0, fente = 0, cadre =
   const salon = (
     <g key="salon">
       {ry(cam, SOL, -1500, 1500, 0, 6, PARQUET, 'sol')}
-      {[...Array(13)].map((_, k) => ligne(cam, [-1500 + k * 250, SOL, 0], [-1500 + k * 250, SOL, 6], 2, '#2a1e16', `pq${k}`, 0.8))}
+      {[...Array(12)].map((_, k) => k % 2 === 1 && ry(cam, SOL - 0.5, -1500 + k * 250, -1250 + k * 250, 0, 6, '#5a3a26', `lame${k}`, 0.7))}
+      {[...Array(13)].map((_, k) => ligne(cam, [-1500 + k * 250, SOL, 0], [-1500 + k * 250, SOL, 6], 3, '#3e2818', `pq${k}`, 0.8))}
+      {[...Array(24)].map((_, k) => ligne(cam, [-1500 + (k % 12) * 250, SOL, 0.25 + Math.floor(k / 12) * 3 + (k % 3) * 0.9], [-1250 + (k % 12) * 250, SOL, 0.25 + Math.floor(k / 12) * 3 + (k % 3) * 0.9], 2, '#3e2818', `pj${k}`, 0.6))}
       {[...Array(6)].map((_, k) => ligne(cam, [-1500 + (k % 2) * 125, SOL, k + 0.5], [1500, SOL, k + 0.5], 1.5, '#2a1e16', `pz${k}`, 0.5))}
       {ry(cam, PLAF, -1500, 1500, 0, 6, PLAFOND, 'plaf')}
       {/* moulures du plafond */}
@@ -432,6 +439,41 @@ export const appart = (cam, f, {tv = 1, lampes = 1, choc = 0, fente = 0, cadre =
       {rz(cam, 0, -1500, 1500, PLAF, SOL, '#41362f', 'mav')}
       {plaque(cam, [1300, -150, 0.01], [-1, 0, 0], [0, 1, 0], 2600, 150, <g>{[...Array(26)].map((_, k) => [...Array(3)].map((_, j) => <rect key={`${k}${j}`} x={k * 100 + 2} y={j * 50 + 2} width="96" height="46" fill={(k + j) % 2 ? '#d8d4c8' : '#c8c4b8'} opacity="0.6" />))}</g>, 'credence')}
       {plaque(cam, [1200, -560, 0.01], [-1, 0, 0], [0, 1, 0], 1400, 300, <g>{[0, 1, 2, 3].map((k) => <rect key={k} x={k * 350 + 5} width="340" height="300" fill="#5a4a3a" stroke="#3a2e24" strokeWidth="8" />)}</g>, 'placards')}
+      {/* papier peint à rayures (mur gauche) */}
+      {[...Array(30)].map((_, k) => ligne(cam, [-1499, PLAF, k * 0.2 + 0.1], [-1499, 100, k * 0.2 + 0.1], 3, '#7a6a5a', `pp${k}`, 0.5))}
+      {/* motif sur le mur du fond */}
+      {[...Array(22)].map((_, k) => cam.visible(5.999, -1450 + (k % 11) * 280, -540 + Math.floor(k / 11) * 320) && <circle key={`mo${k}`} cx={cam.proj(-1450 + (k % 11) * 280 + (Math.floor(k / 11) % 2) * 140, -540 + Math.floor(k / 11) * 320, 5.999)[0]} cy={cam.proj(-1450 + (k % 11) * 280, -540 + Math.floor(k / 11) * 320, 5.999)[1]} r={Math.max(1, 26 * cam.scale(6, 0, -400))} fill="#2e5a5c" opacity="0.8" />)}
+      {/* lambris en bas des murs + cimaise + plinthes */}
+      {rx(cam, -1498, 0, FENETRE.z0, 100, SOL, '#5a4a3c', 'lg1')}
+      {rx(cam, -1498, FENETRE.z1, 6, 100, SOL, '#5a4a3c', 'lg2')}
+      {rx(cam, 1498, 0, COULOIR.z0, 100, SOL, '#3e4c40', 'ld1')}
+      {rx(cam, 1498, COULOIR.z1, SDB.z0, 100, SOL, '#3e4c40', 'ld2')}
+      {rx(cam, 1498, SDB.z1, 6, 100, SOL, '#3e4c40', 'ld3')}
+      {ligne(cam, [-1497, 100, 0], [-1497, 100, FENETRE.z0], 8, '#d8cfc0', 'cg1')}
+      {ligne(cam, [-1497, 100, FENETRE.z1], [-1497, 100, 6], 8, '#d8cfc0', 'cg2')}
+      {ligne(cam, [1497, 100, 0], [1497, 100, COULOIR.z0], 8, '#d8cfc0', 'cd1')}
+      {ligne(cam, [1497, 100, COULOIR.z1], [1497, 100, SDB.z0], 8, '#d8cfc0', 'cd2')}
+      {ligne(cam, [-1497, SOL - 18, 0], [-1497, SOL - 18, 6], 12, '#e8e0d4', 'pl1')}
+      {ligne(cam, [1497, SOL - 18, 0], [1497, SOL - 18, 6], 12, '#e8e0d4', 'pl2')}
+      {ligne(cam, [-1500, SOL - 18, 5.997], [px0, SOL - 18, 5.997], 12, '#e8e0d4', 'pl3')}
+      {ligne(cam, [px1, SOL - 18, 5.997], [1500, SOL - 18, 5.997], 12, '#e8e0d4', 'pl4')}
+      {/* galerie de cadres sur le mur droit, entre le couloir et la TV */}
+      {plaque(cam, [1497, -480, 2.3], [0, 0, -1], [0, 1, 0], 560, 420, <g>{[[0, 0, 250, 180, '#c85a3a'], [280, 0, 280, 200, '#3a7ac8'], [0, 210, 180, 210, '#e8c84a'], [210, 230, 350, 190, '#5ac88a']].map(([x, y, w, h, c], k) => <g key={k}><rect x={x} y={y} width={w} height={h} fill="#e8e0d4" /><rect x={x + 14} y={y + 14} width={w - 28} height={h - 28} fill={c} opacity="0.85" /><circle cx={x + w / 2} cy={y + h / 2} r={Math.min(w, h) / 5} fill="#fff" opacity="0.35" /></g>)}</g>, 'galerie')}
+      {/* horloge sur le mur droit */}
+      {plaque(cam, [1497, -420, 5.95], [0, 0, -1], [0, 1, 0], 200, 200, <g><circle cx="100" cy="100" r="96" fill="#e8e0d4" /><circle cx="100" cy="100" r="84" fill="#f8f4ec" /><line x1="100" y1="100" x2="100" y2="40" stroke="#222" strokeWidth="8" /><line x1="100" y1="100" x2="150" y2="110" stroke="#222" strokeWidth="6" /></g>, 'horloge')}
+      {/* appliques murales (lumière chaude vers le haut) */}
+      {[[-1497, 1.3], [-1497, 4.9]].map(([x, z], k) => (
+        <g key={`ap${k}`}>
+          {rx(cam, x + 2, z - 0.08, z + 0.08, -330, -230, '#e8c890', `apl${k}`)}
+          {halo(cam, x + 10, -300, z, 900, 'ap-chaud', 0.8 * L, `aph${k}`)}
+        </g>
+      ))}
+      {[[-620, 5.995], [1250, 5.995]].map(([x, z], k) => (
+        <g key={`af${k}`}>
+          {rz(cam, z, x - 70, x + 70, -340, -240, '#e8c890', `afl${k}`)}
+          {halo(cam, x, -300, z - 0.02, 900, 'ap-chaud', 0.75 * L, `afh${k}`)}
+        </g>
+      ))}
       {/* lumières : lampadaire, lampe de la console, TV */}
       {halo(cam, -1250, -250, 1.0, 1900, 'ap-chaud', 0.9 * L, 'hl1')}
       {disqueSol(cam, -1250, 1.0, 1300, 1.1, PLAF + 1, 'url(#ap-chaud)', 0.6 * L, 'pl1')}
@@ -476,6 +518,27 @@ export const appart = (cam, f, {tv = 1, lampes = 1, choc = 0, fente = 0, cadre =
       {boite(cam, 420, 470, 190, 260, 3.55, 3.62, ['#c83a3a', '#b82a2a', '#a82a2a'], 'canette')}
       {boite(cam, 360, 390, 215, 260, 3.25, 3.3, ['#e8d8a8', '#d8c898', '#c8b888'], 'bougie')}
       {halo(cam, 375, 200, 3.27, 220, 'ap-chaud', 0.8 * L, 'bh')}
+    </g>
+  )));
+  items.push(item(3.6, 500, SOL - 6, (
+    <g key="motif">
+      {[0, 1, 2, 3, 4].map((k) => ry(cam, SOL - 4, 60 + k * 200, 160 + k * 200, 2.6, 4.6, ['#c85a3a', '#e8c84a', '#3a7ac8', '#c85a3a', '#e8c84a'][k], `mt${k}`, 0.5))}
+      {ligne(cam, [0, SOL - 5, 2.55], [1100, SOL - 5, 2.55], 6, '#e8d8b8', 'fr1', 0.7)}
+      {ligne(cam, [0, SOL - 5, 4.65], [1100, SOL - 5, 4.65], 6, '#e8d8b8', 'fr2', 0.7)}
+    </g>
+  )));
+  items.push(item(5.3, 1100, SOL, (
+    <g key="baskets">
+      {boite(cam, 1060, 1130, 400, SOL, 5.1, 5.3, ['#e8e8e8', '#d0d0d0', '#c0c0c0'], 'bk1')}
+      {boite(cam, 1150, 1220, 400, SOL, 5.15, 5.35, ['#e8e8e8', '#d0d0d0', '#c0c0c0'], 'bk2')}
+      {boite(cam, 1260, 1460, 380, SOL, 5.6, 5.9, ['#c83a3a', '#a82a2a', '#982a2a'], 'pouf')}
+    </g>
+  )));
+  items.push(item(5.5, -800, 0, billboard(cam, -800, SOL, 5.5, <g transform="rotate(-12)"><ellipse cx="0" cy="-160" rx="120" ry="150" fill="#a8642a" /><ellipse cx="0" cy="-380" rx="90" ry="110" fill="#a8642a" /><circle cx="0" cy="-280" r="38" fill="#2a1a10" /><rect x="-16" y="-860" width="32" height="420" fill="#4a2e1a" /><rect x="-30" y="-900" width="60" height="70" fill="#2a1a10" /></g>, 'guitare')));
+  items.push(item(1.8, -1150, PLAF, (
+    <g key="suspendue">
+      {ligne(cam, [-1150, PLAF, 1.8], [-1150, -420, 1.8], 3, '#222', 'cs')}
+      {billboard(cam, -1150, -330, 1.8, <g><path d="M-80,0 Q0,60 80,0 L60,-60 L-60,-60 Z" fill="#c8a07a" />{[-70, -30, 10, 50].map((x, k) => <path key={k} d={`M${x},-10 q${-20 + k * 10},90 ${-10 + k * 8},${160 + k * 30}`} stroke="#2e6a3a" strokeWidth="12" fill="none" strokeLinecap="round" />)}</g>, 'sp')}
     </g>
   )));
   // meuble TV
@@ -716,7 +779,7 @@ const Scooter = () => (
 
 // lampe : lampadaire 0 → 1 ; livreur : {x, z, bras, regard, tete} ; forme : la chose accrochée au-dessus de notre fenêtre (0 → 1)
 // dansFenetre : élément dessiné derrière la vitre de notre fenêtre (le bonhomme)
-export const quartier = (cam, f, {lampe = 1, livreur = null, forme = 0, dansFenetre = null, clign = true} = {}) => {
+export const quartier = (cam, f, {lampe = 1, livreur = null, forme = 0, dansFenetre = null, clign = true, passage = null, pluie = 1} = {}) => {
   const items = [];
   const etoiles = [...Array(70)].map((_, k) => {
     const x = (random(`qx${k}`) - 0.5) * 60000;
@@ -907,13 +970,33 @@ export const quartier = (cam, f, {lampe = 1, livreur = null, forme = 0, dansFene
       {[...Array(14)].map((_, k) => disqueSol(cam, -3000 + random(`fx${k}`) * 6000, 7 + random(`fz${k}`) * 2.8, 40, 0.03, SOL - 3, ['#5a3a1a', '#6a4a20', '#3a2a14'][k % 3], 0.9, `feuille${k}`))}
     </g>
   )));
-  // le vrai livreur
-  if (livreur)
+  // le vrai livreur, en 3D (coucou : 0 → 1, bras levé qui fait signe)
+  if (livreur) {
+    const c = livreur.coucou || 0;
+    const ph = Math.sin(f / 3) * c;
+    const bras = {
+      coudeD: [155 + 115 * c, -540 - 360 * c, 10 + 20 * c],
+      mainD: [150 + 140 * c + 70 * ph, -265 - 905 * c, 25 + 15 * c],
+    };
+    const v = surveillant3D(cam, {x: livreur.x, z: livreur.z, angle: livreur.angle ?? 0, f, echelle: 0.7, tenue: 'vrai', bras});
+    items.push(item(v.z, livreur.x, SOL - 300, v.el));
+  }
+  // une voiture qui passe (phares allumés), de gauche à droite
+  if (passage !== null) {
+    const x0 = passage;
     items.push(
-      item(livreur.z, livreur.x, SOL, (
-        <LivreurPerso key="vrai" cam={cam} id="vrai" x={livreur.x} z={livreur.z} lum={0.75 * Math.max(0.4, lampe)} teinte={[1.1, 0.95, 0.8]} visiere="ouverte" dos={livreur.dos || false} epauleD={livreur.epauleD || 0} coudeD={livreur.coudeD || 0} epauleG={livreur.epauleG || 0} worry={livreur.worry || 0} eyes={livreur.eyes || 1} pupilY={livreur.pupilY || 0} smile={livreur.smile || 0} tilt={livreur.tilt || 0} scream={livreur.scream || 0} />
+      item(3.0, x0 + 900, ROUTE_Y, (
+        <g key="passe">
+          {disqueSol(cam, x0 + 2600, 3.0, 1500, 0.9, ROUTE_Y - 3, 'url(#ap-phare)', 0.9, 'cone')}
+          {voiture(cam, x0, x0 + 1900, 2.5, 3.5, ['#3a3a44', '#2c2c34', '#24242c'], 'vp')}
+          {halo(cam, x0 + 1900, ROUTE_Y - 220, 2.65, 600, 'ap-phare', 1, 'ph1')}
+          {halo(cam, x0 + 1900, ROUTE_Y - 220, 3.35, 600, 'ap-phare', 1, 'ph2')}
+          {halo(cam, x0, ROUTE_Y - 230, 2.65, 260, 'ap-rouge', 1, 'fr1')}
+          {halo(cam, x0, ROUTE_Y - 230, 3.35, 260, 'ap-rouge', 1, 'fr2')}
+        </g>
       ))
     );
+  }
   const brume = (
     <g>
       <defs>
@@ -925,5 +1008,20 @@ export const quartier = (cam, f, {lampe = 1, livreur = null, forme = 0, dansFene
       <rect width="1080" height="1920" fill="url(#qu-brume)" />
     </g>
   );
+  // fine pluie : des gouttes en 3D autour de la caméra (la perspective est juste dans tous les plans)
+  if (pluie > 0)
+    items.push({
+      z: cam.z + 0.05,
+      el: (
+        <g key="pluie" opacity={0.35 * pluie}>
+          {[...Array(160)].map((_, k) => {
+            const x = cam.x + (random(`px${k}`) - 0.5) * 5000;
+            const z = cam.z + (random(`pz${k}`) - 0.5) * 5;
+            const y = cam.y - 2500 + ((random(`py${k}`) * 5000 + f * 140) % 5000);
+            return ligne(cam, [x, y, z], [x + 15, y + 160, z], 2, '#b8c8e8', `g${k}`);
+          })}
+        </g>
+      ),
+    });
   return {fond, items, brume};
 };

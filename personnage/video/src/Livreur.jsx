@@ -89,16 +89,16 @@ const Coups = () => {
   const k0 = repere('coups', 'toque', 58);
   const choc = chocs(f, [k0, k0 + 7, k0 + 14]);
   const cams = [
-    () => ({x: -1050, y: -380, z: 0.5 + (0.35 * t) / d, yaw: 26, pitch: 9}),
+    () => ({x: -1050, y: -330, z: 0.5 + (0.35 * t) / d, yaw: 26, pitch: 3}),
     () => ({x: 830, y: -170, z: 3.4 + (0.6 * t) / d, yaw: 0}),
-    () => ({x: 720 + tremble(f, 30 * choc, 'c1'), y: -40, z: 4.7, yaw: 5, pitch: -3}),
+    () => ({x: 720 + tremble(f, 8 * choc, 'c1'), y: -40, z: 4.7, yaw: 5, pitch: -3}),
     () => camFace(P0.x, P0.z, 1, 0.8, t, d, {dy: -20}),
   ];
   const cam = makeCam(cams[i]());
   const decor = appart(cam, f, {choc, fente: interpolate(f, [k0 - 10, k0], [0, 1], clamp)});
   const tourne = interpolate(f, [k0 + 2, k0 + 8], [0, 1], clamp);
   return (
-    <Plan f={f} cam={cam} decor={decor} noir={0.1} zoom={punch(t) + choc * 0.05} roll={[-2, 0, 3, -4][i]}
+    <Plan f={f} cam={cam} decor={decor} noir={0.05} zoom={punch(t) + choc * 0.015} roll={[-2, 0, 3, -4][i]}
       items={[{z: P0.z, x: P0.x, el: <Perso cam={cam} id="l1" x={P0.x} z={P0.z} dos={dosPour(cam, P0.z, 1)} lum={0.85} teinte={SOIR} pupilX={-6 + 6 * tourne} pupilY={2} eyes={1 + 0.25 * tourne} worry={0.5 * tourne} breath={Math.sin(f / 8) * 3} />}]}
     />
   );
@@ -123,7 +123,7 @@ const Message = () => {
     ecran(f, {messages: [{debut: MSG1, texte: "J'arrive dans 5 minutes 👍"}], echelle: 1.05 + (0.15 * t) / d, y: 980}, 0.5),
   ][i];
   return (
-    <Plan f={f} cam={cam} decor={decor} noir={0.1} zoom={punch(t)} roll={[3, -2, 0][i]}
+    <Plan f={f} cam={cam} decor={decor} noir={0.05} zoom={punch(t)} roll={[3, -2, 0][i]}
       items={[{z: P0.z, x: P0.x, el: <Perso cam={cam} id="l2" x={P0.x} z={P0.z} dos={dosPour(cam, P0.z, 1)} lum={0.85} teinte={i === 0 ? TELE : SOIR} worry={0.8} eyes={1.2} pupilY={5} breath={Math.sin(f / 7) * 3} />}]}
       dessus={tel}
     />
@@ -143,7 +143,7 @@ const Question = () => {
   const decor = appart(cam, f, {fente: 1});
   const tel = i === 0 ? ecran(f, {messages: [{debut: -400, texte: "J'arrive dans 5 minutes 👍"}], echelle: 2.2, y: 20, x: 640}, 0.6) : null;
   return (
-    <Plan f={f} cam={cam} decor={decor} noir={0.12} zoom={punch(t, 0.16)} roll={[-3, 4, -6][i]}
+    <Plan f={f} cam={cam} decor={decor} noir={0.07} zoom={punch(t, 0.16)} roll={[-3, 4, -6][i]}
       items={[{z: P0.z, x: P0.x, el: <Perso cam={cam} id="l3" x={P0.x} z={P0.z} dos={dosPour(cam, P0.z, 1)} lum={0.85} teinte={SOIR} worry={1} eyes={1.3} pupilX={Math.sin(f / 4) * 4} sweat={0.4} breath={Math.sin(f / 6) * 3} />}]}
       dessus={tel}
     />
@@ -175,7 +175,7 @@ const Judas1 = () => {
   const cam = makeCam(cams[i]());
   const decor = appart(cam, f, {fente: 1});
   return (
-    <Plan f={f} cam={cam} decor={decor} noir={0.12} zoom={punch(t)} roll={[2, 0, -3, 0, 5, 0][i]}
+    <Plan f={f} cam={cam} decor={decor} noir={0.07} zoom={punch(t)} roll={[2, 0, -3, 0, 5, 0][i]}
       items={[{z, x, el: <Perso cam={cam} id="l4" x={i === 0 ? x : PP.x} z={i === 0 ? z : PP.z} dos={dosPour(cam, i === 0 ? z : PP.z, 1)} lum={0.8} teinte={SOIR} lift={m.bob} legG={m.legG} legD={m.legD} epauleG={m.bras} epauleD={-m.bras} worry={1} eyes={i === 2 ? 0.55 : 1.3} pupilX={i === 2 ? 0 : 3} sweat={i === 4 ? 1 : 0.3} breath={Math.sin(f / 5) * 3} shiver={i === 4 ? tremble(f, 4, 'l4') : 0} />}]}
     />
   );
@@ -192,8 +192,8 @@ const Prenom = () => {
   const z = PP.z - 1.1 * recule;
   const nom = interpolate(f, [repere('prenom', 'prénom', 102) - 4, repere('prenom', 'prénom', 102) + 6], [0, 1], clamp);
   const cams = [
-    () => ({x: 700 + tremble(f, 30 * choc, 'p0'), y: -150, z: 4.6, yaw: 6}),
-    () => ({x: 560 + tremble(f, 40 * choc, 'p1'), y: 250, z: 4.3, yaw: 14, pitch: -14}),
+    () => ({x: 700 + tremble(f, 8 * choc, 'p0'), y: -150, z: 4.6, yaw: 6}),
+    () => ({x: 560 + tremble(f, 12 * choc, 'p1'), y: 250, z: 4.3, yaw: 14, pitch: -14}),
     () => ({x: 770, y: 392, z: 5.5 + (0.08 * t) / d, yaw: 6, pitch: -3}),
     () => camFace(PP.x, PP.z, 1, 0.3, t, d, {dy: -15, push: 0.05}),
     () => ({x: 820, y: -250, z: 3.4, yaw: 1}),
@@ -204,7 +204,7 @@ const Prenom = () => {
   const decor = appart(cam, f, {choc, fente: 0.9 + 0.1 * pied});
   const m = marche(f, 0.25, recule > 0 && recule < 1 ? 0.6 : 0);
   return (
-    <Plan f={f} cam={cam} decor={decor} noir={0.14} zoom={punch(t, 0.16) + choc * 0.06} roll={[3, -6, 0, 4, -3, 7][i]}
+    <Plan f={f} cam={cam} decor={decor} noir={0.08} zoom={punch(t, 0.16) + choc * 0.02} roll={[3, -6, 0, 4, -3, 7][i]}
       items={[i !== 2 && {z, x: PP.x, el: <Perso cam={cam} id="l5" x={PP.x} z={z} dos={dosPour(cam, z, 1)} lum={0.75} teinte={SOIR} lift={m.bob} legG={m.legD} legD={m.legG} worry={1} eyes={1.25 + 0.2 * nom} scream={i === 5 ? 0.5 : 0} sweat={1} shiver={tremble(f, 3 + 4 * nom, 'l5')} epauleG={i === 5 ? 25 : 0} coudeG={i === 5 ? 100 : 0} epauleD={i === 5 ? -25 : 0} coudeD={i === 5 ? -100 : 0} breath={Math.sin(f / 4) * 4} />}]}
     />
   );
@@ -222,7 +222,7 @@ const Message2 = () => {
     ecran(f, {verrouille: true, notif: {debut: vib, texte: 'Je suis en bas de ton immeuble 🛵'}, echelle: 0.85, y: 1100, vibre: interpolate(f, [vib, vib + 22], [1, 0], clamp)}, 0.35),
     ecran(f, {messages: msgs, echelle: 1.05 + (0.12 * t) / d, y: 980}, 0.55),
   ][i];
-  return <Plan f={f} cam={cam} decor={decor} noir={0.12} zoom={punch(t)} roll={[-2, 0][i]} items={[]} dessus={tel} />;
+  return <Plan f={f} cam={cam} decor={decor} noir={0.07} zoom={punch(t)} roll={[-2, 0][i]} items={[]} dessus={tel} />;
 };
 
 // ---------- 7. À la fenêtre ----------
@@ -239,19 +239,21 @@ const Fenetre = () => {
   const f = useCurrentFrame();
   const {i, t, d, bornes} = decoupe('fenetre', f);
   const signe = repere('fenetre', 'fait', 188) - 10;
-  const leve = interpolate(f, [repere('fenetre', 'lève', 150), repere('fenetre', 'tête', 163)], [0, 1], clamp);
-  const coucou = f > signe ? 1 : 0;
-  const livreur = {...VRAI, pupilY: -7 * leve, eyes: 1, smile: 0.4 * coucou, epauleD: -150 * coucou, coudeD: coucou * (-10 + Math.sin(f / 3) * 30)};
+  const coucou = interpolate(f, [signe, signe + 6], [0, 1], clamp);
+  const livreur = {...VRAI, coucou};
   if (i >= 2) {
     const cams = {
       2: () => ({x: 0, y: NOTRE.y1 - 180, z: 9.72, yaw: 180 + Math.sin(f / 30) * 3, pitch: 46 + (10 * t) / d}),
-      3: () => ({x: -500, y: -2500, z: 9.85, yaw: 184, pitch: 48}),
-      4: () => ({x: -650, y: -1500, z: 9.3, yaw: 178, pitch: 45}),
+      // descente « drone » qui tourne autour de lui
+      3: () => orbite(VRAI.x, VRAI.z, 2.2 - (0.6 * t) / d, 205 - (30 * t) / d, -2600 + (1300 * t) / d, {pitch: 48 - (12 * t) / d}),
+      // en contre-plongée, il lève le bras vers toi
+      4: () => orbite(VRAI.x, VRAI.z, 1.0, 160 + (35 * t) / d, 300, {pitch: -24}),
     };
     const cam = makeCam(cams[i]());
-    const decor = quartier(cam, f, {livreur});
+    const passage = i === 2 ? -8000 + (f - bornes[2]) * 230 : i === 4 ? -6000 + (f - bornes[4]) * 260 : null;
+    const decor = quartier(cam, f, {livreur, passage});
     return (
-      <Plan f={f} cam={cam} decor={decor} noir={0.08} zoom={[1, 1, 1 + (0.15 * t) / d, 1.1 + (0.25 * t) / d, 1.25 + (0.15 * t) / d][i]} roll={[0, 0, -4 + (6 * t) / d, 2, -2][i]} dessus={i === 2 ? <BordFenetre f={f} /> : null} />
+      <Plan f={f} cam={cam} decor={decor} noir={0.06} zoom={[1, 1, 1 + (0.15 * t) / d, 1, punch(t)][i]} roll={[0, 0, -4 + (6 * t) / d, 3 - (6 * t) / d, -3][i]} dessus={i === 2 ? <BordFenetre f={f} /> : null} />
     );
   }
   // il traverse le salon jusqu'à la fenêtre, puis ouvre les rideaux
@@ -265,7 +267,7 @@ const Fenetre = () => {
   const decor = appart(cam, f, {rideau: i === 0 ? 0 : rideau});
   const bras = i === 1 ? Math.sin(rideau * Math.PI) : 0;
   return (
-    <Plan f={f} cam={cam} decor={decor} noir={0.12} zoom={punch(t)} roll={[-2, 3][i]}
+    <Plan f={f} cam={cam} decor={decor} noir={0.07} zoom={punch(t)} roll={[-2, 3][i]}
       items={[{z, x, el: <Perso cam={cam} id="l7" x={x} z={z} dos={cam.x > x} lum={0.75} teinte={SOIR} lift={m.bob} legG={m.legG} legD={m.legD} epauleG={m.bras + 60 * bras} coudeG={40 * bras} epauleD={-m.bras - 60 * bras} coudeD={-40 * bras} worry={1} eyes={1.2} breath={Math.sin(f / 6) * 3} />}]}
     />
   );
@@ -278,19 +280,20 @@ const Arrete = () => {
   const stop = repere('arrete', 'arrête', 31);
   const tombe = interpolate(f, [repere('arrete', 'bras', 56), repere('arrete', 'retombe', 62) + 6], [0, 1], {...clamp, easing: Easing.in(Easing.quad)});
   const coucou = f < stop ? 1 : Math.max(0, 1 - tombe);
-  const plusHaut = interpolate(f, [repere('arrete', 'regarde', 89), repere('arrete', 'haut', 115)], [0, 1], ease);
   const forme = interpolate(f, [bornes[2] + 10, bornes[2] + 40], [0.15, 1], clamp);
-  const livreur = {...VRAI, pupilY: -7 - 3 * plusHaut, eyes: 1 + 0.35 * (1 - coucou), worry: 1 - coucou, smile: 0.4 * coucou * (f < stop ? 1 : 0), epauleD: -150 * coucou, coudeD: f < stop ? -10 + Math.sin(f / 3) * 30 : -10 * coucou, tilt: -4 * plusHaut};
+  const livreur = {...VRAI, coucou};
   const cams = [
-    () => ({x: -650, y: -1500, z: 9.3, yaw: 178, pitch: 45}),
-    () => ({x: -1250, y: 120, z: 5.6, yaw: 18, pitch: -22}),
-    () => ({x: 350, y: -150, z: 7.7, yaw: -6, pitch: -63 - (6 * t) / d}),
+    () => orbite(VRAI.x, VRAI.z, 1.4, 170 + (25 * t) / d, -900, {pitch: 30}),
+    () => orbite(VRAI.x, VRAI.z, 0.85, 195 - (20 * t) / d, 120, {pitch: -14}),
+    // par-dessus son épaule, la façade immense
+    () => ({x: VRAI.x + 120, y: -420, z: VRAI.z - 0.75, yaw: 10, pitch: -44 - (12 * t) / d}),
     () => ({x: 250, y: -4650, z: 7.9 + (0.25 * t) / d, yaw: -4, pitch: -12}),
   ];
   const cam = makeCam(cams[i]());
   const dansFenetre = i >= 2 ? <Perso cam={cam} id="l8f" x={0} y={NOTRE.y1 + 330} z={10.5} lum={0.8} teinte={SOIR} worry={1} eyes={1.2} pupilY={7} epauleG={10} epauleD={-10} ombre={0} /> : null;
-  const decor = quartier(cam, f, {livreur, forme: i >= 2 ? forme : 0, dansFenetre});
-  return <Plan f={f} cam={cam} decor={decor} noir={0.1} zoom={i === 0 ? 1.35 : i === 2 ? 1.5 + (0.2 * t) / d : punch(t)} roll={[-2, 4, -3 + (4 * t) / d, 3][i]} />;
+  const passage = i === 1 ? -7000 + (f - bornes[1]) * 250 : null;
+  const decor = quartier(cam, f, {livreur, forme: i >= 2 ? forme : 0, dansFenetre, passage});
+  return <Plan f={f} cam={cam} decor={decor} noir={0.06} zoom={i === 2 ? 1 + (0.15 * t) / d : punch(t)} roll={[-2, 3, -2 + (4 * t) / d, 3][i]} />;
 };
 
 // ---------- 9. « Ne sortez surtout pas » ----------
@@ -298,7 +301,7 @@ const Alerte = () => {
   const f = useCurrentFrame();
   const {i, t, d} = decoupe('alerte', f);
   const bip = repere('alerte', 'bipe', 28);
-  const flash = interpolate(f, [bip - 1, bip, bip + 8], [0, 0.55, 0], clamp);
+  const flash = interpolate(f, [bip - 1, bip, bip + 8], [0, 0.25, 0], clamp);
   const cams = [() => ({x: PF.x + 450, y: -180, z: PF.z + 0.15, yaw: -90}), () => ({x: -600, y: -300, z: 2.9, yaw: -80}), () => ({x: -600, y: -300, z: 2.9, yaw: -80}), () => ({x: PF.x + 380, y: -170, z: PF.z, yaw: -90})];
   const cam = makeCam(cams[i]());
   const decor = appart(cam, f, {rideau: 1});
@@ -315,7 +318,7 @@ const Alerte = () => {
   ][i];
   // vu depuis la fenêtre : il nous fait face, le visage éclairé par le téléphone
   return (
-    <Plan f={f} cam={cam} decor={decor} noir={0.18} zoom={punch(t, 0.18)} roll={[3, 0, -2, -6][i]}
+    <Plan f={f} cam={cam} decor={decor} noir={0.12} zoom={punch(t, 0.18)} roll={[3, 0, -2, -6][i]}
       items={[{z: PF.z, x: PF.x, el: <Perso cam={cam} id="l9" x={PF.x} z={PF.z} dos={cam.x > PF.x + 400 && i === 1} lum={0.8} teinte={TELE} worry={1} eyes={1.3} pupilY={6} sweat={1} scream={i === 3 ? 0.6 : 0} shiver={i === 3 ? tremble(f, 7, 'l9') : 0} breath={Math.sin(f / 4) * 4} />}]}
       dessus={
         <g>
@@ -345,7 +348,7 @@ const Vide = () => {
   const cam = makeCam(cams[i]());
   const decor = appart(cam, f, {tv: 0, lampes: 0.6});
   return (
-    <Plan f={f} cam={cam} decor={decor} noir={0.2} zoom={punch(t)} roll={[2, 0, 0, -3][i]}
+    <Plan f={f} cam={cam} decor={decor} noir={0.14} zoom={punch(t)} roll={[2, 0, 0, -3][i]}
       items={[{z, x, el: <Perso cam={cam} id="l10" x={x} z={z} dos={dosPour(cam, z, 1)} lum={0.6} teinte={SOIR} lift={m.bob} legG={m.legG} legD={m.legD} epauleG={m.bras} epauleD={-m.bras} worry={1} eyes={i === 3 ? 1.35 : 1.2} sweat={1} breath={Math.sin(f / 5) * 3} />}]}
     />
   );
@@ -361,7 +364,7 @@ const Bruit = () => {
   const ombre = interpolate(f, [repere('bruit', 'ombre', 94) - 2, repere('bruit', 'porte', 122) + 4], [-1, 1.6], clamp);
   const cams = [
     () => ({x: -1100, y: -420, z: 0.6, yaw: 30, pitch: 10}),
-    () => ({x: 100 + tremble(f, 70 * choc, 'b1'), y: -300 + tremble(f, 50 * choc, 'b1y'), z: 4.6, yaw: -14}),
+    () => ({x: 100 + tremble(f, 25 * choc, 'b1'), y: -300 + tremble(f, 18 * choc, 'b1y'), z: 4.6, yaw: -14}),
     () => camFace(PP.x, PP.z, -1, 0.75, t, d, {dy: -20}),
     () => ({x: 900, y: -120, z: 1.2, yaw: 90, pitch: 2}),
   ];
@@ -369,7 +372,7 @@ const Bruit = () => {
   const decor = appart(cam, f, {tv: 0, lampes: 0.6, cadre, fenteChambre: i === 3 ? ombre : null, lumiereChambre: 0.8});
   const peur = interpolate(f, [bornes[2], bornes[2] + 6], [0, 1], clamp);
   return (
-    <Plan f={f} cam={cam} decor={decor} noir={0.2} zoom={punch(t, 0.2) + choc * 0.08} roll={[0, 6 * choc, -5, 2][i]}
+    <Plan f={f} cam={cam} decor={decor} noir={0.14} zoom={punch(t, 0.2) + choc * 0.03} roll={[0, 2 * choc, -5, 2][i]}
       items={[{z: PP.z, x: PP.x, el: <Perso cam={cam} id="l11" x={PP.x} z={PP.z} dos={i === 2 ? false : dosPour(cam, PP.z, 1)} lum={0.6} teinte={SOIR} worry={1} eyes={1 + 0.4 * peur} scream={i === 2 ? peur * 0.8 : 0} sweat={1} shiver={tremble(f, 6 * peur + 10 * choc, 'l11')} epauleG={i === 2 ? 30 * peur : 0} coudeG={i === 2 ? 110 * peur : 0} epauleD={i === 2 ? -30 * peur : 0} coudeD={i === 2 ? -110 * peur : 0} />}]}
     />
   );
@@ -395,7 +398,7 @@ const Chambre = () => {
   const decor = appart(cam, f, {tv: 0, lampes: 0.5, porteChambre: porte, monstre: monstre(cam, f, {ouvre}), lumiereChambre: 0.8});
   const X = 3250;
   return (
-    <Plan f={f} cam={cam} decor={decor} noir={0.16} zoom={punch(t, i === 2 ? 0.25 : 0.1)} roll={[0, 2, -6][i]}
+    <Plan f={f} cam={cam} decor={decor} noir={0.1} zoom={punch(t, i === 2 ? 0.25 : 0.1)} roll={[0, 2, -6][i]}
       items={[i === 1 && {z: 1.2, x: X, el: <Perso cam={cam} id="l12" x={X} z={1.2} dos={true} lum={0.55} teinte={SOIR} epauleD={-75} coudeD={-55} breath={Math.sin(f / 4) * 3} />}]}
       dessus={<rect width="1080" height="1920" fill="#ffe9e0" opacity={flash} />}
     />
@@ -460,7 +463,7 @@ const Dilemme = () => {
   }
   if (i === 2 || i === 4) items.push({z: PD.z, x: PD.x, el: <Perso cam={cam} id="l14" x={PD.x} z={PD.z} dos={i === 4} lum={0.6} teinte={SOIR} worry={1} eyes={1.35} sweat={1} pupilX={-5} pupilY={-5} breath={Math.sin(f / 3) * 4} shiver={tremble(f, 4, 'l14')} />});
   return (
-    <Plan f={f} cam={cam} decor={decor} noir={0.16} zoom={(i === 2 ? 1.35 : 1) * punch(t)} roll={[-4, 6, 0, -5, 0][i]} items={items}
+    <Plan f={f} cam={cam} decor={decor} noir={0.1} zoom={(i === 2 ? 1.35 : 1) * punch(t)} roll={[-4, 6, 0, -5, 0][i]} items={items}
       dessus={
         <g>
           <Choix f={f} debut={repere('dilemme', 'cours', 28)} x={540} y={200} texte="REJOINDRE LE LIVREUR ?" emoji="1f6f5" couleur="#3ad86a" />
