@@ -2,22 +2,24 @@ import {random, spring} from 'remotion';
 import {plaque} from './Lycee';
 import {SOL} from './Rue';
 
-// ===================== « La soirée » : la maison, le jardin, le portail =====================
-// Façade de la maison en Z = 8 (on la regarde depuis le jardin), de X -1500 à 1500.
-// Rez-de-chaussée de Y 432 à -700, étage de -700 à -1500, toit jusqu'à -2300.
-export const FACADE = 8;
-export const MX = 1500;
-export const PORTE = {x0: 450, x1: 750}; // porte d'entrée (avec perron)
-export const BAIE = {x0: -950, x1: -500}; // porte-fenêtre de la terrasse
-export const PORTAIL = {z: -2.5, x0: 380, x1: 820};
-export const PERRON = {z0: 7.25, marche: 60, n: 3}; // 3 marches de 60 unités
+// ===================== « La soirée » : le manoir (salle des fêtes), le parc, le portail =====================
+// Un grand manoir en 3D. Corps principal : X -3200 → 3200, façade en Z = 10, profondeur jusqu'à Z = 24,
+// rez-de-chaussée + étage + combles (Y 432 → -3000, faîtage à -4700). Deux ailes avancées (X ±3200 → ±5400, de Z = 5 à 24).
+// Grand porche à colonnes au centre avec perron (3 marches), porte double. Terrasse en bois à gauche, devant la baie vitrée.
+export const FACADE = 10;
+export const MX = 4000;
+export const AILE = {x0: 4000, x: 6300, z: 10.6, h: -1900}; // ailes basses, en léger retrait derrière la façade
+export const PORTE = {x0: -280, x1: 280};
+export const BAIE = {x0: -2350, x1: -1650};
+export const PORTAIL = {z: -3, x0: -450, x1: 450};
+export const PERRON = {z0: 8.75, marche: 60, n: 3}; // 3 marches de 60 unités, de Z 8.75 à 9.5 ; palier jusqu'à 10
+export const TERRASSE_Z = [8.3, 10];
+export const FONTAINE = {x: 2300, z: 3.5};
+// fenêtres de la façade principale (rez-de-chaussée et étage) + fenêtres des ailes
 export const FENETRES = [
-  {x0: -250, x1: 150, y0: -520, y1: -100}, // rez-de-chaussée
-  {x0: -1250, x1: -870, y0: -1380, y1: -960},
-  {x0: -650, x1: -270, y0: -1380, y1: -960},
-  {x0: -50, x1: 330, y0: -1380, y1: -960},
-  {x0: 550, x1: 930, y0: -1380, y1: -960},
-  {x0: 1050, x1: 1380, y0: -520, y1: -100},
+  ...[-3500, -2800, -1000, 1000, 1800, 2600, 3400].map((x) => ({x0: x - 260, x1: x + 260, y0: -1250, y1: -150, z: FACADE})),
+  ...[-3400, -2600, -1800, -1000, 0, 1000, 1800, 2600, 3400].map((x) => ({x0: x - 240, x1: x + 240, y0: -2700, y1: -1750, z: FACADE})),
+  ...[-5700, -4700, 4700, 5700].map((x) => ({x0: x - 300, x1: x + 300, y0: -1450, y1: -300, z: AILE.z})),
 ];
 const FETE = ['#ff3ea5', '#3ec8ff', '#ffd23e', '#9a3eff'];
 
@@ -34,52 +36,81 @@ const billboard = (cam, x, y, z, contenu, key, taille = 1) => {
     </g>
   );
 };
-const cercleSol = (cam, cx, cz, rx, rz, y = SOL - 1) => cam.poly([...Array(18)].map((_, k) => [cx + Math.cos((k / 18) * 6.283) * rx, y, cz + Math.sin((k / 18) * 6.283) * rz]));
-
-// Silhouette derrière une fenêtre : tête + épaules ; danse pendant la fête ; sourire trop large ensuite
-const Silhouette = ({f, k, danse, sourire}) => {
-  const b = danse ? Math.sin(f / 4 + k * 1.7) * 25 : 0;
-  const r = danse ? Math.sin(f / 6 + k) * 8 : 0;
+const cercleSol = (cam, cx, cz, rx, rz, y = SOL - 1) => cam.poly([...Array(20)].map((_, k) => [cx + Math.cos((k / 20) * 6.283) * rx, y, cz + Math.sin((k / 20) * 6.283) * rz]));
+// Volume en 3D : on ne dessine que les faces tournées vers la caméra
+const bloc = (cam, x0, x1, y0, y1, z0, z1, [dessus, face, cote], key) => {
+  const {poly} = cam;
   return (
-    <g transform={`translate(0 ${b}) rotate(${r})`}>
-      <path d="M-150,0 Q-140,-170 -60,-190 L60,-190 Q140,-170 150,0 Z" fill="#050507" />
-      <ellipse cx="0" cy="-270" rx="70" ry="85" fill="#050507" />
-      {danse && <path d="M-140,-120 L-220,-330 M140,-120 L220,-330" stroke="#050507" strokeWidth="40" strokeLinecap="round" />}
-      {sourire > 0.02 && (
-        <g opacity={Math.min(1, sourire * 1.5)}>
-          <path d={`M${-55 * sourire - 10},-250 Q0,${-250 + 70 * sourire} ${55 * sourire + 10},-250 Q0,${-250 + 25 * sourire} ${-55 * sourire - 10},-250 Z`} fill="#f4f0e6" />
-          {[...Array(7)].map((_, i) => {
-            const x = (-55 * sourire - 10) + ((i + 1) * (110 * sourire + 20)) / 8;
-            return <line key={i} x1={x} y1="-250" x2={x} y2={-250 + 45 * sourire * (1 - Math.abs(x) / (60 * sourire + 12))} stroke="#050507" strokeWidth="3" />;
-          })}
-          <circle cx="-25" cy="-290" r="6" fill="#f4f0e6" opacity="0.8" />
-          <circle cx="25" cy="-290" r="6" fill="#f4f0e6" opacity="0.8" />
-        </g>
-      )}
+    <g key={key}>
+      {cam.y < y0 && <polygon points={poly([[x0, y0, z0], [x1, y0, z0], [x1, y0, z1], [x0, y0, z1]])} fill={dessus} />}
+      {cam.x > x1 && <polygon points={poly([[x1, y0, z0], [x1, y0, z1], [x1, y1, z1], [x1, y1, z0]])} fill={cote} />}
+      {cam.x < x0 && <polygon points={poly([[x0, y0, z0], [x0, y0, z1], [x0, y1, z1], [x0, y1, z0]])} fill={cote} />}
+      {cam.z < z0 && <polygon points={poly([[x0, y0, z0], [x1, y0, z0], [x1, y1, z0], [x0, y1, z0]])} fill={face} />}
     </g>
   );
 };
 
-// fete : 0 → 1 (lumières de la fête) ; eteinte(i) : décalage de l'extinction par fenêtre ;
-// gens : 'danse' | 'immobile' | null ; sourire 0 → 1 ; porte 0 → 1 (ouverture) ; lampadaire, lune ; cadenas : balancement
-export const jardin = (cam, f, {fete = 0, fenetre = () => fete, gens = 'danse', sourire = 0, porte = 0, lampadaire = 1, enceinte = fete, guirlande = fete, cadenas = 0, vitre = null} = {}) => {
+// Silhouette derrière une vitre : buste, bras ballants, tête penchée (chaque silhouette a sa posture).
+// danse pendant la fête ; ensuite immobile ; tord = 0 → 1 la tête se casse sur le côté d'un coup ; sourire 0 → 1
+const Silhouette = ({f, k, danse, sourire, tord = 0, apparition = 1}) => {
+  const penche = (random(`pen${k}`) - 0.5) * 16 + tord * (k % 2 ? 48 : -52);
+  const h = 0.9 + random(`haut${k}`) * 0.25;
+  const b = danse ? Math.sin(f / 4 + k * 1.7) * 25 : 0;
+  const r = danse ? Math.sin(f / 6 + k) * 8 : 0;
+  const tremble = danse ? 0 : (random(`tr${k}${Math.floor(f / 3)}`) - 0.5) * 2;
+  return (
+    <g transform={`translate(${tremble} ${b}) rotate(${r}) scale(${h})`} opacity={apparition} filter="url(#ja-flou)">
+      {/* buste, épaules tombantes */}
+      <path d="M-170,0 Q-175,-150 -120,-215 Q-70,-250 -30,-255 L30,-255 Q70,-250 120,-215 Q175,-150 170,0 Z" fill="#030304" />
+      {/* bras le long du corps */}
+      {!danse && <path d="M-160,-200 Q-195,-80 -185,0 L-150,0 Q-158,-90 -130,-180 Z M160,-200 Q195,-80 185,0 L150,0 Q158,-90 130,-180 Z" fill="#030304" />}
+      {danse && <path d="M-140,-180 L-230,-380 M140,-180 L230,-380" stroke="#030304" strokeWidth="44" strokeLinecap="round" />}
+      {/* cou + tête */}
+      <g transform={`rotate(${penche} 0 -260)`}>
+        <rect x="-26" y="-300" width="52" height="60" fill="#030304" />
+        <ellipse cx="0" cy="-370" rx="68" ry="86" fill="#030304" />
+        {!danse && (
+          <g opacity={0.55}>
+            <circle cx="-24" cy="-385" r="5" fill="#f4e8e0" />
+            <circle cx="24" cy="-385" r="5" fill="#f4e8e0" />
+          </g>
+        )}
+        {sourire > 0.02 && (
+          <g opacity={Math.min(1, sourire * 1.5)}>
+            <path d={`M${-56 * sourire - 8},-345 Q0,${-345 + 72 * sourire} ${56 * sourire + 8},-345 Q0,${-345 + 24 * sourire} ${-56 * sourire - 8},-345 Z`} fill="#f4f0e6" />
+            {[...Array(9)].map((_, i) => {
+              const x = -56 * sourire - 8 + ((i + 1) * (112 * sourire + 16)) / 10;
+              return <line key={i} x1={x} y1="-345" x2={x} y2={-345 + 46 * sourire * (1 - Math.abs(x) / (60 * sourire + 10))} stroke="#030304" strokeWidth="3" />;
+            })}
+          </g>
+        )}
+      </g>
+    </g>
+  );
+};
+
+// fete : lumières de la fête ; fenetre(i) : lumière de chaque fenêtre (0 → 1) ;
+// rouge(i) : faible lumière rouge qui s'allume derrière une fenêtre (0 → 1), révèle une silhouette ;
+// gens : 'danse' | 'immobile' | null ; sourire ; tord ; porte ; lampadaire ; cadenas ; vitre (élément sur la baie)
+export const jardin = (
+  cam,
+  f,
+  {fete = 0, fenetre = () => fete, rouge = () => 0, gens = 'danse', sourire = 0, tord = 0, porte = 0, lampadaire = 1, enceinte = fete, guirlande = fete, cadenas = 0, vitre = null} = {}
+) => {
   const {poly} = cam;
-  const zA = cam.z - 3;
-  const zB = 40;
-  const etoiles = [...Array(70)].map((_, k) => {
-    const x = (random(`ex${k}`) - 0.5) * 60000;
-    const y = -3000 - random(`ey${k}`) * 30000;
+  const etoiles = [...Array(90)].map((_, k) => {
+    const x = (random(`ex${k}`) - 0.5) * 70000;
+    const y = -4000 - random(`ey${k}`) * 34000;
     const z = cam.z + 60;
     if (!cam.visible(z, x, y)) return null;
     const p = cam.proj(x, y, z);
     return <circle key={k} cx={p[0]} cy={p[1]} r={1 + random(`er${k}`) * 1.8} fill="#e8eeff" opacity={0.3 + 0.5 * random(`eo${k}`) * (0.6 + 0.4 * Math.sin(f / 7 + k))} />;
   });
-  const lune = cam.visible(cam.z + 60, -12000, -24000) ? cam.proj(-12000, -24000, cam.z + 60) : null;
-  // herbe : touffes
-  const herbe = [...Array(60)].map((_, k) => {
-    const x = -2100 + random(`hx${k}`) * 4200;
-    const z = -2.2 + random(`hz${k}`) * 9;
-    if (x > 300 && x < 900) return null;
+  const lune = cam.visible(cam.z + 60, -14000, -30000) ? cam.proj(-14000, -30000, cam.z + 60) : null;
+  const herbe = [...Array(90)].map((_, k) => {
+    const x = -6500 + random(`hx${k}`) * 13000;
+    const z = -2.7 + random(`hz${k}`) * 11;
+    if (Math.abs(x) < 520 || Math.hypot((x - FONTAINE.x) / 1000, z - FONTAINE.z) < 1.1) return null;
     return billboard(cam, x, SOL, z, <path d="M-30,0 L-20,-60 L-8,0 L0,-80 L10,0 L22,-55 L32,0 Z" fill="#0e1a10" />, `h${k}`);
   });
   const fond = (
@@ -102,8 +133,15 @@ export const jardin = (cam, f, {fete = 0, fenetre = () => fete, gens = 'danse', 
           <stop offset="0" stopColor="#ff3ea5" stopOpacity="0.45" />
           <stop offset="1" stopColor="#3ec8ff" stopOpacity="0" />
         </radialGradient>
-        <radialGradient id="ja-brume" cx={cam.fuite[0]} cy={cam.fuite[1]} r="1000" gradientUnits="userSpaceOnUse">
-          <stop offset="0" stopColor="#0a0f1a" stopOpacity="0.5" />
+        <radialGradient id="ja-rouge">
+          <stop offset="0" stopColor="#ff1a0a" stopOpacity="0.6" />
+          <stop offset="1" stopColor="#ff1a0a" stopOpacity="0" />
+        </radialGradient>
+        <filter id="ja-flou" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur stdDeviation="4" />
+        </filter>
+        <radialGradient id="ja-brume" cx={cam.fuite[0]} cy={cam.fuite[1]} r="1100" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stopColor="#0a0f1a" stopOpacity="0.45" />
           <stop offset="1" stopColor="#0a0f1a" stopOpacity="0" />
         </radialGradient>
       </defs>
@@ -111,145 +149,223 @@ export const jardin = (cam, f, {fete = 0, fenetre = () => fete, gens = 'danse', 
       {etoiles}
       {lune && (
         <g>
-          <circle cx={lune[0]} cy={lune[1]} r="170" fill="url(#ja-lune)" />
-          <circle cx={lune[0]} cy={lune[1]} r="55" fill="#e8eef8" opacity="0.85" />
-          <circle cx={lune[0] + 14} cy={lune[1] - 8} r="12" fill="#c9d0e0" opacity="0.6" />
+          <circle cx={lune[0]} cy={lune[1]} r="180" fill="url(#ja-lune)" />
+          <circle cx={lune[0]} cy={lune[1]} r="58" fill="#e8eef8" opacity="0.85" />
+          <circle cx={lune[0] + 15} cy={lune[1] - 8} r="13" fill="#c9d0e0" opacity="0.6" />
         </g>
       )}
-      {/* maisons voisines au loin (des deux côtés) */}
-      {[-9000, -6000, 6000, 9500].map((x, k) => (
-        <g key={`v${k}`}>
-          <polygon points={poly([[x - 1400, SOL, 22], [x + 1400, SOL, 22], [x + 1400, -1600, 22], [x, -2600, 22], [x - 1400, -1600, 22]])} fill="#070a12" />
-          {k % 2 === 0 && <polygon points={poly([[x - 300, -1100, 21.9], [x + 100, -1100, 21.9], [x + 100, -800, 21.9], [x - 300, -800, 21.9]])} fill="#6a5a2a" opacity="0.5" />}
-        </g>
-      ))}
-      {/* maisons de l'autre côté de la rue (visibles quand on regarde vers le portail) */}
-      {[-4000, -500, 3200].map((x, k) => (
-        <polygon key={`r${k}`} points={poly([[x - 1500, SOL, -16], [x + 1500, SOL, -16], [x + 1500, -1500, -16], [x, -2500, -16], [x - 1500, -1500, -16]])} fill="#070a12" />
+      {/* forêt au loin derrière le manoir et maisons de l'autre côté de la rue */}
+      {[...Array(14)].map((_, k) => {
+        const x = -16000 + k * 2500;
+        const h = 3500 + random(`fo${k}`) * 3000;
+        return <polygon key={`fo${k}`} points={poly([[x - 1600, SOL, 40], [x, SOL - h - 2500, 40], [x + 1600, SOL, 40]])} fill="#05080a" />;
+      })}
+      {[-6000, -1500, 3500].map((x, k) => (
+        <polygon key={`r${k}`} points={poly([[x - 1800, SOL, -18], [x + 1800, SOL, -18], [x + 1800, -1500, -18], [x, -2600, -18], [x - 1800, -1500, -18]])} fill="#070a12" />
       ))}
       {/* sol : pelouse, rue au-delà du portail */}
-      <polygon points={poly([[-9000, SOL, PORTAIL.z], [9000, SOL, PORTAIL.z], [9000, SOL, zB], [-9000, SOL, zB]])} fill="#0f1a12" />
-      <polygon points={poly([[-9000, SOL + 30, -12], [9000, SOL + 30, -12], [9000, SOL + 30, PORTAIL.z], [-9000, SOL + 30, PORTAIL.z]])} fill="#1a1c20" />
-      {ligne(cam, [-9000, SOL + 29, -7], [9000, SOL + 29, -7], 4, '#8a8470', 'marquage', 0.4)}
-      {/* lumière chaude de la fête sur la pelouse */}
-      {fete > 0.02 && <polygon points={cercleSol(cam, -300, 6.5, 2200, 2.5)} fill="url(#ja-fete)" opacity={fete} />}
-      {/* allée de pierres du portail à la porte */}
-      {[...Array(9)].map((_, k) => {
-        const z = PORTAIL.z + 0.6 + k * 1.05;
-        return <polygon key={`p${k}`} points={cercleSol(cam, 600 + Math.sin(k) * 40, z, 150, 0.18)} fill="#23262a" />;
-      })}
+      <polygon points={poly([[-12000, SOL, PORTAIL.z], [12000, SOL, PORTAIL.z], [12000, SOL, 40], [-12000, SOL, 40]])} fill="#0f1a12" />
+      <polygon points={poly([[-12000, SOL + 30, -14], [12000, SOL + 30, -14], [12000, SOL + 30, PORTAIL.z], [-12000, SOL + 30, PORTAIL.z]])} fill="#1a1c20" />
+      {ligne(cam, [-12000, SOL + 29, -8.5], [12000, SOL + 29, -8.5], 4, '#8a8470', 'marquage', 0.4)}
+      {fete > 0.02 && <polygon points={cercleSol(cam, 0, 7.5, 5200, 3.5)} fill="url(#ja-fete)" opacity={fete} />}
+      {/* allée gravillonnée du portail au perron */}
+      <polygon points={poly([[-420, SOL - 1, PORTAIL.z], [420, SOL - 1, PORTAIL.z], [420, SOL - 1, PERRON.z0], [-420, SOL - 1, PERRON.z0]])} fill="#2b2b2a" />
+      {[...Array(14)].map((_, k) => ligne(cam, [-420, SOL - 2, PORTAIL.z + k * 0.85], [420, SOL - 2, PORTAIL.z + k * 0.85], 2, '#222', `al${k}`, 0.6))}
       {herbe}
     </g>
   );
 
   const items = [];
-  // ---- la maison ----
   const zF = FACADE;
-  const zD = FACADE + 4;
+  // ---------- le manoir ----------
   const fenetreEl = (w, k) => {
     const v = fenetre(k);
+    const rr = rouge(k);
     const col = FETE[(k + Math.floor(f / 8)) % FETE.length];
-    const zz = zF - 0.004;
+    const zz = w.z - 0.004;
+    const zi = w.z + 0.14; // le fond de l'embrasure (la vitre est en retrait)
+    const fond_ = v > 0.05 ? col : rr > 0.02 ? '#2a0404' : '#070b16';
+    const cx = (w.x0 + w.x1) / 2;
     return (
       <g key={`fe${k}`}>
-        <polygon points={poly([[w.x0 - 30, w.y0 - 30, zz], [w.x1 + 30, w.y0 - 30, zz], [w.x1 + 30, w.y1 + 30, zz], [w.x0 - 30, w.y1 + 30, zz]])} fill="#d8d2c4" />
-        <polygon points={poly([[w.x0, w.y0, zz - 0.001], [w.x1, w.y0, zz - 0.001], [w.x1, w.y1, zz - 0.001], [w.x0, w.y1, zz - 0.001]])} fill={v > 0.05 ? col : '#0a1020'} opacity={v > 0.05 ? 0.55 + 0.45 * v : 1} />
-        {/* reflet de lune sur la vitre éteinte */}
-        {v <= 0.05 && <polygon points={poly([[w.x0 + 30, w.y0, zz - 0.002], [w.x0 + 110, w.y0, zz - 0.002], [w.x0 + 10, w.y1, zz - 0.002], [w.x0, w.y1 - 60, zz - 0.002]])} fill="#9fb4e0" opacity="0.12" />}
-        {gens && billboard(cam, (w.x0 + w.x1) / 2, w.y1 + 10, zz + 0.05, <Silhouette f={f} k={k} danse={gens === 'danse'} sourire={sourire} />, `si${k}`, (w.y1 - w.y0) / 420)}
-        {ligne(cam, [(w.x0 + w.x1) / 2, w.y0, zz - 0.003], [(w.x0 + w.x1) / 2, w.y1, zz - 0.003], 8, '#d8d2c4', 'mont')}
-        {v > 0.05 && <circle cx={cam.proj((w.x0 + w.x1) / 2, (w.y0 + w.y1) / 2, zz)[0]} cy={cam.proj((w.x0 + w.x1) / 2, (w.y0 + w.y1) / 2, zz)[1]} r={600 * cam.scale(zz, w.x0, w.y0)} fill="url(#ja-fete)" opacity={0.6 * v} />}
+        {/* encadrement en pierre */}
+        <polygon points={poly([[w.x0 - 45, w.y0 - 60, zz], [w.x1 + 45, w.y0 - 60, zz], [w.x1 + 45, w.y1 + 50, zz], [w.x0 - 45, w.y1 + 50, zz]])} fill="#cbc3b2" />
+        {/* embrasure : côtés et linteau en profondeur */}
+        <polygon points={poly([[w.x0, w.y0, zz], [w.x0, w.y0, zi], [w.x0, w.y1, zi], [w.x0, w.y1, zz]])} fill="#8f887a" />
+        <polygon points={poly([[w.x1, w.y0, zz], [w.x1, w.y0, zi], [w.x1, w.y1, zi], [w.x1, w.y1, zz]])} fill="#a39b8c" />
+        <polygon points={poly([[w.x0, w.y0, zz], [w.x1, w.y0, zz], [w.x1, w.y0, zi], [w.x0, w.y0, zi]])} fill="#7a7468" />
+        {/* la pièce derrière */}
+        <polygon points={poly([[w.x0, w.y0, zi], [w.x1, w.y0, zi], [w.x1, w.y1, zi], [w.x0, w.y1, zi]])} fill={fond_} opacity={v > 0.05 ? 0.6 + 0.4 * v : 1} />
+        {rr > 0.02 && <circle cx={cam.proj(cx, (w.y0 + w.y1) / 2, zi + 0.3)[0]} cy={cam.proj(cx, (w.y0 + w.y1) / 2, zi + 0.3)[1]} r={500 * cam.scale(zi, cx, w.y0)} fill="url(#ja-rouge)" opacity={rr} />}
+        {gens && billboard(cam, cx, w.y1 + 20, zi + 0.12, <Silhouette f={f} k={k} danse={gens === 'danse'} sourire={sourire} tord={tord} apparition={gens === 'danse' ? 1 : Math.max(rr, 0.35)} />, `si${k}`, (w.y1 - w.y0) / 520)}
+        {/* vitre : reflet de lune + croisillons */}
+        {v <= 0.05 && <polygon points={poly([[w.x0 + 40, w.y0, w.z + 0.13], [w.x0 + 150, w.y0, w.z + 0.13], [w.x0 + 20, w.y1, w.z + 0.13], [w.x0, w.y1 - 80, w.z + 0.13]])} fill="#9fb4e0" opacity="0.1" />}
+        {ligne(cam, [cx, w.y0, w.z + 0.12], [cx, w.y1, w.z + 0.12], 10, '#d8d2c4', 'mont')}
+        {ligne(cam, [w.x0, (w.y0 * 2 + w.y1) / 3, w.z + 0.12], [w.x1, (w.y0 * 2 + w.y1) / 3, w.z + 0.12], 8, '#d8d2c4', 'trav')}
+        {/* appui de fenêtre */}
+        {ligne(cam, [w.x0 - 60, w.y1 + 55, w.z - 0.05], [w.x1 + 60, w.y1 + 55, w.z - 0.05], 18, '#b9b1a0', 'appui')}
+        {v > 0.05 && <circle cx={cam.proj(cx, (w.y0 + w.y1) / 2, zz)[0]} cy={cam.proj(cx, (w.y0 + w.y1) / 2, zz)[1]} r={900 * cam.scale(zz, w.x0, w.y0)} fill="url(#ja-fete)" opacity={0.55 * v} />}
       </g>
     );
   };
-  const vPorte = PORTE;
   const ouv = porte;
   items.push({
-    z: zF,
+    z: zF + 0.5,
     el: (
-      <g key="maison">
-        {/* côtés de la maison */}
-        {cam.x > MX && <polygon points={poly([[MX, SOL, zF], [MX, SOL, zD], [MX, -1500, zD], [MX, -1500, zF]])} fill="#3a3530" />}
-        {cam.x < -MX && <polygon points={poly([[-MX, SOL, zF], [-MX, SOL, zD], [-MX, -1500, zD], [-MX, -1500, zF]])} fill="#3a3530" />}
-        {/* façade crépie + soubassement */}
-        <polygon points={poly([[-MX, SOL, zF], [MX, SOL, zF], [MX, -1500, zF], [-MX, -1500, zF]])} fill="#5a5248" />
-        <polygon points={poly([[-MX, SOL, zF - 0.002], [MX, SOL, zF - 0.002], [MX, 250, zF - 0.002], [-MX, 250, zF - 0.002]])} fill="#3e3a34" />
-        {ligne(cam, [-MX, -700, zF - 0.003], [MX, -700, zF - 0.003], 16, '#4a443c', 'bandeau')}
-        {/* toit */}
-        <polygon points={poly([[-MX - 120, -1500, zF - 0.4], [MX + 120, -1500, zF - 0.4], [MX + 120, -2350, zF + 2], [-MX - 120, -2350, zF + 2]])} fill="#2a1e1a" />
-        {[...Array(6)].map((_, k) => ligne(cam, [-MX - 120, -1500 - k * 140, zF - 0.4 + k * 0.4], [MX + 120, -1500 - k * 140, zF - 0.4 + k * 0.4], 4, '#1c1310', `tu${k}`))}
-        <polygon points={poly([[900, -2100, zF + 1.2], [1100, -2100, zF + 1.2], [1100, -2700, zF + 1.2], [900, -2700, zF + 1.2]])} fill="#3a302a" />
-        {/* lucarne */}
-        <polygon points={poly([[-200, -1950, zF + 0.9], [200, -1950, zF + 0.9], [200, -1650, zF + 0.3], [-200, -1650, zF + 0.3]])} fill={fenetre(9) > 0.05 ? '#ffd23e' : '#0a1020'} opacity="0.85" />
-        {FENETRES.map(fenetreEl)}
-        {/* porte-fenêtre de la terrasse */}
-        <polygon points={poly([[BAIE.x0 - 30, -460, zF - 0.004], [BAIE.x1 + 30, -460, zF - 0.004], [BAIE.x1 + 30, SOL, zF - 0.004], [BAIE.x0 - 30, SOL, zF - 0.004]])} fill="#d8d2c4" />
-        <polygon points={poly([[BAIE.x0, -430, zF - 0.005], [BAIE.x1, -430, zF - 0.005], [BAIE.x1, SOL - 10, zF - 0.005], [BAIE.x0, SOL - 10, zF - 0.005]])} fill={fenetre(7) > 0.05 ? FETE[Math.floor(f / 8) % 4] : '#081020'} opacity={fenetre(7) > 0.05 ? 0.7 : 1} />
+      <g key="manoir">
+        {/* toit à quatre pans + cheminées */}
+        <polygon points={poly([[-MX - 200, -3000, zF - 0.4], [MX + 200, -3000, zF - 0.4], [MX - 1400, -4700, 17], [-MX + 1400, -4700, 17]])} fill="#241a17" />
+        {cam.x > MX && <polygon points={poly([[MX + 200, -3000, zF - 0.4], [MX + 200, -3000, 24.4], [MX - 1400, -4700, 17]])} fill="#1a1210" />}
+        {cam.x < -MX && <polygon points={poly([[-MX - 200, -3000, zF - 0.4], [-MX - 200, -3000, 24.4], [-MX + 1400, -4700, 17]])} fill="#1a1210" />}
+        {[...Array(9)].map((_, k) => {
+          const t = (k + 1) / 10;
+          return ligne(cam, [-MX - 200 + 1600 * t, -3000 - 1700 * t, zF - 0.4 + 7.4 * t], [MX + 200 - 1600 * t, -3000 - 1700 * t, zF - 0.4 + 7.4 * t], 4, '#16100e', `tu${k}`);
+        })}
+        {/* lucarnes du toit */}
+        {[-2000, 0, 2000].map((x, k) => (
+          <g key={`lu${k}`}>
+            <polygon points={poly([[x - 260, -3350, zF + 1.2], [x + 260, -3350, zF + 1.2], [x + 260, -3850, zF + 1.2], [x, -4150, zF + 1.2], [x - 260, -3850, zF + 1.2]])} fill="#cbc3b2" />
+            <polygon points={poly([[x - 170, -3420, zF + 1.19], [x + 170, -3420, zF + 1.19], [x + 170, -3820, zF + 1.19], [x - 170, -3820, zF + 1.19]])} fill={fenetre(20 + k) > 0.05 ? '#ffd23e' : rouge(20 + k) > 0.05 ? '#2a0404' : '#070b16'} />
+          </g>
+        ))}
+        {[[-2900, 14], [2900, 14]].map(([x, z], k) => bloc(cam, x - 180, x + 180, -5300, -3600, z, z + 0.4, ['#3a2e28', '#4a3a32', '#3a2e28'], `che${k}`))}
+        {/* façade principale */}
+        <polygon points={poly([[-MX, SOL, zF], [MX, SOL, zF], [MX, -3000, zF], [-MX, -3000, zF]])} fill="#6a6152" />
+        {[...Array(14)].map((_, k) => ligne(cam, [-MX, -100 - k * 210, zF - 0.002], [MX, -100 - k * 210, zF - 0.002], 2, '#5e5648', `as${k}`, 0.6))}
+        <polygon points={poly([[-MX, SOL, zF - 0.003], [MX, SOL, zF - 0.003], [MX, 220, zF - 0.003], [-MX, 220, zF - 0.003]])} fill="#3e3a34" />
+        {ligne(cam, [-MX - 30, -1500, zF - 0.06], [MX + 30, -1500, zF - 0.06], 40, '#cbc3b2', 'bandeau')}
+        {ligne(cam, [-MX - 60, -3000, zF - 0.1], [MX + 60, -3000, zF - 0.1], 60, '#cbc3b2', 'corniche')}
+        {[-MX, MX].map((x) => ligne(cam, [x, SOL, zF - 0.05], [x, -3000, zF - 0.05], 70, '#cbc3b2', `ch${x}`))}
+        {FENETRES.filter((w) => w.z === FACADE).map((w) => fenetreEl(w, FENETRES.indexOf(w)))}
+        {/* baie vitrée de la terrasse */}
+        <polygon points={poly([[BAIE.x0 - 40, -1000, zF - 0.004], [BAIE.x1 + 40, -1000, zF - 0.004], [BAIE.x1 + 40, SOL - 25, zF - 0.004], [BAIE.x0 - 40, SOL - 25, zF - 0.004]])} fill="#cbc3b2" />
+        <polygon points={poly([[BAIE.x0, -960, zF - 0.005], [BAIE.x1, -960, zF - 0.005], [BAIE.x1, SOL - 30, zF - 0.005], [BAIE.x0, SOL - 30, zF - 0.005]])} fill={fenetre(30) > 0.05 ? FETE[Math.floor(f / 8) % 4] : '#081020'} opacity={fenetre(30) > 0.05 ? 0.7 : 1} />
         {vitre}
-        {ligne(cam, [(BAIE.x0 + BAIE.x1) / 2, -430, zF - 0.006], [(BAIE.x0 + BAIE.x1) / 2, SOL, zF - 0.006], 10, '#d8d2c4', 'baie')}
-        {/* porte d'entrée : battant qui pivote vers l'intérieur */}
-        <polygon points={poly([[vPorte.x0 - 40, -470, zF - 0.004], [vPorte.x1 + 40, -470, zF - 0.004], [vPorte.x1 + 40, SOL - PERRON.n * PERRON.marche, zF - 0.004], [vPorte.x0 - 40, SOL - PERRON.n * PERRON.marche, zF - 0.004]])} fill="#e0dacc" />
-        <polygon points={poly([[vPorte.x0, -440, zF - 0.005], [vPorte.x1, -440, zF - 0.005], [vPorte.x1, SOL - 180, zF - 0.005], [vPorte.x0, SOL - 180, zF - 0.005]])} fill="#030304" />
+        {ligne(cam, [(BAIE.x0 + BAIE.x1) / 2, -960, zF - 0.006], [(BAIE.x0 + BAIE.x1) / 2, SOL - 30, zF - 0.006], 12, '#d8d2c4', 'baie')}
+        {/* porte double sous le porche */}
+        <polygon points={poly([[PORTE.x0 - 70, -1050, zF - 0.004], [PORTE.x1 + 70, -1050, zF - 0.004], [PORTE.x1 + 70, SOL - 180, zF - 0.004], [PORTE.x0 - 70, SOL - 180, zF - 0.004]])} fill="#cbc3b2" />
+        <polygon points={poly([[PORTE.x0, -1000, zF - 0.005], [PORTE.x1, -1000, zF - 0.005], [PORTE.x1, SOL - 180, zF - 0.005], [PORTE.x0, SOL - 180, zF - 0.005]])} fill="#030304" />
         {ouv > 0.01 && <DiscoInterieur cam={cam} f={f} />}
-        <polygon points={poly([[vPorte.x0, -440, zF - 0.006], [vPorte.x0 + (vPorte.x1 - vPorte.x0) * Math.cos(ouv * 1.4), -440, zF - 0.006 + 0.3 * Math.sin(ouv * 1.4)], [vPorte.x0 + (vPorte.x1 - vPorte.x0) * Math.cos(ouv * 1.4), SOL - 180, zF - 0.006 + 0.3 * Math.sin(ouv * 1.4)], [vPorte.x0, SOL - 180, zF - 0.006]])} fill="#4a2a1c" stroke="#2a1810" strokeWidth="3" />
-        {/* applique au-dessus de la porte */}
-        {(() => {
-          const p = cam.proj(600, -560, zF - 0.1);
-          const s = cam.scale(zF - 0.1, 600, -560);
-          return cam.visible(zF - 0.1, 600, -560) ? <g><circle cx={p[0]} cy={p[1]} r={500 * s} fill="url(#ja-chaud)" opacity={fete > 0.05 ? 1 : 0.15} /><circle cx={p[0]} cy={p[1]} r={30 * s} fill={fete > 0.05 ? '#fff0c8' : '#3a3530'} /></g> : null;
-        })()}
-        {/* numéro de la maison */}
-        {plaque(cam, [820, -380, zF - 0.006], [1, 0, 0], [0, 1, 0], 120, 120, <g><rect width="120" height="120" rx="12" fill="#d8d2c4" /><text x="60" y="88" fontSize="80" textAnchor="middle" fontWeight="900" fill="#2a2420" fontFamily="'DejaVu Sans', Arial">13</text></g>, 'num')}
+        {[[PORTE.x0, 1], [PORTE.x1, -1]].map(([x, s]) => {
+          const a = ouv * 1.3;
+          const xe = x + s * 280 * Math.cos(a);
+          const ze = zF - 0.006 + 0.28 * Math.sin(a);
+          return <polygon key={x} points={poly([[x, -1000, zF - 0.006], [xe, -1000, ze], [xe, SOL - 180, ze], [x, SOL - 180, zF - 0.006]])} fill="#4a2a1c" stroke="#2a1810" strokeWidth="3" />;
+        })}
       </g>
     ),
   });
-  // perron (3 marches)
-  for (let m = 0; m < PERRON.n; m++) {
-    const z0 = PERRON.z0 + m * 0.25;
-    const y = SOL - (m + 1) * PERRON.marche;
+  // ailes avancées (volumes 3D avec acrotère)
+  [-1, 1].forEach((c) => {
+    const x0 = c < 0 ? -AILE.x : AILE.x0;
+    const x1 = c < 0 ? -AILE.x0 : AILE.x;
     items.push({
-      z: z0,
+      z: AILE.z + 0.2,
       el: (
-        <g key={`pe${m}`}>
-          <polygon points={poly([[350, y, z0], [850, y, z0], [850, y, zF], [350, y, zF]])} fill="#6a6660" />
-          <polygon points={poly([[350, y, z0], [850, y, z0], [850, y + PERRON.marche, z0], [350, y + PERRON.marche, z0]])} fill="#4a4640" />
+        <g key={`aile${c}`}>
+          {bloc(cam, x0, x1, AILE.h, SOL, AILE.z, 24, ['#2e2a26', '#625a4c', '#57503f'], 'vol')}
+          {bloc(cam, x0, x1, AILE.h - 160, AILE.h, AILE.z - 0.1, 24, ['#3a352e', '#cbc3b2', '#b9b1a0'], 'acro')}
+          {FENETRES.filter((w) => w.z === AILE.z && (c < 0 ? w.x0 < 0 : w.x0 > 0)).map((w) => fenetreEl(w, FENETRES.indexOf(w)))}
+          {/* fenêtres sur le flanc intérieur de l'aile */}
+          {[7.9, 9.0].map((z, k) => (
+            <polygon key={`fl${k}`} points={poly([[c < 0 ? -AILE.x0 : AILE.x0, -1350, z], [c < 0 ? -AILE.x0 : AILE.x0, -1350, z + 0.7], [c < 0 ? -AILE.x0 : AILE.x0, -350, z + 0.7], [c < 0 ? -AILE.x0 : AILE.x0, -350, z]])} fill={fenetre(40 + k + (c > 0 ? 2 : 0)) > 0.05 ? FETE[(k + Math.floor(f / 8)) % 4] : '#070b16'} opacity="0.9" />
+          ))}
         </g>
       ),
     });
-  }
-  // terrasse en bois
+  });
+  // porche : colonnes, auvent, balcon de l'étage au-dessus
+  const zc = PERRON.z0 + 0.1;
   items.push({
-    z: 6.2,
+    z: zc,
     el: (
-      <g key="terrasse">
-        <polygon points={poly([[-1400, SOL - 25, 6.2], [250, SOL - 25, 6.2], [250, SOL - 25, zF], [-1400, SOL - 25, zF]])} fill="#4a3424" />
-        {[...Array(8)].map((_, k) => ligne(cam, [-1400, SOL - 26, 6.2 + k * 0.23], [250, SOL - 26, 6.2 + k * 0.23], 3, '#2e2016', `la${k}`))}
-        <polygon points={poly([[-1400, SOL - 25, 6.2], [250, SOL - 25, 6.2], [250, SOL, 6.2], [-1400, SOL, 6.2]])} fill="#2e2016" />
+      <g key="porche">
+        {[-560, -200, 200, 560].map((x) => bloc(cam, x - 55, x + 55, -1320, SOL - 180, zc, zc + 0.11, ['#d8d2c4', '#e2dccf', '#c2bba9'], `col${x}`))}
+        {/* fronton du porche (plat, posé sur les colonnes) */}
+        <polygon points={poly([[-760, -1480, zc - 0.1], [760, -1480, zc - 0.1], [760, -1320, zc - 0.1], [-760, -1320, zc - 0.1]])} fill="#d8d2c4" />
+        <polygon points={poly([[-760, -1480, zc - 0.1], [0, -1900, zc - 0.1], [760, -1480, zc - 0.1]])} fill="#cbc3b2" />
+        {ligne(cam, [-760, -1320, zc - 0.11], [760, -1320, zc - 0.11], 6, '#9a937f', 'ombre')}
+        {/* balustrade du balcon */}
+        {[...Array(13)].map((_, k) => ligne(cam, [-660 + k * 110, -1460, zc - 0.05], [-660 + k * 110, -1760, zc - 0.05], Math.max(2, 22 * cam.scale(zc, 0, -1600)), '#d8d2c4', `bal${k}`))}
+        {ligne(cam, [-720, -1780, zc - 0.05], [720, -1780, zc - 0.05], Math.max(2, 34 * cam.scale(zc, 0, -1700)), '#d8d2c4', 'main')}
+        {/* lanterne du porche */}
+        {(() => {
+          const p = cam.proj(0, -1250, zc + 0.5);
+          const s = cam.scale(zc + 0.5, 0, -1250);
+          return cam.visible(zc + 0.5, 0, -1250) ? (
+            <g>
+              <circle cx={p[0]} cy={p[1]} r={900 * s} fill="url(#ja-chaud)" opacity={fete > 0.05 ? 1 : lampadaire * 0.12} />
+              <rect x={p[0] - 34 * s} y={p[1] - 60 * s} width={68 * s} height={110 * s} rx={10 * s} fill={fete > 0.05 ? '#fff0c8' : '#3a3530'} stroke="#1a1a1a" strokeWidth={Math.max(1, 6 * s)} />
+            </g>
+          ) : null;
+        })()}
+        {/* banderole de la fête */}
+        {plaque(cam, [-650, -1900, zc - 0.08], [1, 0, 0], [0, 1, 0], 1300, 130, <g><rect width="1300" height="130" rx="14" fill="#5a1a7a" opacity="0.85" /><text x="650" y="96" fontSize="86" textAnchor="middle" fontWeight="900" fill="#ffd23e" fontFamily="'DejaVu Sans', Arial">SOIRÉE 🎉</text></g>, 'banderole')}
       </g>
     ),
   });
-  // enceinte + gobelets + chaises
+  // perron (sol : dessiné avant les personnages)
   items.push({
-    z: 6.6,
+    z: 30,
+    el: (
+      <g key="perron">
+        {[...Array(PERRON.n)].map((_, m) => {
+          const z0 = PERRON.z0 + m * 0.25;
+          const y = SOL - (m + 1) * PERRON.marche;
+          return (
+            <g key={m}>
+              <polygon points={poly([[-780, y, z0], [780, y, z0], [780, y, zF], [-780, y, zF]])} fill="#7a766e" />
+              <polygon points={poly([[-780, y, z0], [780, y, z0], [780, y + PERRON.marche, z0], [-780, y + PERRON.marche, z0]])} fill="#55524c" />
+            </g>
+          );
+        })}
+        {/* terrasse en bois à gauche */}
+        <polygon points={poly([[-3100, SOL - 25, TERRASSE_Z[0]], [-900, SOL - 25, TERRASSE_Z[0]], [-900, SOL - 25, zF], [-3100, SOL - 25, zF]])} fill="#4a3424" />
+        {[...Array(8)].map((_, k) => ligne(cam, [-3100, SOL - 26, TERRASSE_Z[0] + k * 0.22], [-900, SOL - 26, TERRASSE_Z[0] + k * 0.22], 3, '#2e2016', `la${k}`))}
+        <polygon points={poly([[-3100, SOL - 25, TERRASSE_Z[0]], [-900, SOL - 25, TERRASSE_Z[0]], [-900, SOL, TERRASSE_Z[0]], [-3100, SOL, TERRASSE_Z[0]]])} fill="#2e2016" />
+        {/* fontaine (bassin) */}
+        <polygon points={cercleSol(cam, FONTAINE.x, FONTAINE.z, 900, 0.9, SOL - 2)} fill="#4a4a48" />
+        <polygon points={cercleSol(cam, FONTAINE.x, FONTAINE.z, 760, 0.76, SOL - 3)} fill="#0c1420" />
+      </g>
+    ),
+  });
+  // fontaine : rebord + colonne centrale + vasque
+  items.push({
+    z: FONTAINE.z,
+    el: (
+      <g key="fontaine">
+        {[...Array(16)].map((_, k) => {
+          const a0 = (k / 16) * 6.283;
+          const a1 = ((k + 1) / 16) * 6.283;
+          const p = (a, y) => [FONTAINE.x + Math.cos(a) * 900, y, FONTAINE.z + Math.sin(a) * 0.9];
+          return Math.sin((a0 + a1) / 2) < 0.2 ? <polygon key={k} points={poly([p(a0, SOL), p(a1, SOL), p(a1, SOL - 160), p(a0, SOL - 160)])} fill="#5a5a56" /> : null;
+        })}
+        {bloc(cam, FONTAINE.x - 90, FONTAINE.x + 90, -700, SOL, FONTAINE.z - 0.09, FONTAINE.z + 0.09, ['#7a7a74', '#6a6a64', '#5a5a56'], 'colonne')}
+        <polygon points={cercleSol(cam, FONTAINE.x, FONTAINE.z, 380, 0.38, -700)} fill="#6a6a64" />
+      </g>
+    ),
+  });
+  // enceinte, gobelets, chaises sur la terrasse
+  items.push({
+    z: 8.8,
     el: (
       <g key="enceinte">
-        {billboard(cam, -150, SOL - 25, 6.6, <g><rect x="-110" y="-330" width="220" height="330" rx="16" fill="#151518" /><circle cx="0" cy="-110" r="70" fill="#26262c" /><circle cx="0" cy="-110" r={30 + (enceinte > 0.05 ? Math.abs(Math.sin(f / 2)) * 12 : 0)} fill="#0c0c0f" /><circle cx="0" cy="-250" r="34" fill="#26262c" /><circle cx="80" cy="-305" r="9" fill={enceinte > 0.05 ? '#3eff7a' : '#202020'} /></g>, 'enc')}
-        {[[-600, 6.9], [-520, 7.1], [-360, 6.8]].map(([x, z], k) => billboard(cam, x, SOL - 25, z, <path d="M-22,0 L-28,-80 L28,-80 L22,0 Z" fill="#c42a2a" />, `go${k}`))}
-        {[[-1100, 7.0], [-850, 6.7]].map(([x, z], k) => billboard(cam, x, SOL - 25, z, <g fill="#e8e6e0"><rect x="-90" y="-180" width="180" height="20" /><rect x="-90" y="-420" width="20" height="260" /><rect x="-85" y="-170" width="14" height="170" /><rect x="71" y="-170" width="14" height="170" /></g>, `ch${k}`))}
+        {billboard(cam, -1300, SOL - 25, 8.8, <g><rect x="-110" y="-330" width="220" height="330" rx="16" fill="#151518" /><circle cx="0" cy="-110" r="70" fill="#26262c" /><circle cx="0" cy="-110" r={30 + (enceinte > 0.05 ? Math.abs(Math.sin(f / 2)) * 12 : 0)} fill="#0c0c0f" /><circle cx="0" cy="-250" r="34" fill="#26262c" /><circle cx="80" cy="-305" r="9" fill={enceinte > 0.05 ? '#3eff7a' : '#202020'} /></g>, 'enc')}
+        {[[-1800, 9.0], [-1720, 9.2], [-1560, 8.9]].map(([x, z], k) => billboard(cam, x, SOL - 25, z, <path d="M-22,0 L-28,-80 L28,-80 L22,0 Z" fill="#c42a2a" />, `go${k}`))}
+        {[[-2800, 9.1], [-2550, 8.8]].map(([x, z], k) => billboard(cam, x, SOL - 25, z, <g fill="#e8e6e0"><rect x="-90" y="-180" width="180" height="20" /><rect x="-90" y="-420" width="20" height="260" /><rect x="-85" y="-170" width="14" height="170" /><rect x="71" y="-170" width="14" height="170" /></g>, `ch${k}`))}
       </g>
     ),
   });
-  // guirlande lumineuse (chaînette d'ampoules colorées)
+  // guirlande lumineuse au-dessus de la terrasse
   const guir = [];
-  const A = [-1450, -720, zF - 0.05];
-  const B = [300, -640, 6.3];
-  for (let k = 0; k <= 20; k++) {
-    const t = k / 20;
-    const p = [A[0] + (B[0] - A[0]) * t, A[1] + (B[1] - A[1]) * t + Math.sin(t * Math.PI) * 260, A[2] + (B[2] - A[2]) * t];
-    guir.push(p);
+  const A = [-3150, -1450, zF - 0.05];
+  const B = [-900, -1300, TERRASSE_Z[0]];
+  for (let k = 0; k <= 22; k++) {
+    const t = k / 22;
+    guir.push([A[0] + (B[0] - A[0]) * t, A[1] + (B[1] - A[1]) * t + Math.sin(t * Math.PI) * 380, A[2] + (B[2] - A[2]) * t]);
   }
   items.push({
-    z: 6.3,
+    z: TERRASSE_Z[0] + 0.5,
     el: (
       <g key="guirlande">
         {guir.slice(1).map((p, k) => ligne(cam, guir[k], p, 3, '#111', `gf${k}`))}
@@ -260,64 +376,62 @@ export const jardin = (cam, f, {fete = 0, fenetre = () => fete, gens = 'danse', 
           const on = guirlande > 0.05 && (guirlande >= 1 || random(`gl${k}`) < guirlande);
           return (
             <g key={`gb${k}`}>
-              {on && <circle cx={q[0]} cy={q[1] + 18 * s} r={70 * s} fill={FETE[k % 4]} opacity="0.35" />}
-              <circle cx={q[0]} cy={q[1] + 18 * s} r={14 * s} fill={on ? FETE[k % 4] : '#2a2a2a'} />
+              {on && <circle cx={q[0]} cy={q[1] + 18 * s} r={80 * s} fill={FETE[k % 4]} opacity="0.35" />}
+              <circle cx={q[0]} cy={q[1] + 18 * s} r={16 * s} fill={on ? FETE[k % 4] : '#2a2a2a'} />
             </g>
           );
         })}
       </g>
     ),
   });
-  // haies et arbres
-  [[-2100, -1800, -2, 7.5], [1800, 2100, -2, 7.5]].forEach(([x0, x1, z0, z1], k) => {
-    items.push({
-      z: z0,
-      el: (
-        <g key={`ha${k}`}>
-          <polygon points={poly([[x0, -350, z0], [x1, -350, z0], [x1, -350, z1], [x0, -350, z1]])} fill="#0b160d" />
-          <polygon points={poly([[k ? x0 : x1, -350, z0], [k ? x0 : x1, -350, z1], [k ? x0 : x1, SOL, z1], [k ? x0 : x1, SOL, z0]])} fill="#0d1c10" />
-          <polygon points={poly([[x0, -350, z0], [x1, -350, z0], [x1, SOL, z0], [x0, SOL, z0]])} fill="#0a140c" />
-        </g>
-      ),
+  // lampes de jardin le long de l'allée (éteintes après la coupure)
+  [-0.5, 2.5, 5.5].forEach((z, k) => {
+    [-560, 560].forEach((x) => {
+      items.push({
+        z,
+        el: billboard(cam, x, SOL, z, <g><rect x="-14" y="-260" width="28" height="260" fill="#1a1a1c" /><rect x="-34" y="-320" width="68" height="70" rx="8" fill={fete > 0.05 ? '#fff0c8' : '#2a2a28'} />{fete > 0.05 && <circle cx="0" cy="-285" r="160" fill="url(#ja-chaud)" />}</g>, `lj${k}${x}`),
+      });
     });
   });
-  [[-2600, 3.0, 1.3], [2500, 5.5, 1.5], [-3200, 9.0, 1.6], [3300, -1.0, 1.2]].forEach(([x, z, t], k) => {
+  // haies et arbres
+  [[-7000, -6600, -2.8, 10], [6600, 7000, -2.8, 10]].forEach(([x0, x1, z0, z1], k) => {
+    items.push({z: z0, el: bloc(cam, x0, x1, -450, SOL, z0, z1, ['#0b160d', '#0a140c', '#0d1c10'], `ha${k}`)});
+  });
+  [[-8200, 2.0, 1.6], [8000, 6.0, 1.8], [-8800, 12.0, 2.0], [8600, -1.5, 1.4], [-4600, -1.8, 1.2]].forEach(([x, z, t], k) => {
     items.push({
       z,
-      el: billboard(cam, x, SOL, z, <g fill="#060a08"><rect x="-50" y="-1200" width="100" height="1200" /><circle cx="0" cy="-1600" r="560" /><circle cx="-380" cy="-1350" r="380" /><circle cx="400" cy="-1380" r="420" /><circle cx="60" cy="-2000" r="380" /></g>, `ar${k}`, t),
+      el: billboard(cam, x, SOL, z, <g fill="#060a08"><rect x="-60" y="-1300" width="120" height="1300" /><circle cx="0" cy="-1700" r="600" /><circle cx="-420" cy="-1400" r="420" /><circle cx="440" cy="-1450" r="460" /><circle cx="60" cy="-2150" r="420" /></g>, `ar${k}`, t),
     });
   });
-  // clôture + portail cadenassé
+  // clôture + portail double cadenassé
   const zP = PORTAIL.z;
   const clot = [];
-  for (let x = -2100; x <= 2100; x += 180) {
+  for (let x = -7000; x <= 7000; x += 200) {
     if (x > PORTAIL.x0 - 20 && x < PORTAIL.x1 + 20) continue;
-    clot.push(ligne(cam, [x, SOL, zP], [x, -220, zP], Math.max(2, 16 * cam.scale(zP, x, 0)), '#1d1f22', `cl${x}`));
+    clot.push(ligne(cam, [x, SOL, zP], [x, -280, zP], Math.max(2, 16 * cam.scale(zP, x, 0)), '#1d1f22', `cl${x}`));
   }
-  const pc = cam.proj((PORTAIL.x0 + PORTAIL.x1) / 2, -120, zP - 0.03);
-  const sc = cam.scale(zP - 0.03, 600, -120);
+  const pc = cam.proj(0, -150, zP - 0.03);
+  const sc = cam.scale(zP - 0.03, 0, -150);
   items.push({
     z: zP,
     el: (
       <g key="cloture">
-        {ligne(cam, [-2100, -180, zP], [PORTAIL.x0, -180, zP], 10, '#1d1f22', 'r1')}
-        {ligne(cam, [PORTAIL.x1, -180, zP], [2100, -180, zP], 10, '#1d1f22', 'r2')}
-        {ligne(cam, [-2100, 250, zP], [PORTAIL.x0, 250, zP], 10, '#1d1f22', 'r3')}
-        {ligne(cam, [PORTAIL.x1, 250, zP], [2100, 250, zP], 10, '#1d1f22', 'r4')}
+        {ligne(cam, [-7000, -230, zP], [PORTAIL.x0, -230, zP], 10, '#1d1f22', 'r1')}
+        {ligne(cam, [PORTAIL.x1, -230, zP], [7000, -230, zP], 10, '#1d1f22', 'r2')}
+        {ligne(cam, [-7000, 250, zP], [PORTAIL.x0, 250, zP], 10, '#1d1f22', 'r3')}
+        {ligne(cam, [PORTAIL.x1, 250, zP], [7000, 250, zP], 10, '#1d1f22', 'r4')}
         {clot}
-        {/* portail en fer forgé */}
-        {[PORTAIL.x0, PORTAIL.x1].map((x) => ligne(cam, [x, SOL, zP], [x, -420, zP], Math.max(3, 30 * cam.scale(zP, x, 0)), '#16181b', `pi${x}`))}
-        {[...Array(9)].map((_, k) => {
-          const x = PORTAIL.x0 + ((k + 1) * (PORTAIL.x1 - PORTAIL.x0)) / 10;
-          return ligne(cam, [x, SOL - 10, zP], [x, -340 - (k % 2) * 40, zP], Math.max(2, 12 * cam.scale(zP, x, 0)), '#23262a', `ba${k}`);
+        {[PORTAIL.x0 - 40, PORTAIL.x1 + 40].map((x) => bloc(cam, x - 70, x + 70, -650, SOL, zP - 0.07, zP + 0.07, ['#5a5650', '#4a4640', '#3e3a34'], `pi${x}`))}
+        {[...Array(11)].map((_, k) => {
+          const x = PORTAIL.x0 + ((k + 1) * (PORTAIL.x1 - PORTAIL.x0)) / 12;
+          return ligne(cam, [x, SOL - 10, zP], [x, -420 - (k % 2) * 50 - Math.sin((k / 11) * Math.PI) * 120, zP], Math.max(2, 12 * cam.scale(zP, x, 0)), '#23262a', `ba${k}`);
         })}
-        {ligne(cam, [PORTAIL.x0, -300, zP], [PORTAIL.x1, -300, zP], 12, '#23262a', 'tr1')}
+        {ligne(cam, [PORTAIL.x0, -360, zP], [PORTAIL.x1, -360, zP], 12, '#23262a', 'tr1')}
         {ligne(cam, [PORTAIL.x0, 200, zP], [PORTAIL.x1, 200, zP], 12, '#23262a', 'tr2')}
-        {/* chaîne + cadenas */}
-        {cam.visible(zP - 0.03, 600, -120) && (
+        {cam.visible(zP - 0.03, 0, -150) && (
           <g transform={`translate(${pc[0]} ${pc[1]}) scale(${sc}) rotate(${Math.sin(f / 5) * 12 * cadenas})`}>
-            {[...Array(7)].map((_, k) => (
-              <ellipse key={k} cx={-90 + k * 30} cy={Math.sin(k / 2) * 18} rx="18" ry="10" fill="none" stroke="#9a9ea4" strokeWidth="6" />
+            {[...Array(8)].map((_, k) => (
+              <ellipse key={k} cx={-105 + k * 30} cy={Math.sin(k / 2) * 18} rx="18" ry="10" fill="none" stroke="#9a9ea4" strokeWidth="6" />
             ))}
             <g transform="translate(0 40)">
               <path d="M-22,0 Q-22,-50 0,-50 Q22,-50 22,0" fill="none" stroke="#b8bcc2" strokeWidth="10" />
@@ -329,21 +443,20 @@ export const jardin = (cam, f, {fete = 0, fenetre = () => fete, gens = 'danse', 
       </g>
     ),
   });
-  // lampadaire de la rue (lumière orange qui grésille)
-  const lp = [1500, -1100, -3.6];
+  // lampadaire de la rue
   items.push({
-    z: -3.6,
+    z: -4.2,
     el: (
       <g key="lampadaire">
-        {ligne(cam, [1500, SOL + 30, -3.6], [1500, -1100, -3.6], Math.max(2, 26 * cam.scale(-3.6, 1500, 0)), '#121316', 'lpp')}
-        {ligne(cam, [1500, -1100, -3.6], [1250, -1100, -3.6], Math.max(2, 18 * cam.scale(-3.6, 1500, 0)), '#121316', 'lpb')}
-        {cam.visible(-3.6, 1250, -1080) && (
+        {ligne(cam, [1900, SOL + 30, -4.2], [1900, -1200, -4.2], Math.max(2, 26 * cam.scale(-4.2, 1900, 0)), '#121316', 'lpp')}
+        {ligne(cam, [1900, -1200, -4.2], [1650, -1200, -4.2], Math.max(2, 18 * cam.scale(-4.2, 1900, 0)), '#121316', 'lpb')}
+        {cam.visible(-4.2, 1650, -1180) && (
           <g>
-            <circle cx={cam.proj(1250, -1080, -3.6)[0]} cy={cam.proj(1250, -1080, -3.6)[1]} r={700 * cam.scale(-3.6, 1250, -1080)} fill="url(#ja-chaud)" opacity={lampadaire} />
-            <circle cx={cam.proj(1250, -1080, -3.6)[0]} cy={cam.proj(1250, -1080, -3.6)[1]} r={40 * cam.scale(-3.6, 1250, -1080)} fill={lampadaire > 0.3 ? '#ffe2b0' : '#3a3530'} />
+            <circle cx={cam.proj(1650, -1180, -4.2)[0]} cy={cam.proj(1650, -1180, -4.2)[1]} r={800 * cam.scale(-4.2, 1650, -1180)} fill="url(#ja-chaud)" opacity={lampadaire} />
+            <circle cx={cam.proj(1650, -1180, -4.2)[0]} cy={cam.proj(1650, -1180, -4.2)[1]} r={40 * cam.scale(-4.2, 1650, -1180)} fill={lampadaire > 0.3 ? '#ffe2b0' : '#3a3530'} />
           </g>
         )}
-        <polygon points={cercleSol(cam, 1250, -3.6, 900, 0.9, SOL + 29)} fill="url(#ja-chaud)" opacity={0.7 * lampadaire} />
+        <polygon points={cercleSol(cam, 1650, -4.2, 1000, 1.0, SOL + 29)} fill="url(#ja-chaud)" opacity={0.7 * lampadaire} />
       </g>
     ),
   });
@@ -351,20 +464,20 @@ export const jardin = (cam, f, {fete = 0, fenetre = () => fete, gens = 'danse', 
   return {fond, items, brume};
 };
 
-// Couloir intérieur vu par la porte ouverte : noir, avec les reflets d'une boule à facettes qui tourne encore
+// Le hall vu par la porte ouverte : noir, avec les reflets d'une boule à facettes qui tourne encore
 const DiscoInterieur = ({cam, f}) => {
-  const p = cam.proj(600, -350, FACADE + 1.2);
-  const s = cam.scale(FACADE + 1.2, 600, -350);
-  if (!cam.visible(FACADE + 1.2, 600, -350)) return null;
+  const p = cam.proj(0, -650, FACADE + 1.5);
+  const s = cam.scale(FACADE + 1.5, 0, -650);
+  if (!cam.visible(FACADE + 1.5, 0, -650)) return null;
   return (
     <g>
-      {[...Array(14)].map((_, k) => {
-        const a = (k / 14) * 6.283 + f / 25;
-        return <circle key={k} cx={p[0] + Math.cos(a) * 200 * s} cy={p[1] + 300 * s + Math.sin(a * 1.3) * 160 * s} r={6 * s} fill={['#ff3ea5', '#3ec8ff', '#ffffff'][k % 3]} opacity="0.7" />;
+      {[...Array(18)].map((_, k) => {
+        const a = (k / 18) * 6.283 + f / 25;
+        return <circle key={k} cx={p[0] + Math.cos(a) * 260 * s} cy={p[1] + 400 * s + Math.sin(a * 1.3) * 220 * s} r={7 * s} fill={['#ff3ea5', '#3ec8ff', '#ffffff'][k % 3]} opacity="0.7" />;
       })}
-      <circle cx={p[0]} cy={p[1]} r={40 * s} fill="#9aa0a8" />
-      {[...Array(6)].map((_, k) => (
-        <line key={k} x1={p[0] - 40 * s} y1={p[1] - 30 * s + k * 12 * s} x2={p[0] + 40 * s} y2={p[1] - 30 * s + k * 12 * s} stroke="#d8dce2" strokeWidth={Math.max(1, 2 * s)} />
+      <circle cx={p[0]} cy={p[1]} r={50 * s} fill="#9aa0a8" />
+      {[...Array(7)].map((_, k) => (
+        <line key={k} x1={p[0] - 50 * s} y1={p[1] - 36 * s + k * 12 * s} x2={p[0] + 50 * s} y2={p[1] - 36 * s + k * 12 * s} stroke="#d8dce2" strokeWidth={Math.max(1, 2 * s)} />
       ))}
     </g>
   );
@@ -376,7 +489,7 @@ const DiscoInterieur = ({cam, f}) => {
 export const Telephone = ({f, messages = [], notif = null, echelle = 1, x = 540, y = 980, vibre = 0, nom = 'Lucas 🎧', verrouille = false}) => {
   const shake = vibre > 0 ? Math.sin(f * 2.4) * 10 * vibre : 0;
   const bulles = messages.filter((m) => f >= m.debut);
-  const ecrit = messages.find((m) => f >= m.debut - 18 && f < m.debut);
+  const ecrit = messages.find((m) => f >= m.debut - 32 && f < m.debut);
   const pile = [];
   let yb = 520;
   [...bulles].reverse().forEach((m) => {
@@ -465,35 +578,64 @@ const coupe = (texte, n) => {
   });
   return out;
 };
-// Photo de groupe floue de la soirée… avec une silhouette de trop, immense, au fond
-const PhotoGroupe = ({f}) => (
-  <g>
-    <defs>
-      <clipPath id="ph-clip">
-        <rect x="14" y="14" width="372" height="262" rx="20" />
-      </clipPath>
-      <filter id="ph-flou">
-        <feGaussianBlur stdDeviation="2.5" />
-      </filter>
-    </defs>
-    <g clipPath="url(#ph-clip)">
-      <rect x="14" y="14" width="372" height="262" fill="#3a2a40" />
-      <g filter="url(#ph-flou)">
-        <circle cx="120" cy="60" r="60" fill="#ff3ea5" opacity="0.5" />
-        <circle cx="300" cy="70" r="50" fill="#3ec8ff" opacity="0.5" />
-        {[60, 130, 200, 270, 340].map((x, k) => (
-          <g key={k} fill="#0c0c10">
-            <ellipse cx={x} cy={170} rx="26" ry="32" />
-            <rect x={x - 40} y={196} width="80" height="90" rx="30" />
-          </g>
+// Photo de groupe prise au flash pendant la soirée : visages blêmes, yeux rouges, grain…
+// et au fond, une silhouette de trop, immense, au visage blanc sans traits.
+const PhotoGroupe = ({f}) => {
+  const visage = (x, y, r, k) => (
+    <g key={k}>
+      <rect x={x - r * 1.3} y={y + r * 0.9} width={r * 2.6} height={r * 3} rx={r * 0.9} fill={['#2a1a3a', '#3a1a1a', '#1a2a3a', '#2a2a1a', '#1a1a1a'][k % 5]} />
+      <ellipse cx={x} cy={y} rx={r * 0.85} ry={r} fill="#e8d2c0" />
+      <path d={`M${x - r * 0.9},${y - r * 0.3} Q${x},${y - r * 1.5} ${x + r * 0.9},${y - r * 0.3}`} fill="#2a1a14" />
+      <circle cx={x - r * 0.32} cy={y} r={r * 0.13} fill="#d01a1a" />
+      <circle cx={x + r * 0.32} cy={y} r={r * 0.13} fill="#d01a1a" />
+      <path d={`M${x - r * 0.35},${y + r * 0.45} Q${x},${y + r * 0.7} ${x + r * 0.35},${y + r * 0.45}`} stroke="#5a2a2a" strokeWidth={r * 0.1} fill="none" />
+    </g>
+  );
+  return (
+    <g>
+      <defs>
+        <clipPath id="ph-clip">
+          <rect x="14" y="14" width="372" height="262" rx="20" />
+        </clipPath>
+        <radialGradient id="ph-flash" cx="45%" cy="55%" r="60%">
+          <stop offset="0" stopColor="#fff6e8" stopOpacity="0.35" />
+          <stop offset="1" stopColor="#000" stopOpacity="0.6" />
+        </radialGradient>
+        <filter id="ph-grain">
+          <feTurbulence type="fractalNoise" baseFrequency="1.4" numOctaves="1" seed="7" />
+          <feColorMatrix type="saturate" values="0" />
+        </filter>
+        <filter id="ph-doux">
+          <feGaussianBlur stdDeviation="0.8" />
+        </filter>
+      </defs>
+      <g clipPath="url(#ph-clip)">
+        {/* la pièce sombre, guirlandes floues */}
+        <rect x="14" y="14" width="372" height="262" fill="#120c18" />
+        {[[60, 40, '#ff3ea5'], [150, 30, '#ffd23e'], [260, 45, '#3ec8ff'], [340, 35, '#9a3eff']].map(([x, y, c], k) => (
+          <circle key={k} cx={x} cy={y} r="16" fill={c} opacity="0.6" filter="url(#ph-doux)" />
         ))}
-        {/* celui qu'on ne connaît pas */}
-        <g fill="#050507">
-          <ellipse cx="236" cy="66" rx="22" ry="30" />
-          <rect x="212" y="92" width="48" height="120" rx="18" />
-          <rect x="214" y="44" width="44" height="12" fill="#c9a23a" opacity={0.7 + 0.3 * Math.sin(f / 6)} />
+        {/* LA silhouette de trop, derrière tout le monde : très grande, visage blanc lisse, orbites noires */}
+        <g opacity="0.92">
+          <rect x="222" y="40" width="60" height="230" rx="24" fill="#050507" />
+          <ellipse cx="252" cy="58" rx="26" ry="34" fill="#efece6" />
+          <ellipse cx="243" cy="56" rx="6" ry="9" fill="#050507" />
+          <ellipse cx="261" cy="56" rx="6" ry="9" fill="#050507" />
+          <path d="M236,36 L252,6 L268,36 Z" fill="#c42a8a" />
         </g>
+        {/* les invités qui posent au premier plan */}
+        <g filter="url(#ph-doux)">
+          {[[60, 150, 26], [120, 160, 24], [185, 148, 27], [300, 158, 25], [355, 150, 24]].map(([x, y, r], k) => visage(x, y, r, k))}
+          {/* bras levés, gobelets */}
+          <path d="M95,215 L80,175" stroke="#e8d2c0" strokeWidth="9" strokeLinecap="round" />
+          <rect x="72" y="160" width="14" height="18" fill="#c42a2a" />
+          <path d="M330,215 L345,178" stroke="#e8d2c0" strokeWidth="9" strokeLinecap="round" />
+        </g>
+        {/* lumière du flash, grain, date de la photo */}
+        <rect x="14" y="14" width="372" height="262" fill="url(#ph-flash)" />
+        <rect x="14" y="14" width="372" height="262" filter="url(#ph-grain)" opacity="0.18" />
+        <text x="372" y="266" fontSize="14" textAnchor="end" fill="#ffb45a" fontFamily="'DejaVu Sans Mono', monospace" opacity="0.8">23:12</text>
       </g>
     </g>
-  </g>
-);
+  );
+};
