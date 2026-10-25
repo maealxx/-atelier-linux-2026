@@ -81,7 +81,7 @@ export const classe = (cam, f, {neon = 0, craie = 0, horloge = [19, 12], lune = 
   const fond = (
     <g>
       <defs>
-        {brumeDef(cam, 'cl-brume', '#05060a', 0.55)}
+        {brumeDef(cam, 'cl-brume', '#05060a', 0.45)}
         <linearGradient id="cl-nuit" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0" stopColor="#0e1630" />
           <stop offset="1" stopColor="#24324f" />
@@ -97,7 +97,19 @@ export const classe = (cam, f, {neon = 0, craie = 0, horloge = [19, 12], lune = 
       <polygon points={poly([[-CX, PLAF, zA], [CX, PLAF, zA], [CX, SOL, zA], [-CX, SOL, zA]])} fill="#34383a" />
       <polygon points={poly([[-CX, PLAF, zA], [-CX, PLAF, zB], [-CX, SOL, zB], [-CX, SOL, zA]])} fill="#3d4240" />
       <polygon points={poly([[CX, PLAF, zA], [CX, PLAF, zB], [CX, SOL, zB], [CX, SOL, zA]])} fill="#383d3b" />
-      <polygon points={poly([[-CX, PLAF, zA], [CX, PLAF, zA], [CX, PLAF, zB], [-CX, PLAF, zB]])} fill="#1d1f22" />
+      <polygon points={poly([[-CX, PLAF, zA], [CX, PLAF, zA], [CX, PLAF, zB], [-CX, PLAF, zB]])} fill="#2c2e32" />
+      {plafondDalles(cam, -CX, CX, zA, zB, 'cl')}
+      {/* frise de l'alphabet en haut du mur droit */}
+      {plaque(cam, [CX - 2, -690, 6.8], [0, 0, -1], [0, 1, 0], 8000, 120, <g>{'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map((l, k) => <g key={k}><rect x={k * 305 + 10} y="10" width="280" height="100" fill={['#c9a23a', '#3a7ac9', '#c93a5a', '#5ac93a'][k % 4]} opacity="0.45" /><text x={k * 305 + 150} y="90" fontSize="80" textAnchor="middle" fontWeight="900" fill="#e8e4d8" opacity="0.7" fontFamily="'DejaVu Sans', Arial">{l}</text></g>)}</g>, 'frise')}
+      {/* étagère de livres au fond */}
+      {[-560, -220].map((y) => (
+        <g key={`et${y}`}>
+          {ligne(cam, [-800, y + 160, zA + 0.01], [800, y + 160, zA + 0.01], 10, '#4a3a28', 'pl')}
+          {plaque(cam, [-800, y, zA + 0.012], [1, 0, 0], [0, 1, 0], 1600, 160, <g>{[...Array(28)].map((_, k) => <rect key={k} x={k * 57} y={20 + (k % 3) * 12} width="48" height={140 - (k % 3) * 12} fill={['#7a3b2e', '#2e5a7a', '#6a6a2e', '#3d6a4a', '#5a3a6a'][k % 5]} opacity="0.8" />)}</g>, 'livres')}
+        </g>
+      ))}
+      {/* carte de France au-dessus du tableau */}
+      {plaque(cam, [-260, -690, zB - 0.01], [1, 0, 0], [0, 1, 0], 520, 160, <g><rect width="520" height="160" fill="#c8c2a8" opacity="0.6" /><path d="M200,20 L320,30 L360,80 L330,140 L230,150 L170,110 L180,60 Z" fill="#6a8a5a" opacity="0.8" /></g>, 'carte')}
       <polygon points={poly([[-CX, SOL, zA], [CX, SOL, zA], [CX, SOL, zB], [-CX, SOL, zB]])} fill="#2b2e31" />
       {lignesSol}
       {/* plinthes */}
@@ -167,13 +179,18 @@ export const classe = (cam, f, {neon = 0, craie = 0, horloge = [19, 12], lune = 
       <polygon points={poly([[CX - 1, -330, 5.5], [CX - 1, -330, 6.4], [CX - 1, SOL, 6.4], [CX - 1, SOL, 5.5]])} fill="#5b4632" />
       <polygon points={poly([[CX - 2, -260, 5.7], [CX - 2, -260, 6.2], [CX - 2, -80, 6.2], [CX - 2, -80, 5.7]])} fill="#141a24" />
       {/* néons du plafond */}
-      {[1.5, 3.5, 5.5].flatMap((z) =>
-        [-450, 450].map((x) => (
-          <g key={`n${x}${z}`}>
-            <polygon points={poly([[x - 70, PLAF + 5, z], [x + 70, PLAF + 5, z], [x + 70, PLAF + 5, z + 0.9], [x - 70, PLAF + 5, z + 0.9]])} fill={neon > 0.2 ? '#f4fbff' : '#3a3d42'} />
-            {neon > 0.05 && <polygon points={poly([...Array(16)].map((_, k) => [x + Math.cos((k / 16) * 6.283) * 500, SOL - 1, z + 0.45 + Math.sin((k / 16) * 6.283) * 0.6]))} fill="url(#cl-neon)" opacity={neon} />}
-          </g>
-        ))
+      {[1.5, 3.5, 5.5].flatMap((z, a) =>
+        [-450, 450].map((x, b) => {
+          const v = typeof neon === 'function' ? neon(a * 2 + b) : neon;
+          return (
+            <g key={`n${x}${z}`}>
+              <polygon points={poly([...Array(16)].map((_, k) => [x + Math.cos((k / 16) * 6.283) * 420, PLAF + 2, z + 0.45 + Math.sin((k / 16) * 6.283) * 0.7]))} fill="url(#cl-neon)" opacity={0.15 + 0.85 * v} />
+              <polygon points={poly([[x - 90, PLAF + 3, z - 0.05], [x + 90, PLAF + 3, z - 0.05], [x + 90, PLAF + 3, z + 0.95], [x - 90, PLAF + 3, z + 0.95]])} fill="#46494e" />
+              <polygon points={poly([[x - 70, PLAF + 6, z], [x + 70, PLAF + 6, z], [x + 70, PLAF + 6, z + 0.9], [x - 70, PLAF + 6, z + 0.9]])} fill={v > 0.2 ? '#f4fbff' : '#5a5d62'} />
+              {v > 0.05 && <polygon points={poly([...Array(16)].map((_, k) => [x + Math.cos((k / 16) * 6.283) * 500, SOL - 1, z + 0.45 + Math.sin((k / 16) * 6.283) * 0.6]))} fill="url(#cl-neon)" opacity={v} />}
+            </g>
+          );
+        })
       )}
     </g>
   );
@@ -214,10 +231,118 @@ export const classe = (cam, f, {neon = 0, craie = 0, horloge = [19, 12], lune = 
       ),
     });
   });
+  // vidéoprojecteur suspendu
+  items.push({
+    z: 3.6,
+    el: (
+      <g key="proj">
+        {ligne(cam, [0, PLAF, 3.7], [0, PLAF + 180, 3.7], 8, '#3a3d42', 'tige')}
+        {boite(cam, -110, 110, PLAF + 180, PLAF + 260, 3.55, 3.85, ['#d8d6d0', '#c4c2bc', '#b0aea8'], 'pj')}
+      </g>
+    ),
+  });
+  // plante sur le rebord de fenêtre
+  items.push({z: 3.2, el: plante(cam, -CX + 90, 3.2)});
   // sac par terre
   items.push({z: 2.2, el: boite(cam, 180, 330, 300, SOL, 2.1, 2.3, ['#2d2d3a', '#24242f', '#1e1e28'], 'sac')});
   const brume = <rect key="br" width="1080" height="1920" fill="url(#cl-brume)" />;
   return {fond, items, brume};
+};
+
+// ---- petits éléments de décor réutilisables ----
+// Faux plafond : dalles, quelques dalles manquantes avec un câble qui pend, bouches d'aération
+const plafondDalles = (cam, x0, x1, z0, z1, cle) => {
+  const out = [];
+  for (let x = x0 + 260; x < x1; x += 260) out.push(ligne(cam, [x, PLAF + 1, z0], [x, PLAF + 1, z1], 3, '#1c1d20', `${cle}dx${x}`));
+  for (let z = Math.ceil(z0 / 0.6) * 0.6; z < z1; z += 0.6) {
+    out.push(ligne(cam, [x0, PLAF + 1, z], [x1, PLAF + 1, z], 3, '#1c1d20', `${cle}dz${z}`));
+    const r = random(`${cle}d${Math.round(z * 10)}`);
+    if (r < 0.12) {
+      const x = x0 + 260 * Math.floor(random(`${cle}x${z}`) * ((x1 - x0) / 260));
+      out.push(<polygon key={`${cle}trou${z}`} points={cam.poly([[x, PLAF + 2, z], [x + 260, PLAF + 2, z], [x + 260, PLAF + 2, z + 0.6], [x, PLAF + 2, z + 0.6]])} fill="#0a0a0c" />);
+      out.push(ligne(cam, [x + 130, PLAF + 2, z + 0.3], [x + 150, PLAF + 260, z + 0.35], 4, '#111', `${cle}cable${z}`));
+    } else if (r > 0.8) {
+      const x = x0 + 260 * Math.floor(random(`${cle}v${z}`) * ((x1 - x0) / 260)) + 50;
+      out.push(<polygon key={`${cle}vent${z}`} points={cam.poly([[x, PLAF + 3, z + 0.1], [x + 160, PLAF + 3, z + 0.1], [x + 160, PLAF + 3, z + 0.5], [x, PLAF + 3, z + 0.5]])} fill="#3c3f44" />);
+      [0.2, 0.3, 0.4].forEach((dz) => out.push(ligne(cam, [x + 10, PLAF + 4, z + dz], [x + 150, PLAF + 4, z + dz], 3, '#1f2124', `${cle}g${z}${dz}`)));
+    } else if (r > 0.7) {
+      const p = cam.proj(x0 + 520, PLAF + 4, z + 0.3);
+      if (cam.visible(z + 0.3, x0 + 520, PLAF)) out.push(<circle key={`${cle}spk${z}`} cx={p[0]} cy={p[1]} r={Math.max(1, 12 * cam.scale(z + 0.3, x0 + 520, PLAF))} fill="#8a8d92" />);
+    }
+  }
+  return out;
+};
+// Damier discret au sol
+const damier = (cam, x0, x1, z0, z1) => {
+  const out = [];
+  for (let z = Math.ceil(z0 / 0.5) * 0.5; z < z1; z += 0.5)
+    for (let x = x0, c = 0; x < x1; x += 260, c++)
+      if ((c + Math.round(z * 2)) % 2 === 0) out.push(<polygon key={`dm${x}${z}`} points={cam.poly([[x, SOL - 0.5, z], [x + 260, SOL - 0.5, z], [x + 260, SOL - 0.5, z + 0.5], [x, SOL - 0.5, z + 0.5]])} fill="#1d1f22" />);
+  return out;
+};
+const COUL_CASIERS = ['#3d5a7a', '#7a3d3d', '#3d6a4a', '#6a5a2e'];
+const couleurCasier = (z, ouvert = false) => {
+  const c = COUL_CASIERS[Math.floor((z - 0.6) / 4.2) % COUL_CASIERS.length];
+  return ouvert ? c + 'cc' : c;
+};
+// Haut des murs : affiches, photos de classe, banderole, vitres des salles
+const AFFICHES = [
+  [1.0, '#c9a23a', 'BAC 2026'],
+  [2.6, '#3a7ac9', 'CDI →'],
+  [5.2, '#c93a5a', 'SOIRÉE DU LYCÉE'],
+  [7.4, '#5ac93a', 'ÉCO-DÉLÉGUÉS'],
+  [14.2, '#c96a3a', 'CLUB THÉÂTRE'],
+  [17.0, '#7a3ac9', 'ORIENTATION'],
+  [19.4, '#3ac9b8', 'VOYAGE À LONDRES'],
+];
+const hautDesMurs = (cam, f, z0, z1) => {
+  const out = [];
+  AFFICHES.forEach(([z, c, t], k) => {
+    if (z < z0 - 1 || z > z1) return;
+    out.push(
+      plaque(cam, [-KX + 2, -650, z], [0, 0, 1], [0, 1, 0], 900, 230, <g><rect width="900" height="230" fill={c} opacity="0.55" /><rect x="20" y="20" width="860" height="190" fill="none" stroke="#e8e4d8" strokeWidth="6" opacity="0.4" /><text x="450" y="145" fontSize="88" textAnchor="middle" fontWeight="900" fill="#e8e4d8" opacity="0.75" fontFamily="'DejaVu Sans', Arial">{t}</text></g>, `aff${k}`)
+    );
+  });
+  // photos de classe encadrées
+  [3.6, 6.3, 15.4, 18.3].forEach((z, k) => {
+    if (z < z0 - 1 || z > z1) return;
+    out.push(<polygon key={`ph${k}`} points={cam.poly([[-KX + 2, -650, z], [-KX + 2, -650, z + 0.5], [-KX + 2, -450, z + 0.5], [-KX + 2, -450, z]])} fill="#2a2420" />);
+    out.push(<polygon key={`phi${k}`} points={cam.poly([[-KX + 3, -630, z + 0.04], [-KX + 3, -630, z + 0.46], [-KX + 3, -470, z + 0.46], [-KX + 3, -470, z + 0.04]])} fill="#6a7078" />);
+  });
+  // vitres des salles (mur droit, entre les portes)
+  [4.6, 8.8, 13.0, 17.2, 21.4, 25.6].forEach((z, k) => {
+    if (z < z0 - 1 || z > z1) return;
+    const allume = k === 2 && random(`vs${Math.floor(f / 5)}`) > 0.3;
+    out.push(<polygon key={`vs${k}`} points={cam.poly([[KX - 1, -620, z], [KX - 1, -620, z + 1.6], [KX - 1, -380, z + 1.6], [KX - 1, -380, z]])} fill={allume ? '#3a4a3a' : '#141b24'} />);
+    [0.53, 1.07].forEach((dz) => out.push(ligne(cam, [KX - 2, -620, z + dz], [KX - 2, -380, z + dz], 6, '#2a2d33', `vsm${k}${dz}`)));
+  });
+  // horloge du couloir
+  if (z0 < 12 && z1 > 12) out.push(plaque(cam, [KX - 2, -660, 12.6], [0, 0, -1], [0, 1, 0], 180, 180, <g transform="translate(90 90)"><circle r="85" fill="#d8d6cc" stroke="#222" strokeWidth="8" /><line x1="0" y1="0" x2="0" y2="-40" stroke="#111" strokeWidth="8" transform="rotate(216)" /><line x1="0" y1="0" x2="0" y2="-62" stroke="#111" strokeWidth="5" transform={`rotate(${72 + f * 0.1})`} /></g>, 'horl'));
+  return out;
+};
+const plante = (cam, x, z) => {
+  if (!cam.visible(z, x, 0)) return null;
+  const [px, py] = cam.proj(x, SOL, z);
+  return (
+    <g transform={`translate(${px} ${py}) scale(${cam.scale(z, x, 0)})`}>
+      <path d="M-90,0 L-110,-200 L110,-200 L90,0 Z" fill="#5a3a26" />
+      {[-60, -20, 20, 60].map((a, k) => (
+        <path key={k} d={`M0,-200 Q${a * 2},-420 ${a * 3.5},-560`} stroke="#1f3a24" strokeWidth="30" fill="none" strokeLinecap="round" />
+      ))}
+    </g>
+  );
+};
+const solGlissant = (cam, x, z) => {
+  if (!cam.visible(z, x, 0)) return null;
+  const [px, py] = cam.proj(x, SOL, z);
+  return (
+    <g transform={`translate(${px} ${py}) scale(${cam.scale(z, x, 0)})`}>
+      <path d="M-110,0 L-40,-420 L40,-420 L110,0 Z" fill="#e0b81a" />
+      <text x="0" y="-250" fontSize="44" textAnchor="middle" fontWeight="900" fill="#1a1a1a" fontFamily="'DejaVu Sans', Arial">SOL</text>
+      <text x="0" y="-200" fontSize="34" textAnchor="middle" fontWeight="900" fill="#1a1a1a" fontFamily="'DejaVu Sans', Arial">GLISSANT</text>
+      <path d="M-30,-340 L0,-390 L30,-340 Z" fill="#1a1a1a" />
+    </g>
+  );
 };
 
 // ===================== LE COULOIR =====================
@@ -245,14 +370,14 @@ export const couloir = (
       <polygon points={poly([[KX - 1, -330, z], [KX - 1, -330, z + 0.95], [KX - 1, SOL, z + 0.95], [KX - 1, SOL, z]])} fill="#5a4530" />
       <polygon points={poly([[KX - 2, -250, z + 0.2], [KX - 2, -250, z + 0.55], [KX - 2, -60, z + 0.55], [KX - 2, -60, z + 0.2]])} fill="#0d1218" />
       {ligne(cam, [KX - 4, 60, z + 0.8], [KX - 4, 60, z + 0.88], 10, '#b8b2a0', 'poignee')}
-      {plaque(cam, [KX - 3, -420, z + 0.25], [0, 0, 1], [0, 1, 0], 450, 70, <g><rect width="450" height="70" rx="8" fill="#d8d4c8" /><text x="225" y="52" fontSize="48" textAnchor="middle" fontWeight="900" fill="#222" fontFamily="'DejaVu Sans', Arial">{`SALLE ${12 + k}`}</text></g>, 'num')}
+      {plaque(cam, [KX - 3, -420, z + 0.7], [0, 0, -1], [0, 1, 0], 450, 70, <g><rect width="450" height="70" rx="8" fill="#d8d4c8" /><text x="225" y="52" fontSize="48" textAnchor="middle" fontWeight="900" fill="#222" fontFamily="'DejaVu Sans', Arial">{`SALLE ${12 + k}`}</text></g>, 'num')}
     </g>
   ));
   const rouge = porteRouge === 'fond' ? {x: 0, z: KFOND} : {x: -KX, z: porteRouge};
   const fond = (
     <g>
       <defs>
-        {brumeDef(cam, 'co-brume', '#020304', 0.8)}
+        {brumeDef(cam, 'co-brume', '#020304', 0.65)}
         <radialGradient id="co-vert">
           <stop offset="0" stopColor="#3dff8a" stopOpacity="0.55" />
           <stop offset="1" stopColor="#3dff8a" stopOpacity="0" />
@@ -261,6 +386,14 @@ export const couloir = (
           <stop offset="0" stopColor="#ff2a1a" stopOpacity="0.7" />
           <stop offset="1" stopColor="#ff2a1a" stopOpacity="0" />
         </radialGradient>
+        <radialGradient id="co-distrib">
+          <stop offset="0" stopColor="#5aa0e0" stopOpacity="0.35" />
+          <stop offset="1" stopColor="#5aa0e0" stopOpacity="0" />
+        </radialGradient>
+        <linearGradient id="co-cour" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#0c1428" />
+          <stop offset="1" stopColor="#1e2c48" />
+        </linearGradient>
         <radialGradient id="co-neon">
           <stop offset="0" stopColor="#f0fff6" stopOpacity="0.5" />
           <stop offset="1" stopColor="#f0fff6" stopOpacity="0" />
@@ -275,14 +408,21 @@ export const couloir = (
       {/* murs : bas peint, haut clair, frise */}
       {[-KX, KX].map((x) => (
         <g key={`m${x}`}>
-          <polygon points={poly([[x, PLAF, zA], [x, PLAF, zB], [x, 60, zB], [x, 60, zA]])} fill="#3d3d38" />
+          <polygon points={poly([[x, PLAF, zA], [x, PLAF, zB], [x, 60, zB], [x, 60, zA]])} fill="#47463f" />
           <polygon points={poly([[x, 60, zA], [x, 60, zB], [x, SOL, zB], [x, SOL, zA]])} fill="#2e3b45" />
           {ligne(cam, [x, 60, zA], [x, 60, zB], 8, '#7a2e2e', 'frise')}
         </g>
       ))}
-      <polygon points={poly([[-KX, PLAF, zA], [KX, PLAF, zA], [KX, PLAF, zB], [-KX, PLAF, zB]])} fill="#191a1d" />
+      <polygon points={poly([[-KX, PLAF, zA], [KX, PLAF, zA], [KX, PLAF, zB], [-KX, PLAF, zB]])} fill="#2a2c30" />
+      {plafondDalles(cam, -KX, KX, zA, zB, 'co')}
+      {/* chemin de câbles et tuyaux le long du plafond */}
+      {ligne(cam, [-470, PLAF + 45, zA], [-470, PLAF + 45, zB], 16, '#4a4d52', 'tuyau1')}
+      {ligne(cam, [-420, PLAF + 70, zA], [-420, PLAF + 70, zB], 9, '#3a3d42', 'tuyau2')}
+      {ligne(cam, [470, PLAF + 35, zA], [470, PLAF + 35, zB], 7, '#5a3a2a', 'tuyau3')}
       <polygon points={poly([[-KX, SOL, zA], [KX, SOL, zA], [KX, SOL, zB], [-KX, SOL, zB]])} fill="#232529" />
+      {damier(cam, -KX, KX, zA, zB)}
       {sol}
+      {hautDesMurs(cam, f, zA, zB)}
       {portes}
       {/* tableau d'affichage en liège + la phrase à la craie sur une ardoise */}
       <polygon points={poly([[KX - 1, -420, 8.6], [KX - 1, -420, 10.6], [KX - 1, -60, 10.6], [KX - 1, -60, 8.6]])} fill="#8a6a44" />
@@ -293,8 +433,8 @@ export const couloir = (
       {affichage > 0 &&
         plaque(
           cam,
-          [KX - 2, -390, 13.08],
-          [0, 0, 1],
+          [KX - 2, -390, 14.52],
+          [0, 0, -1],
           [0, 1, 0],
           1440,
           260,
@@ -347,9 +487,9 @@ export const couloir = (
       z: z + 0.05,
       el: (
         <g key={`c${k}`}>
-          <polygon points={poly([[x - 1, -400, z], [x - 1, -400, z + L], [x - 1, 420, z + L], [x - 1, 420, z]])} fill={a > 0.05 ? '#08090b' : '#3d5a7a'} />
+          <polygon points={poly([[x - 1, -400, z], [x - 1, -400, z + L], [x - 1, 420, z + L], [x - 1, 420, z]])} fill={a > 0.05 ? '#08090b' : couleurCasier(z)} />
           {a > 0.05 && ligne(cam, [x - 2, 0, z + 0.02], [x - 2, 0, z + L - 0.02], 4, '#1b1d22', 'etag')}
-          <polygon points={poly([[x, -400, z], [bout[0], -400, bout[1]], [bout[0], 420, bout[1]], [x, 420, z]])} fill={a > 0.05 ? '#4a6c90' : '#3d5a7a'} stroke="#22344a" strokeWidth="2" />
+          <polygon points={poly([[x, -400, z], [bout[0], -400, bout[1]], [bout[0], 420, bout[1]], [x, 420, z]])} fill={couleurCasier(z, a > 0.05)} stroke="#1c2430" strokeWidth="2" />
           {[-330, -300, -270].map((y) => ligne(cam, [x + 1 + 320 * Math.sin(a) * 0.3, y, z + 0.06 + L * Math.cos(a) * 0.3], [x + 1 + 320 * Math.sin(a) * 0.8, y, z + 0.06 + L * Math.cos(a) * 0.8], 3, '#22344a', `ev${y}`))}
           {ligne(cam, [x + 1 + 320 * Math.sin(a) * 0.85, 0, z + L * Math.cos(a) * 0.85], [x + 1 + 320 * Math.sin(a) * 0.85, 60, z + L * Math.cos(a) * 0.85], 6, '#b8b2a0', 'poi')}
         </g>
@@ -364,7 +504,10 @@ export const couloir = (
       z,
       el: (
         <g key={`n${i}`}>
-          <polygon points={poly([[-60, PLAF + 8, z], [60, PLAF + 8, z], [60, PLAF + 8, z + 1], [-60, PLAF + 8, z + 1]])} fill={v > 0.2 ? '#f4fffa' : '#33363b'} />
+          <polygon points={poly([...Array(16)].map((_, k) => [Math.cos((k / 16) * 6.283) * 480, PLAF + 2, z + 0.5 + Math.sin((k / 16) * 6.283) * 0.9]))} fill="url(#co-neon)" opacity={0.25 + 0.75 * v} />
+          <polygon points={poly([[-95, PLAF + 4, z - 0.05], [95, PLAF + 4, z - 0.05], [95, PLAF + 4, z + 1.05], [-95, PLAF + 4, z + 1.05]])} fill="#44474d" />
+          <polygon points={poly([[-60, PLAF + 10, z], [-10, PLAF + 10, z], [-10, PLAF + 10, z + 1], [-60, PLAF + 10, z + 1]])} fill={v > 0.2 ? '#f4fffa' : '#55585e'} />
+          <polygon points={poly([[10, PLAF + 10, z], [60, PLAF + 10, z], [60, PLAF + 10, z + 1], [10, PLAF + 10, z + 1]])} fill={v > 0.2 && (i % 3 !== 0 || random(`tube${i}${Math.floor(f / 3)}`) > 0.4) ? '#f4fffa' : '#55585e'} />
           {v > 0.05 && <polygon points={poly([...Array(16)].map((_, k) => [Math.cos((k / 16) * 6.283) * 520, SOL - 1, z + 0.5 + Math.sin((k / 16) * 6.283) * 0.8]))} fill="url(#co-neon)" opacity={v} />}
           {eclats && eclats(i, z)}
         </g>
@@ -406,6 +549,52 @@ export const couloir = (
       ),
     });
   });
+  // ---- variété du couloir ----
+  // vitrine à trophées
+  items.push({
+    z: 9.2,
+    el: (
+      <g key="vitrine">
+        {boite(cam, -KX, -KX + 200, -420, 380, 9.2, 10.8, ['#3a2e22', '#2b3a44', '#5a4632'], 'vit')}
+        <polygon points={poly([[-KX + 201, -400, 9.25], [-KX + 201, -400, 10.75], [-KX + 201, 360, 10.75], [-KX + 201, 360, 9.25]])} fill="#9fc6d8" opacity="0.12" />
+        {[9.45, 9.8, 10.2, 10.55].map((zz, k) => (
+          <g key={k}>
+            {ligne(cam, [-KX + 100, -150 - (k % 2) * 220, zz], [-KX + 100, -60 - (k % 2) * 220, zz], Math.max(2, 26 * cam.scale(zz, -KX + 100, 0)), '#c9a23a', 'cou')}
+            {ligne(cam, [-KX + 100, -190 - (k % 2) * 220, zz - 0.05], [-KX + 100, -190 - (k % 2) * 220, zz + 0.05], Math.max(2, 30 * cam.scale(zz, -KX + 100, 0)), '#e0bb4a', 'coupe')}
+          </g>
+        ))}
+        {[-190, 40, 270].map((y) => ligne(cam, [-KX + 190, y, 9.25], [-KX + 190, y, 10.75], 4, '#bcd', `et${y}`))}
+      </g>
+    ),
+  });
+  // distributeur de boissons qui éclaire le couloir
+  items.push({
+    z: 11.1,
+    el: (
+      <g key="distrib">
+        <polygon points={poly([...Array(14)].map((_, k) => [-KX + 420 + Math.cos((k / 14) * 6.283) * 360, SOL - 1, 11.5 + Math.sin((k / 14) * 6.283) * 0.7]))} fill="url(#co-distrib)" />
+        {boite(cam, -KX, -KX + 260, -520, SOL, 11.1, 11.9, ['#1c1c22', '#26262e', '#2b2b34'], 'dis')}
+        <polygon points={poly([[-KX + 262, -470, 11.18], [-KX + 262, -470, 11.65], [-KX + 262, 120, 11.65], [-KX + 262, 120, 11.18]])} fill="#5aa0e0" opacity={0.75 + 0.25 * (random(`dist${Math.floor(f / 4)}`) > 0.15 ? 1 : 0)} />
+        {[...Array(5)].map((_, r) => ligne(cam, [-KX + 263, -400 + r * 110, 11.2], [-KX + 263, -400 + r * 110, 11.63], 6, '#c8463a', `r${r}`))}
+        <polygon points={poly([[-KX + 262, 200, 11.3], [-KX + 262, 200, 11.6], [-KX + 262, 330, 11.6], [-KX + 262, 330, 11.3]])} fill="#08080a" />
+      </g>
+    ),
+  });
+  items.push({z: 12.2, el: boite(cam, -KX, -KX + 160, 250, SOL, 12.2, 13.0, ['#5a4632', '#4a3a28', '#3d3022'], 'banc')});
+  // grande fenêtre sur la cour (arbres et lune)
+  items.push({
+    z: 21.8,
+    el: (
+      <g key="cour">
+        <polygon points={poly([[-KX + 1, -600, 21.8], [-KX + 1, -600, 25.4], [-KX + 1, 60, 25.4], [-KX + 1, 60, 21.8]])} fill="url(#co-cour)" />
+        {plaque(cam, [-KX + 2, -600, 25.4], [0, 0, -1], [0, 1, 0], 3600, 660, <g fill="#06080c"><circle cx="2800" cy="160" r="70" fill="#d8e2f0" opacity="0.6" />{[300, 900, 1500, 2200, 3100].map((x, k) => <g key={k}><rect x={x - 25} y="380" width="50" height="280" /><circle cx={x} cy="330" r={150 + (k % 2) * 50} /></g>)}<rect x="0" y="560" width="3600" height="100" /></g>, 'arbres')}
+        {[22.7, 23.6, 24.5].map((zz) => ligne(cam, [-KX + 3, -600, zz], [-KX + 3, 60, zz], 12, '#2a2d33', `mont${zz}`))}
+        {ligne(cam, [-KX + 3, -270, 21.8], [-KX + 3, -270, 25.4], 10, '#2a2d33', 'trav')}
+      </g>
+    ),
+  });
+  items.push({z: 20.6, el: plante(cam, -KX + 120, 20.6)});
+  items.push({z: 6.5, el: solGlissant(cam, 260, 6.5)});
   // haut-parleur
   items.push({
     z: 6.2,
@@ -470,42 +659,68 @@ export const escalier = (cam, f, {lumiere = 1} = {}) => {
   return {fond, items, brume};
 };
 
-// Volée de marches vue de côté (pour les plans « tu descends… tu reviens au même étage »)
-export const volee = (cam, f, {lumiere = 1} = {}) => {
+// Volée de marches qui descend vers +Z jusqu'à un palier, avec le panneau « 1ER ÉTAGE » face à la caméra.
+// marcheY(z) donne la hauteur du sol à la profondeur z (pour poser le bonhomme sur les marches).
+export const VOLEE = {z0: 0.5, pas: 0.28, h: 95, n: 16};
+export const marcheY = (z) => {
+  const m = Math.max(0, Math.min(VOLEE.n, Math.floor((z - VOLEE.z0) / VOLEE.pas) + 1));
+  return SOL + m * VOLEE.h;
+};
+export const volee = (cam, f, {ampoule = 1} = {}) => {
   const {poly} = cam;
+  const {z0, pas, h, n} = VOLEE;
+  const bas = SOL + n * h;
+  const zP = z0 + n * pas; // début du palier
+  const zF = zP + 1.4; // mur du fond
+  const X = 430;
   const marches = [];
-  for (let m = 0; m < 14; m++) {
-    const z = 2 + m * 0.28;
-    const y = SOL - m * 95;
+  for (let m = 0; m < n; m++) {
+    const z = z0 + m * pas;
+    const y = SOL + (m + 1) * h;
     marches.push(
       <g key={m}>
-        <polygon points={poly([[-420, y - 95, z], [420, y - 95, z], [420, y - 95, z + 0.28], [-420, y - 95, z + 0.28]])} fill="#3a3d42" />
-        <polygon points={poly([[-420, y - 95, z], [420, y - 95, z], [420, y, z], [-420, y, z]])} fill="#2b2e33" />
-        {ligne(cam, [-420, y - 95, z], [420, y - 95, z], 5, '#b9a43a', 'nez')}
+        <polygon points={poly([[-X, y - h, z], [X, y - h, z], [X, y, z], [-X, y, z]])} fill="#25282c" />
+        <polygon points={poly([[-X, y, z], [X, y, z], [X, y, z + pas], [-X, y, z + pas]])} fill={m % 2 ? '#3a3d42' : '#373a3f'} />
+        {ligne(cam, [-X, y, z + 0.01], [X, y, z + 0.01], 6, '#b9a43a', 'nez')}
       </g>
     );
   }
+  const pb = cam.proj(0, bas - 1150, zF - 0.3);
+  const sb = cam.scale(zF - 0.3, 0, bas - 1150);
   const fond = (
     <g>
       <defs>
-        {brumeDef(cam, 'vo-brume', '#020203', 0.7)}
+        {brumeDef(cam, 'vo-brume', '#020203', 0.5)}
         <radialGradient id="vo-lampe">
-          <stop offset="0" stopColor="#ffe7b0" stopOpacity="0.55" />
+          <stop offset="0" stopColor="#ffe7b0" stopOpacity="0.6" />
           <stop offset="1" stopColor="#ffe7b0" stopOpacity="0" />
         </radialGradient>
       </defs>
-      <rect width="1080" height="1920" fill="#040405" />
-      <polygon points={poly([[-420, -1900, 6], [420, -1900, 6], [420, SOL, 6], [-420, SOL, 6]])} fill="#2c2f2c" />
-      <polygon points={poly([[-420, -1900, -1], [-420, -1900, 6], [-420, SOL, 6], [-420, SOL, -1]])} fill="#353833" />
-      <polygon points={poly([[420, -1900, -1], [420, -1900, 6], [420, SOL, 6], [420, SOL, -1]])} fill="#30332f" />
-      <polygon points={poly([[-420, SOL, -1], [420, SOL, -1], [420, SOL, 2], [-420, SOL, 2]])} fill="#26292d" />
-      {/* panneau d'étage */}
-      {plaque(cam, [419, -560, 1.5], [0, 0, -1], [0, 1, 0], 900, 300, <g><rect width="900" height="300" rx="20" fill="#e2ddcc" /><text x="450" y="200" fontSize="170" textAnchor="middle" fontWeight="900" fill="#1a1a1a" fontFamily="'DejaVu Sans', Arial">1ER ÉTAGE</text></g>, 'etage')}
-      {/* lampe de palier */}
-      <circle cx={cam.proj(0, -900, 2.5)[0]} cy={cam.proj(0, -900, 2.5)[1]} r={600 * cam.scale(2.5, 0, -900)} fill="url(#vo-lampe)" opacity={lumiere} />
+      <rect width="1080" height="1920" fill="#050506" />
+      {/* murs latéraux, plafond en pente, mur du fond */}
+      <polygon points={poly([[-X, -900, -1], [-X, -900, zF], [-X, bas, zF], [-X, bas, -1]])} fill="#3a3c38" />
+      <polygon points={poly([[X, -900, -1], [X, -900, zF], [X, bas, zF], [X, bas, -1]])} fill="#34362f" />
+      <polygon points={poly([[-X, -900, -1], [X, -900, -1], [X, bas - 1500, zF], [-X, bas - 1500, zF]])} fill="#26282b" />
+      <polygon points={poly([[-X, bas - 1500, zF], [X, bas - 1500, zF], [X, bas, zF], [-X, bas, zF]])} fill="#3e403a" />
+      {/* bandes peintes le long des murs */}
+      {[-X, X].map((x) => ligne(cam, [x, SOL - 380, -1], [x, bas - 380, zP], 14, '#7a2e2e', `bande${x}`))}
+      {/* palier */}
+      <polygon points={poly([[-X, bas, zP], [X, bas, zP], [X, bas, zF], [-X, bas, zF]])} fill="#2e3135" />
       {marches}
       {/* main courante */}
-      {ligne(cam, [380, SOL - 300, 1.6], [380, SOL - 300 - 13 * 95, 2 + 13 * 0.28], 10, '#8e2a22', 'mc')}
+      {[-X + 30, X - 30].map((x) => ligne(cam, [x, SOL - 300, -0.5], [x, bas - 300, zP], 10, '#8e2a22', `mc${x}`))}
+      {/* tuyau et tags */}
+      {ligne(cam, [X - 20, -880, -1], [X - 20, bas - 1480, zF], 14, '#4a4d52', 'tuyau')}
+      {plaque(cam, [-X + 2, SOL - 500, 1.0], [0, 0, 1], [0, 1, 0], 1600, 400, <g opacity="0.35"><path d="M50,300 C200,50 350,350 500,120 S800,300 950,80" stroke="#3a7ac9" strokeWidth="40" fill="none" /><text x="1100" y="260" fontSize="200" fontWeight="900" fill="#c93a5a" fontFamily="'DejaVu Sans', Arial">REM</text></g>, 'tag')}
+      {/* le panneau d'étage, toujours le même */}
+      {plaque(cam, [-420, bas - 1300, zF - 0.01], [1, 0, 0], [0, 1, 0], 840, 300, <g><rect width="840" height="300" rx="20" fill="#e2ddcc" /><text x="420" y="200" fontSize="150" textAnchor="middle" fontWeight="900" fill="#1a1a1a" fontFamily="'DejaVu Sans', Arial">1ER ÉTAGE</text></g>, 'etage')}
+      {/* ampoule qui grésille au-dessus du panneau */}
+      {cam.visible(zF - 0.3, 0, bas - 1150) && (
+        <g>
+          <circle cx={pb[0]} cy={pb[1]} r={900 * sb} fill="url(#vo-lampe)" opacity={ampoule} />
+          <circle cx={pb[0]} cy={pb[1]} r={28 * sb} fill={ampoule > 0.3 ? '#fff6dc' : '#3a3a30'} />
+        </g>
+      )}
     </g>
   );
   const brume = <rect key="br" width="1080" height="1920" fill="url(#vo-brume)" />;

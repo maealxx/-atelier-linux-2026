@@ -1,7 +1,8 @@
 import {Easing, interpolate, random, Series, spring, staticFile, useCurrentFrame} from 'remotion';
-import {CASIERS, classe, couloir, escalier, KX, PLAF, Surveillant, volee} from './Lycee';
+import {CASIERS, classe, couloir, escalier, KX, marcheY, PLAF, volee, VOLEE} from './Lycee';
+import {surveillant3D} from './Monstre3D';
 import {camFace, dosPour, montage, Plan, punch} from './montage';
-import {clamp, flick, makeCam, marche, Perso} from './moteur';
+import {clamp, flick, makeCam, marche, orbite, Perso} from './moteur';
 import {SOL} from './Rue';
 import PLANS from './salle-zero/plans.json';
 import timeline from './salle-zero/timeline.json';
@@ -15,16 +16,21 @@ const LUNE = [0.75, 0.85, 1.08]; // lumière de la classe
 const VERT = [0.72, 1, 0.82]; // lumière du couloir (panneaux sortie)
 const ASSIS = SOL + 250; // le bonhomme assis : on l'enfonce derrière sa table
 
-const monstre = (cam, x, z, props, key = 'mo') => {
-  if (!cam.visible(z, x, -500)) return null;
-  const [px, py] = cam.proj(x, SOL, z);
-  return (
-    <g key={key} transform={`translate(${px} ${py}) scale(${cam.scale(z, x, -500)})`}>
-      <ellipse rx="160" ry="26" fill="#000" opacity="0.5" />
-      <Surveillant {...props} />
-    </g>
-  );
+// Néon qui « bugue » : il tient, puis il hoquette et coupe par moments
+const bug = (f, graine, base = 0.9) => {
+  const r = random(`${graine}${Math.floor(f / 2)}`);
+  const coupe = random(`${graine}c${Math.floor(f / 9)}`) < 0.32;
+  return coupe ? (r > 0.5 ? base : 0.04) : base * (0.82 + 0.18 * r);
 };
+// Classe : un seul néon allumé, qui bugue
+const neonsClasse = (f) => (k) => (k === 3 ? bug(f, 'cl3') : k === 0 ? 0.25 * bug(f, 'cl0', 1) : 0);
+// Couloir : un néon sur trois bugue, un sur trois reste faible, les autres sont morts
+const neonsCouloir = (f, extra = () => null) => (k) => extra(k) ?? (k % 3 === 1 ? bug(f, `co${k}`) : k % 3 === 2 ? 0.28 : 0);
+// La pièce s'assombrit un peu quand le néon principal coupe
+const noirBug = (f, graine) => 0.03 + 0.12 * (1 - bug(f, graine, 1));
+
+// Le surveillant en 3D : tour 0 → 1 = il se retourne vers le bonhomme, pattes = il se met à quatre pattes
+const monstre = (cam, x, z, {f, tour = 0, ouvre = 0, pattes = 0}) => surveillant3D(cam, {x, z, angle: 180 * tour, ouvre, pose: pattes, f}).el;
 
 // ---------- 1. Le réveil ----------
 const Reveil = () => {
@@ -37,14 +43,14 @@ const Reveil = () => {
     () => ({x: 0, y: -720, z: -1.2 + (0.3 * t) / d, pitch: 30}),
   ];
   const cam = makeCam(cams[i]());
-  const decor = classe(cam, f, {neon: 0});
+  const decor = classe(cam, f, {neon: neonsClasse(f)});
   const reveille = interpolate(f, [bornes[2], bornes[2] + 8], [0, 1], clamp);
   return (
     <Plan
       f={f}
       cam={cam}
       decor={decor}
-      noir={0.05}
+      noir={noirBug(f, 'nb')}
       zoom={punch(t)}
       roll={[4, -3, 2, 0][i]}
       items={[{z: 2.55, el: <Perso cam={cam} id="z1" x={0} y={ASSIS} z={2.55} dos={dosPour(cam, 2.55, 1)} lum={0.65} teinte={LUNE} tilt={-28 * (1 - reveille)} eyes={f < bornes[2] ? 0.08 : 1 + 0.2 * reveille} worry={0.5 * reveille} breath={Math.sin(f / 12) * 3} />}]}
@@ -62,13 +68,13 @@ const ClasseVide = () => {
     () => camFace(0, 2.4, 1, 0.5, t, d),
   ];
   const cam = makeCam(cams[i]());
-  const decor = classe(cam, f, {neon: 0});
+  const decor = classe(cam, f, {neon: neonsClasse(f)});
   return (
     <Plan
       f={f}
       cam={cam}
       decor={decor}
-      noir={0.05}
+      noir={noirBug(f, 'nb')}
       zoom={punch(t)}
       roll={[0, -4, 3][i]}
       items={[{z: 2.4, el: <Perso cam={cam} id="z2" x={0} z={2.4} dos={dosPour(cam, 2.4, 1)} lum={0.65} teinte={LUNE} worry={0.7} pupilX={Math.sin(f / 10) * 4} breath={Math.sin(f / 8) * 3} />}]}
@@ -88,7 +94,7 @@ const Tableau = () => {
   ];
   const cam = makeCam(cams[i]());
   const craie = interpolate(f, [4, bornes[1] + 10], [0, 1], clamp);
-  const decor = classe(cam, f, {craie});
+  const decor = classe(cam, f, {craie, neon: neonsClasse(f)});
   // la craie qui tombe toute seule du rebord
   const tc = f - bornes[1];
   const craieY = -60 + Math.max(0, tc) ** 2 * 1.4;
@@ -99,7 +105,7 @@ const Tableau = () => {
       f={f}
       cam={cam}
       decor={decor}
-      noir={0.05}
+      noir={noirBug(f, 'nb')}
       zoom={punch(t)}
       roll={[0, 5, 3, -6][i]}
       items={[
@@ -123,14 +129,14 @@ const Couloir = () => {
   ];
   const cam = makeCam(cams[i]());
   const fleche = (k) => (k === 1 ? interpolate(f, [DUREES.couloir * 0.3, DUREES.couloir * 0.5], [0, 180], ease) : 180);
-  const decor = couloir(cam, f, {fleche, neon: (k) => (k === 3 ? flick(f, 'c4', 0, 300, 0.05) * 0.4 : 0)});
+  const decor = couloir(cam, f, {fleche, neon: neonsCouloir(f)});
   const m = marche(f, 0.3, 0.8);
   return (
     <Plan
       f={f}
       cam={cam}
       decor={decor}
-      noir={0.04}
+      noir={noirBug(f, 'nb')}
       zoom={punch(t)}
       roll={[3, -5, 2, 4][i]}
       items={[{z, el: <Perso cam={cam} id="z4" x={0} z={z} dos={dosPour(cam, z, 1)} lum={0.55} teinte={VERT} lift={m.bob} legG={m.legG} legD={m.legD} epauleG={m.bras} epauleD={m.bras} worry={0.7} pupilX={Math.sin(f / 9) * 4} breath={Math.sin(f / 7) * 3} />}]}
@@ -161,14 +167,14 @@ const Casiers = () => {
     if (zc > 5.6) return 0;
     return interpolate(f, [(zc - 0.6) * 22, (zc - 0.6) * 22 + 5], [0, 1], clamp);
   };
-  const decor = couloir(cam, f, {casier});
+  const decor = couloir(cam, f, {casier, neon: neonsCouloir(f)});
   const m = marche(f, 0.3 + 0.22 * vite, 0.8 + 0.2 * vite);
   return (
     <Plan
       f={f}
       cam={cam}
       decor={decor}
-      noir={0.04}
+      noir={noirBug(f, 'nb')}
       zoom={punch(t, i >= 1 && i <= 3 ? 0.2 : 0.12)}
       roll={[2, -6, 5, -7, 3][i]}
       items={[{z, el: <Perso cam={cam} id="z5" x={0} z={z} dos={dosPour(cam, z, 1)} lum={0.55} teinte={VERT} lift={m.bob} legG={m.legG} legD={m.legD} epauleG={m.bras} epauleD={m.bras} worry={1} eyes={1.15} sweat={0.6 + 0.4 * vite} breath={Math.sin(f / 5) * 3} />}]}
@@ -190,13 +196,13 @@ const HautParleur = () => {
   ];
   const cam = makeCam(cams[i]());
   const allume = i === 2 && t < d * 0.55 ? (random(`hpn${f}`) > 0.25 ? 1 : 0.3) : 0;
-  const decor = couloir(cam, f, {casier: casiersOuverts, neon: () => allume});
+  const decor = couloir(cam, f, {casier: casiersOuverts, neon: neonsCouloir(f, () => (allume ? 1 : null))});
   return (
     <Plan
       f={f}
       cam={cam}
       decor={decor}
-      noir={0.04}
+      noir={noirBug(f, 'nb')}
       zoom={punch(t)}
       roll={[6, -3, 0, 4][i]}
       items={[{z: 5.4, el: <Perso cam={cam} id="z6" x={0} z={5.4} dos={dosPour(cam, 5.4, 1)} lum={0.55 + 0.4 * allume} teinte={VERT} worry={1} eyes={1.25} pupilY={-4} tilt={3} sweat={1} shiver={(random(`s6${f}`) - 0.5) * 4} breath={Math.sin(f / 5) * 3} />}]}
@@ -215,13 +221,13 @@ const SalleZeroScene = () => {
     () => ({x: 120, y: -230, z: 4.5, yaw: 0}),
   ];
   const cam = makeCam(cams[i]());
-  const decor = couloir(cam, f, {casier: casiersOuverts, ouvreRouge: interpolate(f, [DUREES.salleZero * 0.5, DUREES.salleZero], [0.15, 0.35], clamp), neon: (k) => (k === 9 ? flick(f, 'c7', 0, 300, 0.05) * 0.5 : 0)});
+  const decor = couloir(cam, f, {casier: casiersOuverts, ouvreRouge: interpolate(f, [DUREES.salleZero * 0.5, DUREES.salleZero], [0.15, 0.35], clamp), neon: neonsCouloir(f)});
   return (
     <Plan
       f={f}
       cam={cam}
       decor={decor}
-      noir={0.04}
+      noir={noirBug(f, 'nb')}
       zoom={punch(t)}
       roll={[0, 4, -5, 2][i]}
       items={[{z: 5.4, el: <Perso cam={cam} id="z7" x={0} z={5.4} dos={dosPour(cam, 5.4, 1)} lum={0.55} teinte={[1, 0.8, 0.8]} worry={1} breath={Math.sin(f / 6) * 3} />}]}
@@ -234,27 +240,34 @@ const Escalier = () => {
   const f = useCurrentFrame();
   const {i, t, d} = decoupe('escalier', f);
   if (i === 0) {
-    const cam = makeCam({x: Math.sin(f / 9) * 40, y: -1100 + (300 * t) / d, z: 0.001, pitch: 89.5, yaw: f * 1.2});
-    return <Plan f={f} decor={escalier(cam, f)} noir={0.05} zoom={punch(t)} roll={f * 0.8} />;
+    const cam = makeCam({x: Math.sin(f / 9) * 40, y: -1100 + (300 * t) / d, z: 0.001, pitch: 89.5, yaw: f * 0.8});
+    return <Plan f={f} decor={escalier(cam, f)} noir={noirBug(f, 'es')} zoom={punch(t)} roll={f * 0.5} />;
   }
-  const cam = makeCam(
-    i === 4 ? {x: -100, y: -410, z: 1.05, yaw: 88} : {x: 200, y: -80, z: 0.4, yaw: 4, pitch: -10}
-  );
-  const decor = volee(cam, f);
-  // il redescend la même volée à chaque plan (l'escalier boucle)
-  const k = Math.min(1, t / Math.max(1, d - 2));
-  const zc = 5.6 - 3.6 * k;
-  const marche_ = Math.max(0, Math.min(13, Math.round((zc - 2) / 0.28)));
-  const m = marche(f, 0.7, 1);
+  // il dévale la volée ; à chaque plan il repart du haut et retombe sur le même panneau
+  const {z0, pas, n} = VOLEE;
+  const k = Math.min(1, t / Math.max(1, d - 3));
+  const zc = z0 - 0.2 + k * (n * pas + 0.5);
+  const yc = marcheY(zc);
+  const zF = z0 + n * pas + 1.4;
+  const bas = SOL + n * VOLEE.h;
+  const cams = {
+    1: () => ({x: 170, y: yc - 720, z: zc - 1.25, pitch: 22, yaw: -3}),
+    2: () => ({x: -160, y: yc - 300, z: zc - 1.0, pitch: 10, yaw: 6}),
+    3: () => ({x: 60, y: bas - 200, z: zF - 0.45, yaw: 180, pitch: -14}),
+    4: () => ({x: 0, y: bas - 1150, z: zF - 1.15 + (0.25 * t) / d, pitch: 0}),
+  };
+  const cam = makeCam(cams[i]());
+  const decor = volee(cam, f, {ampoule: bug(f, 'amp')});
+  const m = marche(f, 0.75, 1);
   return (
     <Plan
       f={f}
       cam={cam}
       decor={decor}
-      noir={0.04}
+      noir={noirBug(f, 'es')}
       zoom={punch(t, 0.16)}
-      roll={[0, -5, 5, -7, 8][i]}
-      items={[{z: zc, el: <Perso cam={cam} id="z8" x={0} y={SOL - marche_ * 95} z={zc} dos={false} lum={0.65} teinte={[1, 0.9, 0.75]} lift={m.bob * 2} legG={m.legG} legD={m.legD} epauleG={m.bras * 3} epauleD={m.bras * 3} coudeG={-60} coudeD={60} worry={1} scream={0.3} sweat={1} />}]}
+      roll={[0, -5, 6, -8, 9][i]}
+      items={[{z: zc, el: <Perso cam={cam} id="z8" x={0} y={yc} z={zc} dos={dosPour(cam, zc, 1)} lum={0.55 + 0.35 * bug(f, 'amp')} teinte={[1, 0.9, 0.75]} lift={m.bob * 2} legG={m.legG} legD={m.legD} epauleG={m.bras * 3} epauleD={m.bras * 3} coudeG={-60} coudeD={60} worry={1} scream={0.3} sweat={1} />}]}
     />
   );
 };
@@ -270,14 +283,14 @@ const SurveillantScene = () => {
     () => ({x: -250, y: -150, z: 5.5, yaw: 5}),
   ];
   const cam = makeCam(cams[i]());
-  const decor = couloir(cam, f, {casier: casiersOuverts, neon: (k) => (k === 7 ? flick(f, 'c9', 0, 300, 0.1) : 0)});
+  const decor = couloir(cam, f, {casier: casiersOuverts, neon: neonsCouloir(f, (k) => (k === 7 ? bug(f, 'c9') : null))});
   const leve = interpolate(f, [DUREES.surveillant * 0.75, DUREES.surveillant * 0.85], [0, 1], clamp);
   return (
     <Plan
       f={f}
       cam={cam}
       decor={decor}
-      noir={0.04}
+      noir={noirBug(f, 'nb')}
       zoom={punch(t)}
       roll={[0, 3, -3, 2][i]}
       items={[
@@ -300,7 +313,7 @@ const Retourne = () => {
     () => ({x: 100, y: 380, z: 14.8, pitch: -22, yaw: -2}),
   ];
   const cam = makeCam(cams[i]());
-  const decor = couloir(cam, f, {casier: casiersOuverts, neon: (k) => (k === 7 ? flick(f, 'c10', 0, 300, 0.1) : 0)});
+  const decor = couloir(cam, f, {casier: casiersOuverts, neon: neonsCouloir(f, (k) => (k === 7 ? bug(f, 'c10') : null))});
   const tour = interpolate(f, [6, bornes[1] - 2], [0, 1], ease);
   const ouvre = interpolate(f, [bornes[1] + 4, bornes[2]], [0, 1], ease);
   const peur = interpolate(f, [bornes[2], bornes[2] + 5], [0, 1], clamp);
@@ -310,7 +323,7 @@ const Retourne = () => {
       f={f}
       cam={cam}
       decor={decor}
-      noir={0.04}
+      noir={noirBug(f, 'nb')}
       zoom={punch(t, 0.18)}
       roll={[0, 4, -8, 6, -4][i]}
       items={[
@@ -331,7 +344,7 @@ const Charge = () => {
   const cams = [
     () => ({x: 150, y: -300, z: 15.2, yaw: -4}),
     () => ({x: 60 + sh, y: 400 + sh * 0.5, z: 8.6, pitch: -6, yaw: 0}),
-    () => ({x: 0, y: -480, z: zM - 1.6, pitch: -18}),
+    () => orbite(0, zM, 2.2, 168 + (24 * t) / d, -380, {pitch: 6}),
     () => camFace(0, 8, 1, 0.4, t, d),
   ];
   const cam = makeCam(cams[i]());
@@ -354,7 +367,7 @@ const Charge = () => {
       f={f}
       cam={cam}
       decor={decor}
-      noir={0.04}
+      noir={noirBug(f, 'nb')}
       zoom={punch(t, 0.18)}
       roll={[-3, 5, -6, 8][i]}
       items={[
@@ -386,18 +399,18 @@ const Dilemme = () => {
     () => ({x: 0, y: -540, z: 5.7 + (0.2 * t) / d, pitch: 12, yaw: 0}),
     () => ({x: 120, y: -150, z: 7.4, yaw: 24}),
     () => ({x: -120, y: -150, z: 7.3, yaw: -24}),
-    () => ({x: 0, y: 0, z: 9.25 + (0.05 * t) / d, pitch: -8}),
+    () => orbite(0, 10.6, 1.6, 196 - (30 * t) / d, 150, {pitch: -10}),
     () => ({x: 0, y: -540, z: 5.4 + (0.3 * t) / d, pitch: 12, yaw: 0}),
   ];
   const cam = makeCam(cams[i]());
-  const decor = couloir(cam, f, {casier: casiersOuverts, porteRouge: 8.6, ouvreRouge: 0.35, neon: (k) => (k === 3 ? flick(f, 'c12', 0, 300, 0.2) * 0.7 : 0)});
+  const decor = couloir(cam, f, {casier: casiersOuverts, porteRouge: 8.6, ouvreRouge: 0.35, neon: neonsCouloir(f)});
   const regard = f < 60 ? 1 : f < 100 ? -1 : 0;
   return (
     <Plan
       f={f}
       cam={cam}
       decor={decor}
-      noir={0.03}
+      noir={noirBug(f, 'nb')}
       zoom={punch(t)}
       roll={[-3, 4, -4, 6, 0][i]}
       items={[
