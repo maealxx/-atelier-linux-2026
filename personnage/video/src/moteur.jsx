@@ -6,16 +6,67 @@ import {Bonhomme} from './Bonhomme';
 export const VP = [540, 820];
 export const clamp = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'};
 
+// Caméra 3D : position (x, y, z), lacet `yaw` (+ = regarde à droite), tangage `pitch` (+ = regarde vers le bas).
+// Les polygones sont découpés au plan proche, donc on peut tourner la caméra librement.
+const PROCHE = 0.06;
 export const makeCam = (cam) => {
-  const proj = (X, Y, Z) => {
-    const d = Math.max(Z - cam.z, 0.02);
-    return [VP[0] + (X - cam.x) / d, VP[1] + (Y - cam.y) / d];
+  const ya = ((cam.yaw || 0) * Math.PI) / 180;
+  const pi = ((cam.pitch || 0) * Math.PI) / 180;
+  const [cy, sy, cp, sp] = [Math.cos(ya), Math.sin(ya), Math.cos(pi), Math.sin(pi)];
+  const versCam = (X, Y, Z) => {
+    const x = X - cam.x;
+    const y = Y - cam.y;
+    const z = (Z - cam.z) * 1000;
+    const x1 = x * cy - z * sy;
+    const z1 = x * sy + z * cy;
+    return [x1, y * cp - z1 * sp, (y * sp + z1 * cp) / 1000];
   };
-  const poly = (pts) => pts.map((p) => proj(...p).join(',')).join(' ');
-  const scale = (Z) => 1 / Math.max(Z - cam.z, 0.02);
-  const visible = (Z) => Z - cam.z > 0.12;
-  return {...cam, proj, poly, scale, visible};
+  const ecran = ([x, y, d]) => {
+    const dd = Math.max(d, 0.02);
+    return [VP[0] + x / dd, VP[1] + y / dd];
+  };
+  const proj = (X, Y, Z) => ecran(versCam(X, Y, Z));
+  const profondeur = (Z, X = cam.x, Y = cam.y) => versCam(X, Y, Z)[2];
+  const scale = (Z, X, Y) => 1 / Math.max(profondeur(Z, X, Y), 0.02);
+  const visible = (Z, X, Y) => profondeur(Z, X, Y) > 0.12;
+  const decoupe = (pts) => {
+    const out = [];
+    pts.forEach((a, i) => {
+      const b = pts[(i + 1) % pts.length];
+      const ina = a[2] >= PROCHE;
+      if (ina) out.push(a);
+      if (ina !== b[2] >= PROCHE) {
+        const t = (PROCHE - a[2]) / (b[2] - a[2]);
+        out.push([a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, PROCHE]);
+      }
+    });
+    return out;
+  };
+  const poly = (pts) => {
+    const c = decoupe(pts.map((p) => versCam(...p)));
+    return c.length < 3 ? '' : c.map((p) => ecran(p).join(',')).join(' ');
+  };
+  // segment 3D → [a, b] à l'écran, ou null s'il est derrière la caméra
+  const seg = (A, B) => {
+    let a = versCam(...A);
+    let b = versCam(...B);
+    if (a[2] < PROCHE && b[2] < PROCHE) return null;
+    if (a[2] < PROCHE) a = a.map((v, k) => v + (b[k] - v) * ((PROCHE - a[2]) / (b[2] - a[2])));
+    if (b[2] < PROCHE) b = b.map((v, k) => v + (a[k] - v) * ((PROCHE - b[2]) / (a[2] - b[2])));
+    return [ecran(a), ecran(b)];
+  };
+  const fuite = ecran(versCam(cam.x, cam.y, cam.z + 100));
+  return {...cam, proj, poly, seg, scale, visible, profondeur, fuite};
 };
+
+// Caméra qui tourne autour d'un point (travelling circulaire) en le gardant au centre
+export const orbite = (cx, cz, rayon, angle, y, extra = {}) => ({
+  x: cx - Math.sin((angle * Math.PI) / 180) * rayon * 1000,
+  z: cz - Math.cos((angle * Math.PI) / 180) * rayon,
+  y,
+  yaw: angle,
+  ...extra,
+});
 
 // Lumière qui grésille (déterministe)
 export const flick = (f, seed, from, to, low = 0.15) =>
@@ -34,9 +85,9 @@ export const marche = (f, vitesse, amp = 1) => {
 
 // Le bonhomme posé dans le monde 3D (billboard). y = sol, lift en unités du dessin (négatif = en l'air).
 export const Perso = ({cam, id, x, z, y = 432, lum = 1, teinte = [1, 1, 1], sx = 1, sy = 1, lift = 0, shiver = 0, ombre = 0.5, ...pose}) => {
-  if (!cam.visible(z)) return null;
+  if (!cam.visible(z, x, y - 300)) return null;
   const [px, py] = cam.proj(x, y, z);
-  const s = cam.scale(z) * 0.78;
+  const s = cam.scale(z, x, y - 300) * 0.78;
   const [r, g, b] = teinte.map((c) => c * lum);
   return (
     <g>
@@ -73,9 +124,9 @@ export const Finition = ({f, id = 'fin', vignette = 0.9}) => (
 
 // Yeux rouges qui brillent dans le noir (billboard)
 export const YeuxRouges = ({cam, x, y, z, taille = 1, ouvert = 1, id = 'yr'}) => {
-  if (!cam.visible(z)) return null;
+  if (!cam.visible(z, x, y)) return null;
   const [px, py] = cam.proj(x, y, z);
-  const s = cam.scale(z) * taille;
+  const s = cam.scale(z, x, y) * taille;
   return (
     <g transform={`translate(${px} ${py}) scale(${s})`}>
       <defs>

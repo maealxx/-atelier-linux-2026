@@ -1,5 +1,4 @@
 import {random} from 'remotion';
-import {VP} from './moteur';
 
 // ===== La rue la nuit, en 2,5D =====
 // La rue file vers +Z. Trottoir droit : X -20 → 520, chaussée : X -1100 → -20, trottoir gauche : X -1500 → -1100.
@@ -42,14 +41,16 @@ const cercleSol = (cam, cx, cz, rx, rz, y = SOL) =>
 
 // lampe(l) → intensité 0..1 ; fenetre(cle, defaut) → 0..1 ; balancoire → angle en degrés
 export const rue = (cam, f, {lampe = () => 1, fenetre = (k, d) => d, balancoire = [0, 0], panneau = 1} = {}) => {
-  const {proj, poly, scale, visible} = cam;
-  const zMin = cam.z + 0.15;
+  const {proj, poly, scale, visible, seg} = cam;
+  const zMin = cam.z - 3;
   const zMax = cam.z + 30;
   const dans = (z0, z1) => z1 > zMin && z0 < zMax;
   const cz = (z) => Math.min(Math.max(z, zMin), zMax);
-  const line = (a, b, w, col, key, op = 1) => (
-    <line key={key} x1={a[0]} y1={a[1]} x2={b[0]} y2={b[1]} stroke={col} strokeWidth={w} opacity={op} strokeLinecap="round" />
-  );
+  // segment 3D (découpé derrière la caméra)
+  const line = (A, B, w, col, key, op = 1) => {
+    const r = seg(A, B);
+    return r ? <line key={key} x1={r[0][0]} y1={r[0][1]} x2={r[1][0]} y2={r[1][1]} stroke={col} strokeWidth={w} opacity={op} strokeLinecap="round" /> : null;
+  };
 
   // ----- Fond : ciel, façades, sol -----
   const facades = (liste, cote) =>
@@ -80,7 +81,7 @@ export const rue = (cam, f, {lampe = () => 1, fenetre = (k, d) => d, balancoire 
         return (
           <g key={`${cote}${b.i}`}>
             {/* face avant du bloc (visible dans les ruelles) */}
-            {visible(b.z0) && <polygon points={poly([[X, TOIT, b.z0], [Xb, TOIT, b.z0], [Xb, SOL, b.z0], [X, SOL, b.z0]])} fill="#141218" />}
+            <polygon points={poly([[X, TOIT, b.z0], [Xb, TOIT, b.z0], [Xb, SOL, b.z0], [X, SOL, b.z0]])} fill="#141218" />
             <polygon points={poly([[X, TOIT, z0], [X, TOIT, z1], [X, SOL, z1], [X, SOL, z0]])} fill={b.c} />
             {/* rideau de fer au rez-de-chaussée */}
             <polygon points={poly([[X, 40, cz(b.z0 + 0.3)], [X, 40, cz(b.z1 - 0.3)], [X, SOL, cz(b.z1 - 0.3)], [X, SOL, cz(b.z0 + 0.3)]])} fill="#34373c" />
@@ -118,7 +119,7 @@ export const rue = (cam, f, {lampe = () => 1, fenetre = (k, d) => d, balancoire 
           <stop offset="0.3" stopColor="#FFB45A" stopOpacity="0.35" />
           <stop offset="1" stopColor="#FF9A3C" stopOpacity="0" />
         </radialGradient>
-        <radialGradient id="rue-brume" cx={VP[0]} cy={VP[1]} r="900" gradientUnits="userSpaceOnUse">
+        <radialGradient id="rue-brume" cx={cam.fuite[0]} cy={cam.fuite[1]} r="900" gradientUnits="userSpaceOnUse">
           <stop offset="0" stopColor="#05060a" stopOpacity="1" />
           <stop offset="0.15" stopColor="#05060a" stopOpacity="0.75" />
           <stop offset="0.5" stopColor="#05060a" stopOpacity="0.2" />
@@ -148,20 +149,19 @@ export const rue = (cam, f, {lampe = () => 1, fenetre = (k, d) => d, balancoire 
   // ----- Éléments triables par profondeur -----
   const items = [];
 
-  LAMPES.filter((l) => visible(l.z) && l.z < zMax).forEach((l, i) => {
+  LAMPES.filter((l) => l.z > zMin && l.z < zMax && (visible(l.z, l.x, SOL) || visible(l.z, l.x, LIGNE_Y))).forEach((l, i) => {
     const v = lampe(l);
-    const s = scale(l.z);
-    const pied = proj(l.x, SOL, l.z);
-    const haut = proj(l.x, LIGNE_Y - 40, l.z);
+    const s = scale(l.z, l.x, -200);
+    const enVue = visible(l.z, l.tete, LIGNE_Y);
     const tete = proj(l.tete, LIGNE_Y, l.z);
     items.push({
       z: l.z,
       el: (
         <g key={`l${l.cote}${l.z}`}>
-          {line(pied, haut, Math.max(2, 26 * s), '#15161a', 'p')}
-          {line(haut, tete, Math.max(2, 18 * s), '#15161a', 'b')}
-          <ellipse cx={tete[0]} cy={tete[1] + 6 * s} rx={60 * s} ry={14 * s} fill={v > 0.05 ? '#FFE9C2' : '#2a2a2e'} opacity={0.3 + 0.7 * v} />
-          {v > 0.02 && <ellipse cx={tete[0]} cy={tete[1] + 30 * s} rx={420 * s} ry={300 * s} fill="url(#rue-halo)" opacity={v} />}
+          {line([l.x, SOL, l.z], [l.x, LIGNE_Y - 40, l.z], Math.max(2, 26 * s), '#15161a', 'p')}
+          {line([l.x, LIGNE_Y - 40, l.z], [l.tete, LIGNE_Y, l.z], Math.max(2, 18 * s), '#15161a', 'b')}
+          {enVue && <ellipse cx={tete[0]} cy={tete[1] + 6 * s} rx={60 * s} ry={14 * s} fill={v > 0.05 ? '#FFE9C2' : '#2a2a2e'} opacity={0.3 + 0.7 * v} />}
+          {enVue && v > 0.02 && <ellipse cx={tete[0]} cy={tete[1] + 30 * s} rx={420 * s} ry={300 * s} fill="url(#rue-halo)" opacity={v} />}
         </g>
       ),
     });
@@ -171,14 +171,15 @@ export const rue = (cam, f, {lampe = () => 1, fenetre = (k, d) => d, balancoire 
   if (dans(ABRIBUS[0], ABRIBUS[1] + 0.1)) {
     const [z0, z1] = ABRIBUS;
     const pc = proj(350, -10, z1);
-    const ps = scale(z1);
+    const ps = scale(z1, 350, -10);
+    const texteVu = visible(z1, 350, -10);
     items.push({
       z: z1,
       el: (
         <g key="panneau">
           <polygon points={poly([[210, -320, z1], [490, -320, z1], [490, 320, z1], [210, 320, z1]])} fill="#1e2a36" />
           <polygon points={poly([[225, -300, z1], [475, -300, z1], [475, 300, z1], [225, 300, z1]])} fill="#dfe9f2" opacity={0.15 + 0.75 * panneau} />
-          <g transform={`translate(${pc[0]} ${pc[1]}) scale(${ps})`} fontFamily="'DejaVu Sans', Arial, sans-serif" textAnchor="middle" opacity={0.25 + 0.75 * panneau}>
+          {texteVu && <g transform={`translate(${pc[0]} ${pc[1]}) scale(${ps})`} fontFamily="'DejaVu Sans', Arial, sans-serif" textAnchor="middle" opacity={0.25 + 0.75 * panneau}>
             <rect x="-112" y="-270" width="224" height="62" fill="#1f5c45" />
             <text y="-226" fontSize="38" fontWeight="900" fill="#fff">LIGNE 42</text>
             <text y="-160" fontSize="22" fill="#2a2f36" fontWeight="700">DERNIER BUS</text>
@@ -190,7 +191,7 @@ export const rue = (cam, f, {lampe = () => 1, fenetre = (k, d) => d, balancoire 
             {[...Array(5)].map((_, k) => (
               <rect key={k} x="-90" y={128 + k * 26} width={150 - k * 18} height="10" rx="5" fill="#9aa4ad" />
             ))}
-          </g>
+          </g>}
         </g>
       ),
     });
@@ -201,8 +202,8 @@ export const rue = (cam, f, {lampe = () => 1, fenetre = (k, d) => d, balancoire 
           <polygon points={poly([[490, -330, z0], [490, -330, z1], [490, SOL, z1], [490, SOL, z0]])} fill="#8fb6d6" opacity="0.13" />
           <polygon points={poly([[180, -330, z0], [500, -330, z0], [500, -330, z1], [180, -330, z1]])} fill="#141418" />
           <polygon points={poly([[180, -360, z0], [500, -360, z0], [500, -330, z0], [180, -330, z0]])} fill="#2a2d33" />
-          {line(proj(190, -330, z0), proj(190, SOL, z0), Math.max(2, 10 * scale(z0)), '#3a3d44', 'm1')}
-          {line(proj(490, -330, z0), proj(490, SOL, z0), Math.max(2, 10 * scale(z0)), '#3a3d44', 'm2')}
+          {line([190, -330, z0], [190, SOL, z0], Math.max(2, 10 * scale(z0, 190)), '#3a3d44', 'm1')}
+          {line([490, -330, z0], [490, SOL, z0], Math.max(2, 10 * scale(z0, 490)), '#3a3d44', 'm2')}
           {/* banc */}
           <polygon points={poly([[380, 250, z0 + 0.2], [470, 250, z0 + 0.2], [470, 250, z1 - 0.2], [380, 250, z1 - 0.2]])} fill="#3b3f46" />
         </g>
@@ -210,14 +211,14 @@ export const rue = (cam, f, {lampe = () => 1, fenetre = (k, d) => d, balancoire 
     });
     // poteau d'arrêt
     const pz = z0 - 0.15;
-    if (visible(pz)) {
-      const s = scale(pz);
+    if (visible(pz, 120, -200)) {
+      const s = scale(pz, 120, -200);
       const t = proj(120, -620, pz);
       items.push({
         z: pz,
         el: (
           <g key="arret">
-            {line(proj(120, SOL, pz), proj(120, -560, pz), Math.max(2, 16 * s), '#2a2c31', 'pa')}
+            {line([120, SOL, pz], [120, -560, pz], Math.max(2, 16 * s), '#2a2c31', 'pa')}
             <circle cx={t[0]} cy={t[1]} r={95 * s} fill="#1f5c45" stroke="#e8e8e8" strokeWidth={8 * s} />
             <text x={t[0]} y={t[1] + 22 * s} fontSize={62 * s} fontWeight="900" fill="#fff" textAnchor="middle" fontFamily="'DejaVu Sans', Arial, sans-serif">BUS</text>
           </g>
@@ -229,13 +230,13 @@ export const rue = (cam, f, {lampe = () => 1, fenetre = (k, d) => d, balancoire 
   // Parc : grille, arbres, balançoire
   if (parcVisible) {
     for (let z = PARC[0]; z <= PARC[1]; z += 0.35) {
-      if (!visible(z)) continue;
-      const s = scale(z);
-      items.push({z, el: <g key={`g${z}`}>{line(proj(530, SOL, z), proj(530, 160, z), Math.max(1, 9 * s), '#101114', 'gp')}{z + 0.35 <= PARC[1] && line(proj(530, 200, z), proj(530, 200, z + 0.35), Math.max(1, 7 * s), '#101114', 'gr')}</g>});
+      if (!visible(z, 530, 300)) continue;
+      const s = scale(z, 530, 300);
+      items.push({z, el: <g key={`g${z}`}>{line([530, SOL, z], [530, 160, z], Math.max(1, 9 * s), '#101114', 'gp')}{z + 0.35 <= PARC[1] && line([530, 200, z], [530, 200, z + 0.35], Math.max(1, 7 * s), '#101114', 'gr')}</g>});
     }
     [[1300, 7.4, 1.1], [900, 5.2, 0.9]].forEach(([x, z, t], k) => {
-      if (!visible(z)) return;
-      const s = scale(z);
+      if (!visible(z, x, -500)) return;
+      const s = scale(z, x, -500);
       const [px, py] = proj(x, SOL, z);
       items.push({
         z,
@@ -250,8 +251,8 @@ export const rue = (cam, f, {lampe = () => 1, fenetre = (k, d) => d, balancoire 
       });
     });
     const zb = 8.0;
-    if (visible(zb)) {
-      const s = scale(zb);
+    if (visible(zb, 950, 0)) {
+      const s = scale(zb, 950, 0);
       const H = -420;
       const chaines = [[860, balancoire[0]], [1040, balancoire[1]]].map(([hx, a], k) => {
         const r = (a * Math.PI) / 180;
@@ -260,9 +261,9 @@ export const rue = (cam, f, {lampe = () => 1, fenetre = (k, d) => d, balancoire 
         const sy = H + Math.cos(r) * L;
         return (
           <g key={k}>
-            {line(proj(hx - 55, H, zb), proj(sx - 55, sy, zb), Math.max(1, 5 * s), '#5d6066', 'c1')}
-            {line(proj(hx + 55, H, zb), proj(sx + 55, sy, zb), Math.max(1, 5 * s), '#5d6066', 'c2')}
-            {line(proj(sx - 70, sy, zb), proj(sx + 70, sy, zb), Math.max(2, 22 * s), '#3a2a22', 's')}
+            {line([hx - 55, H, zb], [sx - 55, sy, zb], Math.max(1, 5 * s), '#5d6066', 'c1')}
+            {line([hx + 55, H, zb], [sx + 55, sy, zb], Math.max(1, 5 * s), '#5d6066', 'c2')}
+            {line([sx - 70, sy, zb], [sx + 70, sy, zb], Math.max(2, 22 * s), '#3a2a22', 's')}
           </g>
         );
       });
@@ -270,9 +271,9 @@ export const rue = (cam, f, {lampe = () => 1, fenetre = (k, d) => d, balancoire 
         z: zb,
         el: (
           <g key="balancoire">
-            {line(proj(740, SOL, zb), proj(760, H, zb), Math.max(2, 18 * s), '#2b2e33', 'b1')}
-            {line(proj(1160, SOL, zb), proj(1140, H, zb), Math.max(2, 18 * s), '#2b2e33', 'b2')}
-            {line(proj(740, H, zb), proj(1160, H, zb), Math.max(2, 18 * s), '#2b2e33', 'b3')}
+            {line([740, SOL, zb], [760, H, zb], Math.max(2, 18 * s), '#2b2e33', 'b1')}
+            {line([1160, SOL, zb], [1140, H, zb], Math.max(2, 18 * s), '#2b2e33', 'b2')}
+            {line([740, H, zb], [1160, H, zb], Math.max(2, 18 * s), '#2b2e33', 'b3')}
             {chaines}
           </g>
         ),
@@ -294,10 +295,10 @@ const BL = 4.4;
 
 export const bus = (cam, f, {zp, sens = 'avant', numero = '42', interieur = '#ffd79a', phares = 1, porte = 0, chauffeur = null, led = 1}) => {
   const {proj, poly, scale, visible} = cam;
-  if (!visible(zp) && !visible(zp + BL)) return null;
-  const z0 = Math.max(zp, cam.z + 0.13);
+  if (!visible(zp, -560, -200) && !visible(zp + BL, -560, -200) && !visible(zp, BX1, -200)) return null;
+  const z0 = zp;
   const z1 = zp + BL;
-  const s = scale(zp);
+  const s = scale(zp, -560, -200);
   const avant = sens === 'avant';
   const zPorte = avant ? [zp + 0.2, zp + 0.75] : [zp + 1.9, zp + 2.45];
 
@@ -307,7 +308,7 @@ export const bus = (cam, f, {zp, sens = 'avant', numero = '42', interieur = '#ff
     if (z + 0.7 < z0) continue;
     fenetres.push(<polygon key={z} points={poly([[BX1, -600, Math.max(z, z0)], [BX1, -600, z + 0.7], [BX1, -180, z + 0.7], [BX1, -180, Math.max(z, z0)]])} fill={interieur} opacity="0.55" />);
   }
-  const roues = [avant ? zp + 0.9 : zp + 0.9, avant ? zp + 3.3 : zp + 3.3].filter((z) => visible(z)).map((z) => (
+  const roues = [avant ? zp + 0.9 : zp + 0.9, avant ? zp + 3.3 : zp + 3.3].filter((z) => visible(z, BX1, 380)).map((z) => (
     <polygon key={z} points={poly([...Array(14)].map((_, i) => [BX1 + 5, 380 + Math.cos((i / 14) * 6.283) * 100, z + Math.sin((i / 14) * 6.283) * 0.1]))} fill="#0b0b0d" />
   ));
   const ouvert = Math.min(1, porte);
@@ -321,7 +322,7 @@ export const bus = (cam, f, {zp, sens = 'avant', numero = '42', interieur = '#ff
         <polygon points={poly([[BX1, 150, z0], [BX1, 150, z1], [BX1, 260, z1], [BX1, 260, z0]])} fill="#2f5d4a" />
         {fenetres}
         {/* porte */}
-        {visible(pz0) && (
+        {visible(pz0, BX1, 0) && (
           <g>
             <polygon points={poly([[BX1, -620, pz0], [BX1, -620, pz1], [BX1, 360, pz1], [BX1, 360, pz0]])} fill={interieur} opacity={0.25 + 0.75 * ouvert} />
             <polygon points={poly([[BX1 + 2, -610, pz0], [BX1 + 2, -610, pm - (pm - pz0) * ouvert], [BX1 + 2, 360, pm - (pm - pz0) * ouvert], [BX1 + 2, 360, pz0]])} fill="#36423c" stroke="#1a201d" strokeWidth="3" />
@@ -334,7 +335,7 @@ export const bus = (cam, f, {zp, sens = 'avant', numero = '42', interieur = '#ff
 
   // face proche
   const c = (x, y) => proj(x, y, zp);
-  const face = visible(zp) ? (
+  const face = visible(zp, -560, -200) ? (
     avant ? (
       <g key="avant">
         {/* intérieur + chauffeur derrière le pare-brise */}
