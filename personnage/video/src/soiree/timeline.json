@@ -1,0 +1,262 @@
+{
+ "fps": 30,
+ "voix": "soiree/voix_finale.wav",
+ "scenes": [
+  {
+   "nom": "coupure",
+   "frames": 170,
+   "texte": "Imagine. Tu sors prendre l'air à une soirée… et d'un coup, toutes les lumières de la maison s'éteignent.",
+   "reperes": {
+    "imagine": 3,
+    "tu": 27,
+    "sors": 33,
+    "prendre": 39,
+    "lair": 49,
+    "à": 55,
+    "une": 61,
+    "soirée": 70,
+    "et": 87,
+    "dun": 93,
+    "coup": 100,
+    "toutes": 113,
+    "les": 121,
+    "lumières": 126,
+    "de": 136,
+    "la": 141,
+    "maison": 146,
+    "séteignent": 153
+   }
+  },
+  {
+   "nom": "silence",
+   "frames": 138,
+   "texte": "La musique s'arrête. Plus un cri, plus un rire. Juste le bruit des grillons.",
+   "reperes": {
+    "la": 1,
+    "musique": 6,
+    "sarrête": 17,
+    "plus": 35,
+    "un": 41,
+    "cri": 48,
+    "rire": 72,
+    "juste": 88,
+    "le": 99,
+    "bruit": 106,
+    "des": 113,
+    "grillons": 120
+   }
+  },
+  {
+   "nom": "vitre",
+   "frames": 162,
+   "texte": "Tu frappes à la vitre. Rien. Puis, de l'intérieur, quelqu'un frappe trois coups en retour.",
+   "reperes": {
+    "tu": 1,
+    "frappes": 8,
+    "à": 19,
+    "la": 26,
+    "vitre": 33,
+    "rien": 51,
+    "puis": 57,
+    "de": 69,
+    "lintérieur": 77,
+    "quelquun": 102,
+    "frappe": 116,
+    "trois": 126,
+    "coups": 132,
+    "en": 138,
+    "retour": 145
+   }
+  },
+  {
+   "nom": "message",
+   "frames": 167,
+   "texte": "Ton tel vibre. Un message de ton pote : on est dans la cave. Surtout, ne rentre pas.",
+   "reperes": {
+    "ton": 0,
+    "tel": 8,
+    "vibre": 16,
+    "un": 35,
+    "message": 39,
+    "de": 48,
+    "pote": 56,
+    "": 62,
+    "on": 73,
+    "est": 78,
+    "dans": 82,
+    "la": 87,
+    "cave": 91,
+    "surtout": 105,
+    "ne": 132,
+    "rentre": 139,
+    "pas": 152
+   }
+  },
+  {
+   "nom": "fenetres",
+   "frames": 159,
+   "texte": "Tu lèves les yeux. Derrière chaque fenêtre, quelqu'un. Immobile. Ils te regardent tous.",
+   "reperes": {
+    "tu": 0,
+    "lèves": 5,
+    "les": 13,
+    "yeux": 18,
+    "derrière": 30,
+    "chaque": 42,
+    "fenêtre": 52,
+    "quelquun": 72,
+    "immobile": 92,
+    "ils": 115,
+    "te": 122,
+    "regardent": 129,
+    "tous": 144
+   }
+  },
+  {
+   "nom": "sourires",
+   "frames": 136,
+   "texte": "Tu reconnais les invités. Sauf qu'ils sourient. Tous pareil. Beaucoup trop.",
+   "reperes": {
+    "tu": 0,
+    "reconnais": 5,
+    "les": 16,
+    "invités": 21,
+    "sauf": 40,
+    "quils": 46,
+    "sourient": 57,
+    "tous": 75,
+    "pareil": 84,
+    "beaucoup": 107,
+    "trop": 120
+   }
+  },
+  {
+   "nom": "porte",
+   "frames": 141,
+   "texte": "La porte d'entrée s'ouvre toute seule. Dans le noir, une voix : tu reviens danser ?",
+   "reperes": {
+    "la": -1,
+    "porte": 5,
+    "dentrée": 15,
+    "souvre": 24,
+    "toute": 33,
+    "seule": 43,
+    "dans": 59,
+    "le": 66,
+    "noir": 74,
+    "une": 88,
+    "voix": 94,
+    "": 98,
+    "tu": 109,
+    "reviens": 113,
+    "danser": 121
+   }
+  },
+  {
+   "nom": "portail",
+   "frames": 139,
+   "texte": "Tu recules vers le portail. Il est fermé. Cadenassé. Il était ouvert quand t'es arrivé.",
+   "reperes": {
+    "tu": 0,
+    "recules": 5,
+    "vers": 17,
+    "le": 22,
+    "portail": 27,
+    "il": 42,
+    "est": 47,
+    "fermé": 51,
+    "cadenassé": 66,
+    "était": 97,
+    "ouvert": 104,
+    "quand": 112,
+    "tes": 117,
+    "arrivé": 121
+   }
+  },
+  {
+   "nom": "message2",
+   "frames": 122,
+   "texte": "Deuxième message : celui qui organise la soirée… personne ne le connaît.",
+   "reperes": {
+    "deuxième": 0,
+    "message": 11,
+    "": 22,
+    "celui": 34,
+    "qui": 43,
+    "organise": 49,
+    "la": 64,
+    "soirée": 70,
+    "personne": 86,
+    "ne": 97,
+    "le": 102,
+    "connaît": 107
+   }
+  },
+  {
+   "nom": "hote",
+   "frames": 159,
+   "texte": "Sur le perron, l'hôte apparaît. Grand. Trop grand. Il enlève son masque de fête…",
+   "reperes": {
+    "sur": 1,
+    "le": 7,
+    "perron": 14,
+    "lhôte": 32,
+    "apparaît": 43,
+    "grand": 65,
+    "trop": 83,
+    "il": 108,
+    "enlève": 113,
+    "son": 125,
+    "masque": 130,
+    "de": 139,
+    "fête": 144
+   }
+  },
+  {
+   "nom": "revelation",
+   "frames": 161,
+   "texte": "Dessous, pas de visage. Juste une bouche qui s'ouvre jusqu'au ventre. Et il descend les marches.",
+   "reperes": {
+    "dessous": 1,
+    "pas": 24,
+    "de": 29,
+    "visage": 34,
+    "juste": 52,
+    "une": 61,
+    "bouche": 71,
+    "qui": 80,
+    "souvre": 86,
+    "jusquau": 95,
+    "ventre": 108,
+    "et": 125,
+    "il": 130,
+    "descend": 135,
+    "les": 142,
+    "marches": 147
+   }
+  },
+  {
+   "nom": "dilemme",
+   "frames": 161,
+   "texte": "T'as deux secondes. Tu rentres dans la maison ? Ou tu escalades le portail ? Dis-le en commentaire !",
+   "reperes": {
+    "tas": 1,
+    "deux": 6,
+    "secondes": 11,
+    "tu": 28,
+    "rentres": 32,
+    "dans": 39,
+    "la": 43,
+    "maison": 47,
+    "": 53,
+    "ou": 64,
+    "escalades": 72,
+    "le": 85,
+    "portail": 89,
+    "dis-le": 106,
+    "en": 114,
+    "commentaire": 119
+   }
+  }
+ ]
+}

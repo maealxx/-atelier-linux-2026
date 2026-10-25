@@ -1,5 +1,5 @@
 """Prépare une voix off enregistrée (ex. ElevenLabs) et recale la vidéo dessus.
-Usage : python3 voix/caler_voix.py <voix_brute> [vitesse=1.1] [projet] [blanc_max=0.16]
+Usage : python3 voix/caler_voix.py <voix_brute> [vitesse=1.1] [projet] [blanc_max=0.16] [boost_max=12]
 Sans projet : texte de voix/generer.py, sorties dans src/timeline.json et voix/ (« Le dernier bus »).
 Avec projet : texte de voix/<projet>/scenes.json, sorties dans src/<projet>/ et voix/<projet>/.
 1. raccourcit les blancs (sans les supprimer), 2. remonte les passages chuchotés,
@@ -18,6 +18,7 @@ FPS = 30
 DEBUT = 0.1  # la voix démarre 0,1 s après le début de la vidéo
 QUEUE = 0.8  # temps laissé après la dernière phrase
 BLANC_MAX = float(sys.argv[4]) if len(sys.argv) > 4 else 0.16  # durée maximale d'un blanc (avant accélération)
+BOOST_MAX = float(sys.argv[5]) if len(sys.argv) > 5 else 12  # remontée max des passages faibles (0 = on ne remonte pas les chuchotements)
 
 # texte de référence (sans importer kokoro)
 if PROJET:
@@ -68,7 +69,7 @@ fondu = int(sr * 0.012)
 for k, (d, f) in enumerate(zones):
     s = a[max(0, int(d * sr) - fondu) : int(f * sr) + fondu].copy()
     r = 20 * np.log10(np.sqrt(np.mean(s**2)) + 1e-9)
-    gain = np.clip(-21 - r, -3, 12)  # on vise -21 dB par morceau, +12 dB max pour les chuchotements
+    gain = np.clip(-21 - r, -3, BOOST_MAX)  # on vise -21 dB par morceau, remontée limitée à BOOST_MAX
     s *= 10 ** (gain / 20)
     s[:fondu] *= np.linspace(0, 1, fondu)
     s[-fondu:] *= np.linspace(1, 0, fondu)

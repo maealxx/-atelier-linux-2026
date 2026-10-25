@@ -58,7 +58,9 @@ const pattes = (f) => {
   };
 };
 
-const COUL = {jambe: '#1c1d22', bras: '#4e545b', main: '#b9b2a8', gilet: '#5b6168', gilet2: '#4a5056', peau: '#c4bdb2', peau2: '#a9a297', cheveux: '#2a2522', rouge: '#3a0505'};
+const SURVEILLANT = {jambe: '#1c1d22', bras: '#4e545b', main: '#b9b2a8', gilet: '#5b6168', gilet2: '#4a5056', peau: '#c4bdb2', peau2: '#a9a297', cheveux: '#2a2522', rouge: '#3a0505'};
+// « L'hôte » de la soirée : costume noir, peau blafarde, chapeau pointu et masque pailleté
+const HOTE = {jambe: '#121216', bras: '#16161b', main: '#d6cfc2', gilet: '#1b1b22', gilet2: '#121218', peau: '#d8d2c6', peau2: '#bdb6aa', cheveux: '#0c0c0e', rouge: '#3a0505'};
 
 // Boîte orientée : centre c, axes unitaires u, v, w (en unités), demi-tailles a, b, e. Faces cachées éliminées.
 const boite = (vue, c, [u, v, w], [a, b, e], cols) => {
@@ -87,8 +89,10 @@ const boite = (vue, c, [u, v, w], [a, b, e], cols) => {
 };
 
 // Construit le monstre : renvoie un élément triable {z, el}
-export const surveillant3D = (cam, {x, z, angle = 0, ouvre = 0, pose = 0, f = 0, echelle = 1}) => {
-  const base = [x, SOL, z * 1000];
+// Options en plus pour l'hôte : tenue 'hote', y (sol sous ses pieds), masque 0 → 1 (posé sur le visage), ventre 0 → 1 (la bouche se déchire jusqu'au ventre)
+export const surveillant3D = (cam, {x, z, y = SOL, angle = 0, ouvre = 0, pose = 0, f = 0, echelle = 1, tenue = 'surveillant', masque = 0, ventre = 0}) => {
+  const COUL = tenue === 'hote' ? HOTE : SURVEILLANT;
+  const base = [x, y, z * 1000];
   const P = debout(f);
   const Q = pattes(f);
   const J = Object.fromEntries(Object.keys(P).map((k) => [k, mix(P[k], Q[k], pose)]));
@@ -158,12 +162,16 @@ export const surveillant3D = (cam, {x, z, angle = 0, ouvre = 0, pose = 0, f = 0,
     if (!fa.coins.every(vis)) return;
     morceaux.push({d: prof(fa.centre), el: <polygon key={`t${i}`} points={fa.coins.map((c) => pr(c).join(',')).join(' ')} fill={fa.col} stroke="#2b2f33" strokeWidth="1" />});
   });
-  // cordon rouge + sifflet sur le devant
+  // cordon rouge + sifflet sur le devant (surveillant) / nœud papillon (hôte)
   const sifflet = add(add(centreT, mul(avant, 66 * echelle)), mul(v, L * 0.3));
   if (vis(sifflet) && dot(avant, sub(vue, sifflet)) > 0) {
     const q = pr(sifflet);
     const s = sc(sifflet) * echelle;
-    morceaux.push({d: prof(sifflet) - 2, el: <g key="sif"><path d={`M${q[0] - 40 * s},${q[1] - 130 * s} Q${q[0]},${q[1] + 10 * s} ${q[0] + 40 * s},${q[1] - 130 * s}`} stroke="#c41a1a" strokeWidth={Math.max(1, 6 * s)} fill="none" /><rect x={q[0] - 14 * s} y={q[1] - 10 * s} width={28 * s} height={40 * s} rx={6 * s} fill="#c9ccd1" /></g>});
+    if (tenue === 'hote') {
+      const n = pr(add(add(centreT, mul(avant, 66 * echelle)), mul(v, L * 0.92)));
+      const s2 = sc(sifflet) * echelle;
+      morceaux.push({d: prof(sifflet) - 2, el: <g key="noeud"><path d={`M${n[0]},${n[1]} l${-40 * s2},${-18 * s2} l0,${36 * s2} Z M${n[0]},${n[1]} l${40 * s2},${-18 * s2} l0,${36 * s2} Z`} fill="#8e1a2a" /><path d={`M${n[0]},${n[1]} L${n[0]},${n[1] + 300 * s2}`} stroke="#e8e4d8" strokeWidth={Math.max(1, 30 * s2)} opacity="0.9" /></g>});
+    } else morceaux.push({d: prof(sifflet) - 2, el: <g key="sif"><path d={`M${q[0] - 40 * s},${q[1] - 130 * s} Q${q[0]},${q[1] + 10 * s} ${q[0] + 40 * s},${q[1] - 130 * s}`} stroke="#c41a1a" strokeWidth={Math.max(1, 6 * s)} fill="none" /><rect x={q[0] - 14 * s} y={q[1] - 10 * s} width={28 * s} height={40 * s} rx={6 * s} fill="#c9ccd1" /></g>});
   }
 
   // tête : deux moitiés qui pivotent autour d'un axe vertical à l'arrière du crâne
@@ -227,16 +235,85 @@ export const surveillant3D = (cam, {x, z, angle = 0, ouvre = 0, pose = 0, f = 0,
       ),
     });
   }
+  // la bouche qui se déchire du crâne jusqu'au ventre (sur le devant du torse)
+  if (ventre > 0.02) {
+    const haut = add(add(centreT, mul(avant, 64 * echelle)), mul(v, L * 0.95));
+    const bas = add(add(centreT, mul(avant, 64 * echelle)), mul(v, -L * 0.75));
+    const larg = 95 * echelle * ventre;
+    const pts = [];
+    for (let k = 0; k <= 10; k++) {
+      const t = k / 10;
+      const c = mix(haut, bas, t);
+      pts.push([add(c, mul(cote, -larg * Math.sin(Math.PI * t))), add(c, mul(cote, larg * Math.sin(Math.PI * t)))]);
+    }
+    if ([haut, bas].every(vis) && dot(avant, sub(vue, centreT)) > 0) {
+      const g = pts.map((p) => pr(p[0]));
+      const d_ = pts.map((p) => pr(p[1])).reverse();
+      const s2 = sc(centreT) * echelle;
+      morceaux.push({
+        d: prof(centreT) - 70,
+        el: (
+          <g key="ventre">
+            <polygon points={[...g, ...d_].map((q) => q.join(',')).join(' ')} fill="#2a0303" stroke="#5a0a0a" strokeWidth={Math.max(1, 6 * s2)} />
+            {pts.slice(1, -1).map((p, k) =>
+              [0, 1].map((c) => {
+                const a = pr(p[c]);
+                const b = pr(add(p[c], mul(cote, (c ? -1 : 1) * 40 * echelle * ventre)));
+                return <polygon key={`${k}${c}`} points={`${a[0]},${a[1] - 8 * s2} ${b[0]},${b[1]} ${a[0]},${a[1] + 8 * s2}`} fill="#ece6cf" />;
+              })
+            )}
+            {[0.3, 0.5, 0.7].map((t, k) => {
+              const q = pr(mix(haut, bas, t));
+              return <circle key={`o${k}`} cx={q[0]} cy={q[1]} r={Math.max(1, 10 * s2 * ventre)} fill="#ff3b2a" />;
+            })}
+          </g>
+        ),
+      });
+    }
+  }
+  // chapeau pointu de fête + masque pailleté
+  if (tenue === 'hote') {
+    const sommet = add(T, mul(norme(sub(W.tete, W.cou)), 95 * echelle));
+    const pointe = add(sommet, mul(norme(sub(W.tete, W.cou)), 230 * echelle));
+    if (vis(sommet) && vis(pointe) && ouvre < 0.2) {
+      const a = pr(sommet);
+      const b = pr(pointe);
+      const s2 = sc(sommet) * echelle;
+      morceaux.push({d: prof(sommet) - 10, el: <g key="chapeau"><polygon points={`${a[0] - 70 * s2},${a[1]} ${a[0] + 70 * s2},${a[1]} ${b[0]},${b[1]}`} fill="#c42a8a" /><line x1={a[0] - 35 * s2} y1={a[1] - 60 * s2} x2={a[0] + 35 * s2} y2={a[1] - 60 * s2} stroke="#ffd23e" strokeWidth={Math.max(1, 12 * s2)} /><circle cx={b[0]} cy={b[1]} r={16 * s2} fill="#ffd23e" /></g>});
+    }
+    if (masque > 0.01) {
+      const tombe = 1 - masque;
+      const pm = add(add(T, mul(dir, 82 * echelle)), [0, tombe * 700, 0]);
+      if (vis(pm) && dot(dir, sub(vue, T)) > 0) {
+        const q = pr(pm);
+        const s2 = sc(pm) * echelle;
+        morceaux.push({
+          d: prof(pm) - 12,
+          el: (
+            <g key="masque" transform={`translate(${q[0]} ${q[1]}) scale(${s2}) rotate(${tombe * 70})`}>
+              <path d="M-95,-40 Q-100,-90 -40,-80 Q0,-60 40,-80 Q100,-90 95,-40 Q90,40 0,60 Q-90,40 -95,-40 Z" fill="#5a1a7a" stroke="#ffd23e" strokeWidth="6" />
+              <ellipse cx="-42" cy="-30" rx="24" ry="14" fill="#050507" />
+              <ellipse cx="42" cy="-30" rx="24" ry="14" fill="#050507" />
+              {[...Array(14)].map((_, k) => (
+                <circle key={k} cx={-80 + (k % 7) * 27} cy={k < 7 ? -62 : 20} r="5" fill={k % 2 ? '#ffd23e' : '#ff8ad8'} opacity={0.6 + 0.4 * Math.sin(f / 3 + k)} />
+              ))}
+              <path d="M-30,25 Q0,45 30,25" stroke="#050507" strokeWidth="5" fill="none" />
+            </g>
+          ),
+        });
+      }
+    }
+  }
   // ombre au sol
   const ombre = W.bassin;
-  const qo = pr([ombre[0], SOL, ombre[2]]);
-  const so = sc([ombre[0], SOL, ombre[2]]);
+  const qo = pr([ombre[0], y, ombre[2]]);
+  const so = sc([ombre[0], y, ombre[2]]);
   morceaux.sort((a, b) => b.d - a.d);
   return {
     z: W.bassin[2] / 1000,
     el: (
       <g key="surveillant3d">
-        {vis([ombre[0], SOL, ombre[2]]) && <ellipse cx={qo[0]} cy={qo[1]} rx={(200 + 350 * pose) * so * echelle} ry={40 * so * echelle} fill="#000" opacity="0.5" />}
+        {vis([ombre[0], y, ombre[2]]) && <ellipse cx={qo[0]} cy={qo[1]} rx={(200 + 350 * pose) * so * echelle} ry={40 * so * echelle} fill="#000" opacity="0.5" />}
         {morceaux.map((m) => m.el)}
       </g>
     ),

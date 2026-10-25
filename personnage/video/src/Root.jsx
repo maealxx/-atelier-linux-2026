@@ -3,6 +3,7 @@ import {DernierBus, DUREE_BUS} from './DernierBus';
 import {Metro} from './Metro';
 import {Personnage} from './Personnage';
 import {DUREE_SALLE_ZERO, SalleZero} from './SalleZero';
+import {DUREE_SOIREE, Soiree} from './Soiree';
 
 export const Root = () => (
   <>
@@ -26,6 +27,14 @@ export const Root = () => (
       id="DernierBus"
       component={DernierBus}
       durationInFrames={DUREE_BUS}
+      fps={30}
+      width={1080}
+      height={1920}
+    />
+    <Composition
+      id="Soiree"
+      component={Soiree}
+      durationInFrames={DUREE_SOIREE}
       fps={30}
       width={1080}
       height={1920}
