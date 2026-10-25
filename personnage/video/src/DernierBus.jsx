@@ -50,6 +50,8 @@ const Plan = ({f, decor, items = [], noir = 0, dessus = null, flou = 0, roll = 0
 
 // ================= MONTAGE EN PLANS COURTS =================
 const DUREES = Object.fromEntries(timeline.scenes.map((s) => [s.nom, s.frames]));
+// Image (dans la scène) où un mot est prononcé, d'après la voix off
+const repere = (nom, mot, defaut) => timeline.scenes.find((s) => s.nom === nom)?.reperes?.[mot] ?? defaut;
 // Dans quelle coupe de la scène on est : i (n° du plan), t (image dans le plan), d (durée du plan), bornes (début de chaque plan)
 const decoupe = (nom, f) => {
   const poids = PLANS[nom];
@@ -499,10 +501,10 @@ const Dilemme = () => {
       ]}
       dessus={
         <g>
-          <Choix f={f} debut={36} x={320} y={190} texte="TU MONTES ?" emoji="1f68c" couleur="#ff3b2a" />
-          <Choix f={f} debut={75} x={760} y={560} texte="TU RESTES ?" emoji="1f479" couleur="#8fd3ff" />
-          {f >= 112 && (
-            <g transform={`translate(540 1680) scale(${spring({frame: f - 112, fps: 30, config: {damping: 10}})})`}>
+          <Choix f={f} debut={repere('dilemme', 'tu', 36)} x={320} y={190} texte="TU MONTES ?" emoji="1f68c" couleur="#ff3b2a" />
+          <Choix f={f} debut={repere('dilemme', 'ou', 75)} x={760} y={560} texte="TU RESTES ?" emoji="1f479" couleur="#8fd3ff" />
+          {f >= repere('dilemme', 'dis-le', 112) && (
+            <g transform={`translate(540 1680) scale(${spring({frame: f - repere('dilemme', 'dis-le', 112), fps: 30, config: {damping: 10}})})`}>
               <rect x="-400" y="-70" width="800" height="140" rx="70" fill="#fff" />
               <image href={staticFile('emoji/1f4ac.svg')} x="-370" y="-48" width="96" height="96" />
               <text x="40" y="18" textAnchor="middle" fontFamily="'DejaVu Sans', Arial, sans-serif" fontWeight="900" fontSize="46" fill="#111">

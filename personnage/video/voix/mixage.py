@@ -204,6 +204,18 @@ r = ts(d) / d
 riser = filtre(bruit(d), "bandpass", [200, 2500]) * r ** 2 + 0.4 * np.sin(2 * np.pi * np.cumsum(120 + 500 * r ** 2) / SR) * r ** 3
 pose(riser, debut["souffle"], 0.06)
 
+# ---------- voix off enregistrée (un seul fichier, déjà traité par caler_voix.py) ----------
+if tl.get("voix"):
+    a, sr = sf.read(f"{ici}/{tl['voix']}")
+    a = resample_poly(a, SR, sr) if sr != SR else a
+    pose(a, 0, 1.0, voix)
+    # les bruitages baissent un peu quand la voix parle
+    n = len(voix) // 480
+    e = np.sqrt(np.mean(voix[: n * 480].reshape(n, 480) ** 2, axis=1))
+    e = np.convolve(e, np.ones(15) / 15, mode="same")
+    duck = 1 - 0.45 * np.clip(e / 0.08, 0, 1)
+    sfx[: n * 480] *= np.repeat(duck, 480)
+
 mix = voix + sfx
 mix = mix[: int(DUREE * SR)]
 mix /= max(1.0, np.abs(mix).max() / 0.95)
