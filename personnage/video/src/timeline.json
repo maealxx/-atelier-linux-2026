@@ -3,99 +3,99 @@
  "scenes": [
   {
    "nom": "busPart",
-   "frames": 150,
+   "frames": 181,
    "voix": "01.wav",
-   "debutVoix": 0.35,
-   "dureeVoix": 3.622,
-   "texte": "Imagine. Tu rates le dernier bus pour rentrer chez toi."
+   "debutVoix": 0.12,
+   "dureeVoix": 5.625,
+   "texte": "Minuit quarante-sept. Tu cours comme jamais… et les portes se ferment sous ton nez. Le dernier bus part sans toi."
   },
   {
    "nom": "aPied",
-   "frames": 135,
+   "frames": 156,
    "voix": "02.wav",
-   "debutVoix": 0.35,
-   "dureeVoix": 2.325,
-   "texte": "Pas le choix. Tu rentres à pied."
+   "debutVoix": 0.12,
+   "dureeVoix": 4.774,
+   "texte": "Génial. Ton tel est à deux pour cent. Alors tu rentres à pied. Vingt minutes, tranquille."
   },
   {
    "nom": "ruelle",
-   "frames": 150,
+   "frames": 131,
    "voix": "03.wav",
-   "debutVoix": 0.35,
-   "dureeVoix": 3.43,
-   "texte": "Pour couper, tu prends une petite ruelle. Grosse erreur."
+   "debutVoix": 0.12,
+   "dureeVoix": 3.938,
+   "texte": "Pour gagner du temps, tu coupes par la petite ruelle. Celle où personne ne passe jamais."
   },
   {
    "nom": "poussette",
-   "frames": 180,
+   "frames": 206,
    "voix": "04.wav",
-   "debutVoix": 0.35,
-   "dureeVoix": 3.178,
-   "texte": "Au fond, une poussette roule vers toi. Toute seule."
+   "debutVoix": 0.12,
+   "dureeVoix": 6.459,
+   "texte": "Au fond, un grincement. Une poussette sort de l'ombre et roule droit vers toi. Toute seule. Tu regardes dedans… vide."
   },
   {
    "nom": "poubelles",
-   "frames": 165,
+   "frames": 163,
    "voix": "05.wav",
-   "debutVoix": 0.35,
-   "dureeVoix": 3.326,
-   "texte": "Entre les poubelles, deux yeux te fixent. Tu accélères."
+   "debutVoix": 0.12,
+   "dureeVoix": 5.015,
+   "texte": "Tu continues. Entre les poubelles, deux yeux rouges s'allument. Ils te suivent. Tu accélères."
   },
   {
    "nom": "arret",
-   "frames": 150,
+   "frames": 143,
    "voix": "06.wav",
-   "debutVoix": 0.35,
-   "dureeVoix": 3.694,
-   "texte": "Au bout de la ruelle, un vieil arrêt de bus. Abandonné."
+   "debutVoix": 0.12,
+   "dureeVoix": 4.348,
+   "texte": "Au bout, un vieil arrêt de bus. Néon qui clignote, vitres cassées. Aucun numéro de ligne."
   },
   {
    "nom": "postit",
-   "frames": 150,
+   "frames": 183,
    "voix": "07.wav",
-   "debutVoix": 0.35,
-   "dureeVoix": 3.91,
-   "texte": "Dessus, un post-it. Surtout, ne pas monter dans le bus."
+   "debutVoix": 0.12,
+   "dureeVoix": 5.693,
+   "texte": "Collé sur le panneau, un post-it écrit à la main : surtout, ne pas monter dans le bus. Souligné deux fois."
   },
   {
    "nom": "busVieux",
-   "frames": 180,
+   "frames": 166,
    "voix": "08.wav",
-   "debutVoix": 0.35,
-   "dureeVoix": 4.842,
-   "texte": "Et là, un bus arrive. Vieux. Rouillé. Dégueulasse."
+   "debutVoix": 0.12,
+   "dureeVoix": 5.119,
+   "texte": "Et là, un phare au loin. Un bus arrive. Vieux, rouillé, dégueulasse. Il s'arrête pile devant toi."
   },
   {
    "nom": "portes",
-   "frames": 165,
+   "frames": 224,
    "voix": "09.wav",
-   "debutVoix": 0.35,
-   "dureeVoix": 3.907,
-   "texte": "Les portes s'ouvrent. Personne au volant. Tu hésites."
+   "debutVoix": 0.12,
+   "dureeVoix": 7.051,
+   "texte": "Les portes s'ouvrent en grinçant. Lumière rouge. Personne au volant. Le post-it. Le bus. Le post-it."
   },
   {
    "nom": "souffle",
-   "frames": 135,
+   "frames": 133,
    "voix": "10.wav",
-   "debutVoix": 0.35,
-   "dureeVoix": 2.285,
-   "texte": "Puis tu sens un souffle chaud, dans ta nuque."
+   "debutVoix": 0.12,
+   "dureeVoix": 4.015,
+   "texte": "Et puis tu le sens. Un souffle chaud… humide… juste dans ta nuque."
   },
   {
    "nom": "creature",
-   "frames": 165,
+   "frames": 147,
    "voix": "11.wav",
-   "debutVoix": 0.35,
-   "dureeVoix": 2.678,
-   "texte": "Derrière toi… quelque chose d'énorme."
+   "debutVoix": 0.12,
+   "dureeVoix": 4.472,
+   "texte": "Tu te retournes. Trois mètres de haut. Sept yeux. Et un sourire beaucoup trop grand."
   },
   {
    "nom": "dilemme",
-   "frames": 195,
+   "frames": 165,
    "voix": "12.wav",
-   "debutVoix": 0.35,
-   "dureeVoix": 5.322,
-   "texte": "Alors… tu montes dans le bus ? Ou tu restes là ? Dis-le en commentaire."
+   "debutVoix": 0.12,
+   "dureeVoix": 4.778,
+   "texte": "T'as deux secondes. Tu montes dans le bus ? Ou tu restes avec lui ? Dis-le en commentaire !"
   }
  ]
 }

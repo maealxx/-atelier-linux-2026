@@ -1,0 +1,15 @@
+{
+ "_doc": "Découpage de chaque scène en plans courts : poids relatifs de chaque plan (la durée de la scène est répartie au prorata).",
+ "busPart": [1, 1, 0.8, 1.3],
+ "aPied": [1.1, 0.9, 0.8],
+ "ruelle": [1.1, 0.8, 0.8, 0.9],
+ "poussette": [1.2, 0.8, 1, 0.7, 0.8],
+ "poubelles": [1, 0.8, 0.7, 1],
+ "arret": [1.3, 0.7, 0.7, 1],
+ "postit": [0.9, 1.2, 0.8, 0.8],
+ "busVieux": [1.1, 0.6, 0.8, 0.7, 1],
+ "portes": [1, 0.8, 0.6, 1.2, 0.8],
+ "souffle": [1, 0.9, 0.7, 0.8],
+ "creature": [0.5, 1.3, 0.8, 0.6, 0.6],
+ "dilemme": [1.3, 0.6, 0.6, 0.8, 1.2]
+}

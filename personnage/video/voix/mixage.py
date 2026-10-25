@@ -1,6 +1,6 @@
-"""Mixe la voix off (voix/NN.wav) et des bruitages synthétisés, calés sur src/timeline.json.
-Usage : python3 voix/mixage.py <sortie.wav>
-Les bruitages restent discrets (la voix passe toujours devant)."""
+"""Bruitages synthétisés calés sur src/timeline.json et src/plans.json (+ la voix guide si --avec-voix).
+Usage : python3 voix/mixage.py <sortie.wav> [--avec-voix]
+Bruitages discrets : swoosh à chaque coupe, pulsation grave, montée avant la créature, impacts."""
 import json, os, sys
 import numpy as np, soundfile as sf
 from scipy.signal import butter, sosfilt, resample_poly
@@ -14,6 +14,7 @@ for s in tl["scenes"]:
     debut[s["nom"]] = t
     t += s["frames"] / FPS
 DUREE = t
+DUREES_CREA = [s["frames"] for s in tl["scenes"] if s["nom"] == "creature"][0] / FPS
 rng = np.random.default_rng(7)
 voix = np.zeros(int(DUREE * SR) + SR)
 sfx = np.zeros_like(voix)
@@ -50,8 +51,8 @@ def ts(d):
     return np.arange(int(d * SR)) / SR
 
 
-# ---------- voix ----------
-for s in tl["scenes"]:
+# ---------- voix guide (seulement si demandée) ----------
+for s in (tl["scenes"] if "--avec-voix" in sys.argv else []):
     a, sr = sf.read(f"{ici}/{s['voix']}")
     a = resample_poly(a, SR, sr)
     pose(a / (np.abs(a).max() + 1e-9), debut[s["nom"]] + s["debutVoix"], 0.9, voix)
@@ -159,6 +160,49 @@ while f < tl["scenes"][-1]["frames"]:
         dd = 0.15
         pose(np.sin(2 * np.pi * 55 * ts(dd)) * np.exp(-ts(dd) * 22), tps("dilemme", f) + dt, 0.22)
     f += 25
+
+# ---------- montage : swoosh à chaque coupe ----------
+plans = json.load(open(f"{ici}/../src/plans.json"))
+coupes = []
+for s in tl["scenes"]:
+    w = plans[s["nom"]]
+    b = 0.0
+    for x in w[:-1]:
+        b += x / sum(w) * s["frames"]
+        coupes.append(debut[s["nom"]] + round(b) / FPS)
+    coupes.append(debut[s["nom"]])
+for c in sorted(coupes)[1:]:
+    dd = 0.28
+    sweep = filtre(bruit(dd), "bandpass", [700, 5000]) * np.sin(np.pi * ts(dd) / dd) ** 2
+    pose(sweep, c - 0.14, 0.035)
+
+
+# ---------- pulsation grave qui accélère (à partir de la ruelle) ----------
+def kick(t0, vol):
+    dd = 0.25
+    pose(np.sin(2 * np.pi * (70 - 30 * ts(dd) / dd) * ts(dd)) * np.exp(-ts(dd) * 14), t0, vol)
+
+
+t = debut["ruelle"]
+while t < debut["creature"]:
+    k = (t - debut["ruelle"]) / (debut["creature"] - debut["ruelle"])
+    kick(t, 0.07 + 0.08 * k)
+    t += 0.8 - 0.35 * k
+
+# ---------- impacts sur les moments forts ----------
+def impact(t0, vol):
+    dd = 1.2
+    pose(np.sin(2 * np.pi * (60 - 25 * ts(dd)) * ts(dd)) * np.exp(-ts(dd) * 4) + filtre(bruit(dd), "lowpass", 300) * np.exp(-ts(dd) * 6), t0, vol)
+
+
+for nom in ["poussette", "postit", "busVieux"]:
+    impact(debut[nom], 0.12)
+
+# ---------- montée de tension avant la créature ----------
+d = debut["creature"] + (plans["creature"][0] / sum(plans["creature"])) * DUREES_CREA - debut["souffle"]
+r = ts(d) / d
+riser = filtre(bruit(d), "bandpass", [200, 2500]) * r ** 2 + 0.4 * np.sin(2 * np.pi * np.cumsum(120 + 500 * r ** 2) / SR) * r ** 3
+pose(riser, debut["souffle"], 0.06)
 
 mix = voix + sfx
 mix = mix[: int(DUREE * SR)]

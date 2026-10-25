@@ -1,38 +1,39 @@
-# Le dernier bus — voix off (version 2 : la ruelle, le post-it et la créature)
+# Le dernier bus — script audio (version 3, montage rapide)
 
-La vidéo utilise pour l'instant une **voix provisoire** (Kokoro, voix française « siwis »), générée par `video/voix/generer.py`.
-Pour mettre ta voix : envoie-la (voix seule, sans musique) et je recale les scènes et les sous-titres dessus.
+La vidéo n'a **plus de voix off** : seulement les bruitages et les **sous-titres**, calés sur le texte ci-dessous.
+Pour enregistrer ta voix, lis le texte **au rythme des sous-titres** (assez vite, sans blanc). Ou envoie-moi ta voix et je recale tout dessus.
 
-**Voix conseillée** : jeune, française, chuchotée, ton de narration POV « creepy », proche du micro.
+**Ton** : narration POV, rapide, un peu chuchotée, qui monte en tension jusqu'à la créature, puis cash sur la question finale.
+Durée totale : 66.6 s.
 
-| Scène | Temps | Texte |
+| # | Temps | Texte |
 |---|---|---|
-| 1. busPart | 0.0 – 5.0 s | Imagine. Tu rates le dernier bus pour rentrer chez toi. |
-| 2. aPied | 5.0 – 9.5 s | Pas le choix. Tu rentres à pied. |
-| 3. ruelle | 9.5 – 14.5 s | Pour couper, tu prends une petite ruelle. Grosse erreur. |
-| 4. poussette | 14.5 – 20.5 s | Au fond, une poussette roule vers toi. Toute seule. |
-| 5. poubelles | 20.5 – 26.0 s | Entre les poubelles, deux yeux te fixent. Tu accélères. |
-| 6. arret | 26.0 – 31.0 s | Au bout de la ruelle, un vieil arrêt de bus. Abandonné. |
-| 7. postit | 31.0 – 36.0 s | Dessus, un post-it. Surtout, ne pas monter dans le bus. |
-| 8. busVieux | 36.0 – 42.0 s | Et là, un bus arrive. Vieux. Rouillé. Dégueulasse. |
-| 9. portes | 42.0 – 47.5 s | Les portes s'ouvrent. Personne au volant. Tu hésites. |
-| 10. souffle | 47.5 – 52.0 s | Puis tu sens un souffle chaud, dans ta nuque. |
-| 11. creature | 52.0 – 57.5 s | Derrière toi… quelque chose d'énorme. |
-| 12. dilemme | 57.5 – 64.0 s | Alors… tu montes dans le bus ? Ou tu restes là ? Dis-le en commentaire. |
+| 1 | 0.0 – 6.0 s | Minuit quarante-sept. Tu cours comme jamais… et les portes se ferment sous ton nez. Le dernier bus part sans toi. |
+| 2 | 6.0 – 11.2 s | Génial. Ton tel est à deux pour cent. Alors tu rentres à pied. Vingt minutes, tranquille. |
+| 3 | 11.2 – 15.6 s | Pour gagner du temps, tu coupes par la petite ruelle. Celle où personne ne passe jamais. |
+| 4 | 15.6 – 22.5 s | Au fond, un grincement. Une poussette sort de l'ombre et roule droit vers toi. Toute seule. Tu regardes dedans… vide. |
+| 5 | 22.5 – 27.9 s | Tu continues. Entre les poubelles, deux yeux rouges s'allument. Ils te suivent. Tu accélères. |
+| 6 | 27.9 – 32.7 s | Au bout, un vieil arrêt de bus. Néon qui clignote, vitres cassées. Aucun numéro de ligne. |
+| 7 | 32.7 – 38.8 s | Collé sur le panneau, un post-it écrit à la main : surtout, ne pas monter dans le bus. Souligné deux fois. |
+| 8 | 38.8 – 44.3 s | Et là, un phare au loin. Un bus arrive. Vieux, rouillé, dégueulasse. Il s'arrête pile devant toi. |
+| 9 | 44.3 – 51.8 s | Les portes s'ouvrent en grinçant. Lumière rouge. Personne au volant. Le post-it. Le bus. Le post-it. |
+| 10 | 51.8 – 56.2 s | Et puis tu le sens. Un souffle chaud… humide… juste dans ta nuque. |
+| 11 | 56.2 – 61.1 s | Tu te retournes. Trois mètres de haut. Sept yeux. Et un sourire beaucoup trop grand. |
+| 12 | 61.1 – 66.6 s | T'as deux secondes. Tu montes dans le bus ? Ou tu restes avec lui ? Dis-le en commentaire ! |
 
 ## Texte d'un seul bloc
 
 ```
-Imagine. Tu rates le dernier bus pour rentrer chez toi.
-Pas le choix. Tu rentres à pied.
-Pour couper, tu prends une petite ruelle. Grosse erreur.
-Au fond, une poussette roule vers toi. Toute seule.
-Entre les poubelles, deux yeux te fixent. Tu accélères.
-Au bout de la ruelle, un vieil arrêt de bus. Abandonné.
-Dessus, un post-it. Surtout, ne pas monter dans le bus.
-Et là, un bus arrive. Vieux. Rouillé. Dégueulasse.
-Les portes s'ouvrent. Personne au volant. Tu hésites.
-Puis tu sens un souffle chaud, dans ta nuque.
-Derrière toi… quelque chose d'énorme.
-Alors… tu montes dans le bus ? Ou tu restes là ? Dis-le en commentaire.
+Minuit quarante-sept. Tu cours comme jamais… et les portes se ferment sous ton nez. Le dernier bus part sans toi.
+Génial. Ton tel est à deux pour cent. Alors tu rentres à pied. Vingt minutes, tranquille.
+Pour gagner du temps, tu coupes par la petite ruelle. Celle où personne ne passe jamais.
+Au fond, un grincement. Une poussette sort de l'ombre et roule droit vers toi. Toute seule. Tu regardes dedans… vide.
+Tu continues. Entre les poubelles, deux yeux rouges s'allument. Ils te suivent. Tu accélères.
+Au bout, un vieil arrêt de bus. Néon qui clignote, vitres cassées. Aucun numéro de ligne.
+Collé sur le panneau, un post-it écrit à la main : surtout, ne pas monter dans le bus. Souligné deux fois.
+Et là, un phare au loin. Un bus arrive. Vieux, rouillé, dégueulasse. Il s'arrête pile devant toi.
+Les portes s'ouvrent en grinçant. Lumière rouge. Personne au volant. Le post-it. Le bus. Le post-it.
+Et puis tu le sens. Un souffle chaud… humide… juste dans ta nuque.
+Tu te retournes. Trois mètres de haut. Sept yeux. Et un sourire beaucoup trop grand.
+T'as deux secondes. Tu montes dans le bus ? Ou tu restes avec lui ? Dis-le en commentaire !
 ```
