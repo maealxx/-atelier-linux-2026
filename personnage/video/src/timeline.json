@@ -1,0 +1,101 @@
+{
+ "fps": 30,
+ "scenes": [
+  {
+   "nom": "busPart",
+   "frames": 150,
+   "voix": "01.wav",
+   "debutVoix": 0.35,
+   "dureeVoix": 3.622,
+   "texte": "Imagine. Tu rates le dernier bus pour rentrer chez toi."
+  },
+  {
+   "nom": "aPied",
+   "frames": 135,
+   "voix": "02.wav",
+   "debutVoix": 0.35,
+   "dureeVoix": 2.325,
+   "texte": "Pas le choix. Tu rentres à pied."
+  },
+  {
+   "nom": "ruelle",
+   "frames": 150,
+   "voix": "03.wav",
+   "debutVoix": 0.35,
+   "dureeVoix": 3.43,
+   "texte": "Pour couper, tu prends une petite ruelle. Grosse erreur."
+  },
+  {
+   "nom": "poussette",
+   "frames": 180,
+   "voix": "04.wav",
+   "debutVoix": 0.35,
+   "dureeVoix": 3.178,
+   "texte": "Au fond, une poussette roule vers toi. Toute seule."
+  },
+  {
+   "nom": "poubelles",
+   "frames": 165,
+   "voix": "05.wav",
+   "debutVoix": 0.35,
+   "dureeVoix": 3.326,
+   "texte": "Entre les poubelles, deux yeux te fixent. Tu accélères."
+  },
+  {
+   "nom": "arret",
+   "frames": 150,
+   "voix": "06.wav",
+   "debutVoix": 0.35,
+   "dureeVoix": 3.694,
+   "texte": "Au bout de la ruelle, un vieil arrêt de bus. Abandonné."
+  },
+  {
+   "nom": "postit",
+   "frames": 150,
+   "voix": "07.wav",
+   "debutVoix": 0.35,
+   "dureeVoix": 3.91,
+   "texte": "Dessus, un post-it. Surtout, ne pas monter dans le bus."
+  },
+  {
+   "nom": "busVieux",
+   "frames": 180,
+   "voix": "08.wav",
+   "debutVoix": 0.35,
+   "dureeVoix": 4.842,
+   "texte": "Et là, un bus arrive. Vieux. Rouillé. Dégueulasse."
+  },
+  {
+   "nom": "portes",
+   "frames": 165,
+   "voix": "09.wav",
+   "debutVoix": 0.35,
+   "dureeVoix": 3.907,
+   "texte": "Les portes s'ouvrent. Personne au volant. Tu hésites."
+  },
+  {
+   "nom": "souffle",
+   "frames": 135,
+   "voix": "10.wav",
+   "debutVoix": 0.35,
+   "dureeVoix": 2.285,
+   "texte": "Puis tu sens un souffle chaud, dans ta nuque."
+  },
+  {
+   "nom": "creature",
+   "frames": 165,
+   "voix": "11.wav",
+   "debutVoix": 0.35,
+   "dureeVoix": 2.678,
+   "texte": "Derrière toi… quelque chose d'énorme."
+  },
+  {
+   "nom": "dilemme",
+   "frames": 195,
+   "voix": "12.wav",
+   "debutVoix": 0.35,
+   "dureeVoix": 5.322,
+   "texte": "Alors… tu montes dans le bus ? Ou tu restes là ? Dis-le en commentaire."
+  }
+ ]
+}

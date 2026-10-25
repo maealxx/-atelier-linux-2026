@@ -293,7 +293,11 @@ const BH = -700;
 const BB = 380;
 const BL = 4.4;
 
-export const bus = (cam, f, {zp, sens = 'avant', numero = '42', interieur = '#ffd79a', phares = 1, porte = 0, chauffeur = null, led = 1}) => {
+// vieux = carrosserie rouillée, vitres sales, un seul phare qui grésille
+export const bus = (cam, f, {zp, sens = 'avant', numero = '42', interieur = '#ffd79a', phares = 1, porte = 0, chauffeur = null, led = 1, vieux = false}) => {
+  const coul = vieux
+    ? {caisse: '#4d4336', bande: '#5e2b1c', porte: '#3a3128', rouille: '#6b3a1e'}
+    : {caisse: '#5d6a62', bande: '#2f5d4a', porte: '#36423c', rouille: null};
   const {proj, poly, scale, visible} = cam;
   if (!visible(zp, -560, -200) && !visible(zp + BL, -560, -200) && !visible(zp, BX1, -200)) return null;
   const z0 = zp;
@@ -318,15 +322,19 @@ export const bus = (cam, f, {zp, sens = 'avant', numero = '42', interieur = '#ff
   const cote =
     cam.x > BX1 ? (
       <g key="cote">
-        <polygon points={poly([[BX1, BH, z0], [BX1, BH, z1], [BX1, BB, z1], [BX1, BB, z0]])} fill="#5d6a62" />
-        <polygon points={poly([[BX1, 150, z0], [BX1, 150, z1], [BX1, 260, z1], [BX1, 260, z0]])} fill="#2f5d4a" />
+        <polygon points={poly([[BX1, BH, z0], [BX1, BH, z1], [BX1, BB, z1], [BX1, BB, z0]])} fill={coul.caisse} />
+        <polygon points={poly([[BX1, 150, z0], [BX1, 150, z1], [BX1, 260, z1], [BX1, 260, z0]])} fill={coul.bande} />
         {fenetres}
+        {coul.rouille &&
+          [0.4, 1.3, 2.1, 2.9, 3.7].map((dz, k) => (
+            <polygon key={k} points={poly([[BX1 + 1, 40 + k * 30, zp + dz], [BX1 + 1, -20 + k * 20, zp + dz + 0.25], [BX1 + 1, 120, zp + dz + 0.45], [BX1 + 1, 330, zp + dz + 0.3], [BX1 + 1, 300, zp + dz]])} fill={coul.rouille} opacity="0.8" />
+          ))}
         {/* porte */}
         {visible(pz0, BX1, 0) && (
           <g>
             <polygon points={poly([[BX1, -620, pz0], [BX1, -620, pz1], [BX1, 360, pz1], [BX1, 360, pz0]])} fill={interieur} opacity={0.25 + 0.75 * ouvert} />
-            <polygon points={poly([[BX1 + 2, -610, pz0], [BX1 + 2, -610, pm - (pm - pz0) * ouvert], [BX1 + 2, 360, pm - (pm - pz0) * ouvert], [BX1 + 2, 360, pz0]])} fill="#36423c" stroke="#1a201d" strokeWidth="3" />
-            <polygon points={poly([[BX1 + 2, -610, pm + (pz1 - pm) * ouvert], [BX1 + 2, -610, pz1], [BX1 + 2, 360, pz1], [BX1 + 2, 360, pm + (pz1 - pm) * ouvert]])} fill="#36423c" stroke="#1a201d" strokeWidth="3" />
+            <polygon points={poly([[BX1 + 2, -610, pz0], [BX1 + 2, -610, pm - (pm - pz0) * ouvert], [BX1 + 2, 360, pm - (pm - pz0) * ouvert], [BX1 + 2, 360, pz0]])} fill={coul.porte} stroke="#1a201d" strokeWidth="3" />
+            <polygon points={poly([[BX1 + 2, -610, pm + (pz1 - pm) * ouvert], [BX1 + 2, -610, pz1], [BX1 + 2, 360, pz1], [BX1 + 2, 360, pm + (pz1 - pm) * ouvert]])} fill={coul.porte} stroke="#1a201d" strokeWidth="3" />
           </g>
         )}
         {roues}
@@ -343,24 +351,32 @@ export const bus = (cam, f, {zp, sens = 'avant', numero = '42', interieur = '#ff
         {chauffeur && chauffeur(zp + 0.45)}
         <path
           fillRule="evenodd"
-          fill="#66746b"
+          fill={vieux ? '#4a4034' : '#66746b'}
           d={`M${c(BX0, BH)} L${c(BX1, BH)} L${c(BX1, BB)} L${c(BX0, BB)} Z M${c(BX0 + 60, -610)} L${c(BX1 - 60, -610)} L${c(BX1 - 60, -80)} L${c(BX0 + 60, -80)} Z`}
         />
-        <polygon points={poly([[BX0 + 60, -610, zp], [BX1 - 60, -610, zp], [BX1 - 60, -80, zp], [BX0 + 60, -80, zp]])} fill="#bfffe0" opacity="0.07" />
+        <polygon points={poly([[BX0 + 60, -610, zp], [BX1 - 60, -610, zp], [BX1 - 60, -80, zp], [BX0 + 60, -80, zp]])} fill={vieux ? '#3b3020' : '#bfffe0'} opacity={vieux ? 0.55 : 0.07} />
+        {vieux && (
+          <g stroke="#cfc6b0" strokeWidth={Math.max(1, 3 * s)} opacity="0.5" fill="none">
+            <path d={`M${c(-400, -350)} L${c(-520, -470)} L${c(-610, -440)} M${c(-400, -350)} L${c(-300, -560)} M${c(-400, -350)} L${c(-250, -260)} L${c(-180, -300)} M${c(-400, -350)} L${c(-470, -150)}`} />
+          </g>
+        )}
+        {vieux && <polygon points={poly([[BX0, 60, zp], [BX0 + 260, 20, zp], [BX0 + 330, 140, zp], [BX0 + 120, 210, zp], [BX0, 180, zp]])} fill={coul.rouille} opacity="0.85" />}
+        {vieux && <polygon points={poly([[BX1 - 300, 280, zp], [BX1, 230, zp], [BX1, 380, zp], [BX1 - 250, 380, zp]])} fill={coul.rouille} opacity="0.85" />}
         <polygon points={poly([[BX0 + 200, -610, zp], [BX0 + 330, -610, zp], [BX0 + 120, -80, zp], [BX0 + 60, -80, zp], [BX0 + 60, -200, zp]])} fill="#fff" opacity="0.06" />
         {/* girouette */}
         <polygon points={poly([[BX0 + 120, -690, zp], [BX1 - 120, -690, zp], [BX1 - 120, -625, zp], [BX0 + 120, -625, zp]])} fill="#0b0b0b" />
         <text x={c(-560, -640)[0]} y={c(-560, -640)[1]} fontSize={56 * s} fill="#ff8a00" opacity={led} fontWeight="900" textAnchor="middle" fontFamily="'DejaVu Sans Mono', monospace">
           {numero}
         </text>
-        <polygon points={poly([[BX0, 150, zp], [BX1, 150, zp], [BX1, 260, zp], [BX0, 260, zp]])} fill="#2f5d4a" />
-        {/* phares */}
-        {[BX0 + 110, BX1 - 110].map((x) => {
+        <polygon points={poly([[BX0, 150, zp], [BX1, 150, zp], [BX1, 260, zp], [BX0, 260, zp]])} fill={coul.bande} />
+        {/* phares (le vieux bus n'en a plus qu'un, qui grésille) */}
+        {[BX0 + 110, BX1 - 110].map((x, k) => {
           const p = c(x, 300);
+          const ph = vieux ? (k === 0 ? 0 : phares * (random(`ph${f}`) > 0.2 ? 1 : 0.3)) : phares;
           return (
             <g key={x}>
-              <ellipse cx={p[0]} cy={p[1]} rx={55 * s} ry={30 * s} fill="#fffbe8" opacity={0.3 + 0.7 * phares} />
-              {phares > 0 && <circle cx={p[0]} cy={p[1]} r={Math.min(900, 380 * s) * phares} fill="url(#bus-glare)" />}
+              <ellipse cx={p[0]} cy={p[1]} rx={55 * s} ry={30 * s} fill={vieux && k === 0 ? '#1a1712' : '#fffbe8'} opacity={0.3 + 0.7 * ph} />
+              {ph > 0 && <circle cx={p[0]} cy={p[1]} r={Math.min(900, 380 * s) * ph} fill="url(#bus-glare)" />}
             </g>
           );
         })}
@@ -389,7 +405,7 @@ export const bus = (cam, f, {zp, sens = 'avant', numero = '42', interieur = '#ff
   ) : null;
 
   return {
-    z: zp,
+    z: zp + BL / 2,
     el: (
       <g key="bus">
         <defs>

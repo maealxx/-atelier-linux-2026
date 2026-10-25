@@ -1,22 +1,11 @@
-import {AbsoluteFill, Easing, interpolate, random, Series, useCurrentFrame} from 'remotion';
+import {AbsoluteFill, Easing, interpolate, random, Series, spring, staticFile, useCurrentFrame} from 'remotion';
+import {Creature, Poussette, ruelle, vague} from './Decors';
 import {clamp, Finition, flick, makeCam, marche, orbite, Perso, YeuxRouges} from './moteur';
 import {bus, LAMPES, rue, SOL} from './Rue';
+import timeline from './timeline.json';
 
-// Durée de chaque scène (en images, 30 i/s). À recaler sur la voix off.
-export const SCENES = [
-  ['busPart', 150], // Imagine. Tu rates le dernier bus pour rentrer chez toi.
-  ['horaires', 150], // Le prochain ? Dans six heures.
-  ['telephone', 120], // Ton téléphone ? Deux pour cent… Plus rien.
-  ['rueVide', 180], // Alors tu marches. La rue est vide. Trop vide.
-  ['balancoire', 180], // Tu passes devant le parc. La balançoire bouge. Toute seule. Y'a pas de vent.
-  ['pas', 180], // Puis t'entends des pas derrière toi. Tu t'arrêtes… ils s'arrêtent aussi.
-  ['souterrain', 210], // Tu coupes par le passage souterrain. Sur le mur, quelqu'un a écrit…
-  ['lampadaires', 180], // Tu te retournes. Personne. Mais les lampadaires s'éteignent. Un par un. Vers toi.
-  ['course', 120], // Tu cours. Tu cours. Tu cours !
-  ['busArrive', 180], // Et là… un bus arrive. Ligne zéro. Elle existe sur aucun plan.
-  ['chauffeur', 150], // Les portes s'ouvrent. Le chauffeur te sourit. Tu montes ?
-  ['fin', 120], // Abonne-toi pour savoir s'il est rentré.
-];
+// Les scènes et leur durée viennent de timeline.json (généré par voix/generer.py à partir de la voix off).
+export const SCENES = timeline.scenes.map((s) => [s.nom, s.frames]);
 export const DUREE_BUS = SCENES.reduce((t, [, d]) => t + d, 0);
 
 const CHAUD = [1, 0.82, 0.68];
@@ -117,98 +106,10 @@ const BusPart = () => {
   );
 };
 
-// ---------- 2. L'abribus et les horaires ----------
-const Horaires = () => {
+// ---------- 2. À pied (plan drone en plongée, de dos) ----------
+const APied = () => {
   const f = useCurrentFrame();
-  const cam = makeCam({
-    x: interpolate(f, [0, 45, 135], [170, 170, 360], ease),
-    y: interpolate(f, [0, 45, 135], [-40, -40, -115], ease),
-    z: interpolate(f, [0, 45, 135], [2.15, 2.2, 3.62], ease),
-    yaw: interpolate(f, [0, 45, 135], [12, 9, 0], ease),
-    pitch: interpolate(f, [0, 45, 135], [4, 4, -3], ease),
-  });
-  const lampe = (l) => (Math.abs(l.z - 3.7) < 0.1 && l.cote === 'D' ? flick(f, 'l2', 0, 150, 0.4) : 1);
-  const decor = rue(cam, f, {lampe, panneau: flick(f, 'pan', 100, 150, 0.6)});
-  return (
-    <Plan
-      f={f}
-      decor={decor}
-      noir={0.02}
-      roll={interpolate(f, [0, 135], [0, -4], ease)}
-      items={[
-        {
-          z: 3.2,
-          el: (
-            <Perso cam={cam} id="p2" x={230} z={3.2} lum={lumiere(3.2, lampe) * 0.9} teinte={[0.85, 0.9, 1]} worry={0.5} breath={Math.sin(f / 9) * 3} pupilX={4} pupilY={-2} tilt={4} eyes={f === 70 || f === 71 ? 0.1 : 1} />
-          ),
-        },
-      ]}
-    />
-  );
-};
-
-// ---------- 3. Le téléphone ----------
-const Telephone = () => {
-  const f = useCurrentFrame();
-  const cam = makeCam({x: 230 + f * 0.8, y: -200, z: 2.2, yaw: Math.sin(f / 30) * 4});
-  const decor = rue(cam, f, {});
-  const allume = f < 72;
-  const glitch = f >= 66 && f < 72;
-  const vide = f >= 80 && f < 96 && Math.floor(f / 4) % 2 === 0;
-  const clign = Math.floor(f / 10) % 2 === 0 ? 1 : 0.35;
-  const fl = Math.sin(f / 20) * 6;
-  return (
-    <Plan
-      f={f}
-      decor={decor}
-      flou={14}
-      noir={0.37}
-      dessus={
-        <g transform={`translate(540 ${1000 + fl}) rotate(${-3 + Math.sin(f / 30) * 1.5}) scale(${interpolate(f, [0, 120], [0.92, 1.08])})`}>
-          {/* mains */}
-          <ellipse cx="-300" cy="200" rx="110" ry="190" fill="#c99a7c" />
-          <ellipse cx="300" cy="200" rx="110" ry="190" fill="#c99a7c" />
-          {/* téléphone */}
-          <rect x="-270" y="-520" width="540" height="1040" rx="70" fill="#0d0d10" />
-          <rect x="-245" y="-495" width="490" height="990" rx="52" fill={allume ? '#0c1428' : '#000'} />
-          {allume && (
-            <g textAnchor="middle" fontFamily="'DejaVu Sans', Arial, sans-serif">
-              <text y="-330" fontSize="120" fontWeight="300" fill="#e8ecff">00:52</text>
-              <text y="-265" fontSize="30" fill="#aab3d6">dimanche 26 octobre</text>
-              <rect x="-110" y="-90" width="220" height="110" rx="18" fill="none" stroke="#ff3b3b" strokeWidth="10" opacity={clign} />
-              <rect x="110" y="-55" width="18" height="40" rx="6" fill="#ff3b3b" opacity={clign} />
-              <rect x="-96" y="-76" width="12" height="82" rx="4" fill="#ff3b3b" opacity={clign} />
-              <text y="140" fontSize="110" fontWeight="900" fill="#ff3b3b">2 %</text>
-              <text y="210" fontSize="30" fill="#aab3d6">Batterie faible</text>
-            </g>
-          )}
-          {glitch &&
-            [...Array(8)].map((_, k) => (
-              <rect key={k} x={-245 + (random(`g${f}${k}`) - 0.5) * 80} y={-495 + random(`gy${f}${k}`) * 990} width="490" height={20 + random(`gh${f}${k}`) * 60} fill={k % 2 ? '#ff3b3b' : '#e8ecff'} opacity="0.5" />
-            ))}
-          {vide && (
-            <g>
-              <rect x="-110" y="-55" width="220" height="110" rx="18" fill="none" stroke="#ff3b3b" strokeWidth="10" />
-              <rect x="110" y="-20" width="18" height="40" rx="6" fill="#ff3b3b" />
-            </g>
-          )}
-          {/* reflet */}
-          <path d="M-245,-200 L-60,-495 L40,-495 L-245,-40 Z" fill="#fff" opacity="0.04" />
-          {/* pouces */}
-          <ellipse cx="-230" cy="120" rx="48" ry="95" fill="#d9a888" transform="rotate(-20 -230 120)" />
-          <ellipse cx="230" cy="120" rx="48" ry="95" fill="#d9a888" transform="rotate(20 230 120)" />
-          {/* lueur de l'écran */}
-          {allume && <rect x="-600" y="-900" width="1200" height="1800" fill="#5577ff" opacity="0.05" />}
-        </g>
-      }
-    />
-  );
-};
-
-// ---------- 4. La rue vide (plan drone en plongée, de dos) ----------
-const RueVide = () => {
-  const f = useCurrentFrame();
-  const z = interpolate(f, [0, 180], [12.3, 13.9]);
+  const z = interpolate(f, [0, 135], [12.3, 13.5]);
   const cam = makeCam({
     x: 120 + Math.sin(f / 50) * 60,
     y: interpolate(f, [0, 180], [-1900, -1500], ease),
@@ -235,421 +136,335 @@ const RueVide = () => {
   );
 };
 
-// ---------- 5. La balançoire ----------
-const Balancoire = () => {
+// ---------- 3. La ruelle ----------
+const Ruelle = () => {
   const f = useCurrentFrame();
-  const z = interpolate(f, [0, 70], [7.6, 6.8], {...clamp, easing: Easing.out(Easing.quad)});
+  const z = interpolate(f, [0, 150], [0.55, 2.0]);
   const cam = makeCam({
-    x: interpolate(f, [0, 85, 170], [150, 150, 270], ease) + Math.sin(f / 25) * 8,
-    y: interpolate(f, [0, 85, 170], [-170, -170, -110], ease),
-    z: interpolate(f, [0, 70, 85, 170], [7.6 - 0.72, 6.8 - 0.72, 6.8 - 0.72, 6.35], ease),
-    yaw: interpolate(f, [90, 165], [0, 24], ease),
-    pitch: interpolate(f, [90, 165], [0, -4], ease),
+    x: 60 + Math.sin(f / 30) * 20,
+    y: interpolate(f, [0, 150], [260, -110], ease),
+    z: interpolate(f, [0, 150], [-0.45, 0.75], ease),
+    pitch: interpolate(f, [0, 150], [-10, 3], ease),
+    yaw: interpolate(f, [0, 150], [5, -2], ease),
   });
-  const a1 = 32 * Math.sin(f / 13);
-  const decor = rue(cam, f, {balancoire: [a1, 1.5 * Math.sin(f / 25)]});
-  const m = marche(f, 0.3, interpolate(f, [0, 55, 70], [0.8, 0.8, 0], clamp));
-  const regarde = interpolate(f, [80, 95], [0, 1], clamp);
+  const ampoule = (i) => (i === 0 ? flick(f, 'ru0', 40, 150, 0.15) : 1);
+  const decor = ruelle(cam, f, {ampoule});
+  const m = marche(f, 0.3, 0.8);
   return (
     <Plan
       f={f}
       decor={decor}
-      noir={0.07}
-      roll={interpolate(f, [90, 165], [0, 5], ease)}
-      items={[
-        {
-          z,
-          el: (
-            <Perso cam={cam} id="p5" x={150} z={z} lum={lumiere(z, () => 1)} teinte={CHAUD} lift={m.bob} legG={m.legG} legD={m.legD} epauleG={m.bras} epauleD={m.bras} worry={0.3 + 0.6 * regarde} pupilX={5 * regarde} tilt={6 * regarde} eyes={1 + 0.2 * regarde} sweat={interpolate(f, [120, 180], [0, 1], clamp)} breath={Math.sin(f / 6) * 3} />
-          ),
-        },
-      ]}
+      noir={0.05}
+      roll={interpolate(f, [0, 150], [-3, 2], ease)}
+      items={[{z, el: <Perso cam={cam} id="r3" x={0} z={z} dos lum={0.4 + 0.6 * ampoule(0)} teinte={[0.95, 0.95, 0.75]} lift={m.bob} legG={m.legG} legD={m.legD} epauleG={m.bras} epauleD={m.bras} breath={Math.sin(f / 8) * 3} />}]}
     />
   );
 };
 
-// ---------- 6. Les pas (caméra au ras du sol, puis gros plan de face) ----------
-const TAPS = [8, 18, 28, 38, 48, 58, 124, 134];
-const Pas = () => {
+// ---------- 4. La poussette ----------
+const PoussetteScene = () => {
   const f = useCurrentFrame();
-  const face = f >= 72;
-  const z = f < 60 ? interpolate(f, [0, 60], [-3, -2.3]) : f < 120 ? -2.3 : interpolate(f, [120, 140], [-2.3, -2.45], clamp);
-  const marcheOn = f < 60 || (f >= 120 && f < 140);
-  const m = marche(f, 0.32, marcheOn ? 0.8 : 0);
+  const contre = f >= 95; // contrechamp : la caméra est à la place de la poussette
+  const zP = interpolate(f, [10, 90], [10, 3.75], {...clamp, easing: Easing.out(Easing.quad)});
+  const z = interpolate(f, [0, 20], [2.75, 3.0], clamp);
   const cam = makeCam(
-    face
-      ? {x: 150 + Math.sin(f / 40) * 10, y: -210, z: z - interpolate(f, [72, 180], [0.75, 0.5], ease), pitch: 2}
-      : {x: 150 + Math.sin(f / 9) * 12, y: 340, z: z - 0.8, pitch: -11, yaw: Math.sin(f / 30) * 3}
+    contre
+      ? {x: 120, y: 290, z: interpolate(f, [95, 180], [3.78, 3.6], ease), yaw: 180, pitch: -13}
+      : {x: 150 + Math.sin(f / 25) * 10, y: -210, z: interpolate(f, [0, 95], [1.85, 2.15], ease), pitch: 2, yaw: 2}
   );
-  const decor = rue(cam, f, {});
-  const peur = interpolate(f, [60, 70], [0, 1], clamp);
-  const taps = TAPS.map((t, k) => {
-    const r = f - t;
-    if (r < 0 || r > 14) return null;
-    // de dos : les pas résonnent juste derrière lui (près de la caméra) ; de face : au loin derrière lui
-    const [x, y, zt] = face ? [150 + (k % 2 ? 160 : -160), -120, z + 1.6] : [150 + (k % 2 ? 230 : -230), 330, cam.z + 0.5];
-    if (!cam.visible(zt, x, y)) return null;
-    const p = cam.proj(x, y, zt);
-    const sc = cam.scale(zt, x, y) * (1 + r * 0.03);
-    return (
-      <text key={k} x={p[0]} y={p[1]} fontSize={(face ? 150 : 90) * sc} fontStyle="italic" fontWeight="900" fill="#d8d8e0" opacity={0.6 * (1 - r / 14)} textAnchor="middle" fontFamily="'DejaVu Sans', Arial, sans-serif">
-        TAP
-      </text>
-    );
+  const ampoule = (i) => (i === 0 ? flick(f, 'ru1', 0, 180, 0.3) : 1);
+  const decor = ruelle(cam, f, {ampoule});
+  const peur = interpolate(f, [60, 80], [0, 1], clamp);
+  return (
+    <Plan
+      f={f}
+      decor={decor}
+      noir={0.05}
+      roll={contre ? interpolate(f, [95, 180], [4, 9], ease) : 2}
+      items={[
+        !contre && {z: zP, el: billboardPoussette(cam, 120, zP, f, f < 90 ? 1 : 0)},
+        {
+          z,
+          el: (
+            <Perso cam={cam} id="r4" x={0} z={z} dos={!contre} lum={0.5 + 0.5 * ampoule(0)} teinte={[0.95, 0.95, 0.75]} breath={Math.sin(f / 5) * 4} epauleG={-6 * peur} epauleD={6 * peur} coudeG={-20 * peur} coudeD={20 * peur} worry={contre ? 1 : 0.5} eyes={contre ? 1.3 : 1} pupilY={contre ? 3 : 0} pupilX={contre ? 2 : 0} scream={contre ? interpolate(f, [120, 135], [0, 0.35], clamp) : 0} sweat={contre ? 1 : 0} shiver={contre ? (random(`r4${f}`) - 0.5) * 6 : 0} />
+          ),
+        },
+      ]}
+    />
+  );
+};
+const billboardPoussette = (cam, x, z, f, roule) => {
+  if (!cam.visible(z, x, 0)) return null;
+  const [px, py] = cam.proj(x, SOL, z);
+  return (
+    <g transform={`translate(${px} ${py}) scale(${cam.scale(z, x, 0)})`}>
+      <ellipse rx="220" ry="30" fill="#000" opacity="0.5" />
+      <Poussette f={f} roule={roule} />
+    </g>
+  );
+};
+
+// ---------- 5. Les yeux entre les poubelles ----------
+const Poubelles = () => {
+  const f = useCurrentFrame();
+  const vite = interpolate(f, [95, 115], [0, 1], clamp);
+  const z = 5.0 + f * 0.0075 + Math.max(0, f - 95) * 0.006;
+  const cam = makeCam({x: -40 + Math.sin(f / 35) * 25, y: -130, z: z + 1.15, yaw: 186, pitch: 1});
+  const ampoule = (i) => (i === 1 ? flick(f, 'ru2', 60, 165, 0.25) : 1);
+  const decor = ruelle(cam, f, {ampoule});
+  const m = marche(f, 0.3 + 0.18 * vite, 0.8 + 0.2 * vite);
+  const regard = interpolate(f, [68, 76, 92, 100], [0, 1, 1, 0], clamp);
+  return (
+    <Plan
+      f={f}
+      decor={decor}
+      noir={0.06}
+      roll={interpolate(f, [0, 165], [3, -4], ease)}
+      items={[
+        {
+          z,
+          el: (
+            <Perso cam={cam} id="r5" x={110} z={z} lum={0.5 + 0.5 * ampoule(1)} teinte={[0.95, 0.95, 0.75]} lift={m.bob} legG={m.legG} legD={m.legD} epauleG={m.bras} epauleD={m.bras} worry={0.4 + 0.6 * regard + 0.5 * vite} pupilX={6 * regard} tilt={6 * regard} eyes={1 + 0.25 * regard} sweat={vite} breath={Math.sin(f / 5) * 3} />
+          ),
+        },
+      ]}
+      dessus={f >= 45 ? <YeuxRouges cam={cam} id="yr5" x={-300} y={300} z={4.65} taille={0.8} ouvert={(f - 45) % 55 < 3 ? 0.1 : interpolate(f, [45, 52], [0.1, 1], clamp)} /> : null}
+    />
+  );
+};
+
+// ---------- 6. Le vieil arrêt ----------
+const Arret = () => {
+  const f = useCurrentFrame();
+  const z = interpolate(f, [0, 130], [0.8, 2.35], clamp);
+  const cam = makeCam({
+    x: interpolate(f, [0, 150], [400, 270], ease),
+    y: interpolate(f, [0, 150], [-1150, -160], ease),
+    z: interpolate(f, [0, 150], [-1.4, 0.95], ease),
+    pitch: interpolate(f, [0, 150], [26, 2], ease),
+    yaw: interpolate(f, [0, 150], [-5, 4], ease),
   });
+  const neon = flick(f, 'ne6', 0, 150, 0.1);
+  const decor = vague(cam, f, {neon});
+  const m = marche(f, 0.3, interpolate(f, [0, 115, 130], [0.8, 0.8, 0], clamp));
   return (
     <Plan
       f={f}
       decor={decor}
-      noir={0.1}
-      roll={face ? interpolate(f, [72, 180], [-4, -9], ease) : 3}
-      items={[
-        {z: face ? z + 1.6 : cam.z + 0.5, el: <g>{taps}</g>},
-        {
-          z,
-          el: (
-            <Perso cam={cam} id="p6" x={150} z={z} dos={!face} lum={lumiere(z, () => 1)} teinte={CHAUD} lift={m.bob} legG={m.legG} legD={m.legD} epauleG={m.bras - 4 * peur} epauleD={m.bras + 4 * peur} coudeG={-15 * peur} coudeD={15 * peur} worry={0.4 + 0.6 * peur} eyes={1 + 0.25 * peur} pupilX={f > 90 && f < 115 ? -4 : 0} sweat={peur} shiver={peur && !marcheOn ? (random(`s6${f}`) - 0.5) * 6 * cam.scale(z) : 0} breath={Math.sin(f / 5) * 3} />
-          ),
-        },
-      ]}
+      noir={0.04}
+      roll={interpolate(f, [0, 150], [-4, 1], ease)}
+      items={[{z, el: <Perso cam={cam} id="v6" x={220} z={z} dos lum={0.45 + 0.4 * neon} teinte={[0.8, 0.95, 0.88]} lift={m.bob} legG={m.legG} legD={m.legD} epauleG={m.bras} epauleD={m.bras} breath={Math.sin(f / 7) * 3} />}]}
     />
   );
 };
 
-// ---------- 7. Le passage souterrain ----------
-const Souterrain = () => {
-  const f = useCurrentFrame();
-  const z = interpolate(f, [0, 90], [4.6, 3.9], clamp);
-  const camZ = interpolate(f, [0, 90, 170], [3.55, 2.85, 7.3], ease);
-  const cam = makeCam({x: interpolate(f, [90, 130, 170], [0, 300, -120], ease), y: interpolate(f, [90, 170], [-30, -200], ease), z: camZ, yaw: interpolate(f, [0, 90, 130, 170], [5, -4, -10, 3], ease)});
-  const {proj, poly, scale, visible} = cam;
-  const FONDZ = 9;
-  const X = 520;
-  const PL = -480;
-  const zs = Math.max(cam.z + 0.15, 0.2);
-  const neons = [1, 2.6, 4.2, 5.8, 7.4];
-  const nl = (k) => (k === 2 ? flick(f, 'sn', 0, 210, 0.1) : k === 4 ? flick(f, 'sn4', 60, 120, 0.3) : 1);
-  const tuiles = [];
-  for (let zz = Math.ceil(zs / 0.2) * 0.2; zz < FONDZ; zz += 0.2) {
-    for (const sx of [-X, X]) {
-      const a = proj(sx, PL, zz);
-      const b = proj(sx, SOL, zz);
-      tuiles.push(<line key={`${sx}${zz}`} x1={a[0]} y1={a[1]} x2={b[0]} y2={b[1]} stroke="#16201f" strokeWidth={Math.max(1, 4 * scale(zz))} />);
-    }
-  }
-  for (let y = PL + 110; y < SOL; y += 110) {
-    for (const sx of [-X, X]) {
-      const a = proj(sx, y, zs);
-      const b = proj(sx, y, FONDZ);
-      tuiles.push(<line key={`h${sx}${y}`} x1={a[0]} y1={a[1]} x2={b[0]} y2={b[1]} stroke="#16201f" strokeWidth="3" />);
-    }
-  }
-  const message = 'IL EST DERRIÈRE TOI';
-  const nb = Math.floor(interpolate(f, [118, 160], [0, message.length], clamp));
-  const pm = proj(-170, -120, FONDZ - 0.01);
-  const sm = scale(FONDZ, -170, -120);
-  const ombreX = interpolate(f, [176, 196], [80, 560], clamp);
-  const lumG = 0.3 + 0.7 * nl(2);
-  const zone = (
-    <g>
-      <defs>
-        <radialGradient id="st-sortie">
-          <stop offset="0" stopColor="#ffb45a" stopOpacity="0.7" />
-          <stop offset="1" stopColor="#ffb45a" stopOpacity="0" />
-        </radialGradient>
-        <radialGradient id="st-neon">
-          <stop offset="0" stopColor="#d8fff0" stopOpacity="0.45" />
-          <stop offset="1" stopColor="#d8fff0" stopOpacity="0" />
-        </radialGradient>
-      </defs>
-      <rect width="1080" height="1920" fill="#000" />
-      {/* fond : mur + sortie */}
-      <polygon points={poly([[-X, PL, FONDZ], [X, PL, FONDZ], [X, SOL, FONDZ], [-X, SOL, FONDZ]])} fill="#2a2e2a" />
-      <polygon points={poly([[150, PL, FONDZ], [X, PL, FONDZ], [X, SOL, FONDZ], [150, SOL, FONDZ]])} fill="#3a2a1a" />
-      {[0, 1, 2, 3, 4, 5].map((k) => (
-        <polygon key={k} points={poly([[150, SOL - k * 140, FONDZ], [X, SOL - k * 140, FONDZ], [X, SOL - k * 140 - 20, FONDZ], [150, SOL - k * 140 - 20, FONDZ]])} fill="#6b4a28" />
-      ))}
-      <ellipse cx={proj(335, -50, FONDZ)[0]} cy={proj(335, -50, FONDZ)[1]} rx={500 * sm} ry={700 * sm} fill="url(#st-sortie)" />
-      {/* silhouette qui passe dans la sortie */}
-      {f >= 176 && f < 196 && (
-        <g transform={`translate(${proj(ombreX, SOL, FONDZ - 0.05)[0]} ${proj(ombreX, SOL, FONDZ - 0.05)[1]}) scale(${scale(FONDZ, ombreX, 0) * 0.85})`} fill="#020303">
-          <ellipse cx="0" cy="-945" rx="58" ry="78" />
-          <path d="M-95,-820 Q0,-860 95,-820 L70,-420 L-70,-420 Z M-38,0 L-30,-430 L-8,-430 L-14,0 Z M14,0 L8,-430 L30,-430 L38,0 Z M-92,-815 Q-130,-600 -120,-260 L-100,-255 Q-100,-560 -72,-760 Z M92,-815 Q130,-600 120,-260 L100,-255 Q100,-560 72,-760 Z" />
-        </g>
-      )}
-      {/* message peint */}
-      <g transform={`translate(${pm[0]} ${pm[1]}) scale(${sm})`} fontFamily="Georgia, 'DejaVu Serif', serif" fontWeight="900" fontStyle="italic" fill="#a10f14" textAnchor="middle">
-        <text y="-40" fontSize="150">{message.slice(0, Math.min(nb, 6))}</text>
-        <text y="125" fontSize="88">{nb > 7 ? message.slice(7, nb) : ''}</text>
-        {nb > 6 &&
-          [...Array(14)].map((_, k) => {
-            const x = -300 + random(`d${k}`) * 600;
-            const len = interpolate(f, [130 + k * 2, 200], [0, 60 + random(`dl${k}`) * 200], clamp);
-            return <line key={k} x1={x} y1={k < 5 ? -20 : 150} x2={x} y2={(k < 5 ? -20 : 150) + len} stroke="#a10f14" strokeWidth="9" strokeLinecap="round" />;
-          })}
-      </g>
-      {/* murs, plafond, sol */}
-      <polygon points={poly([[-X, PL, zs], [-X, PL, FONDZ], [-X, SOL, FONDZ], [-X, SOL, zs]])} fill="#2c3d38" />
-      <polygon points={poly([[X, PL, zs], [X, PL, FONDZ], [X, SOL, FONDZ], [X, SOL, zs]])} fill="#2c3d38" />
-      <polygon points={poly([[-X, PL, zs], [X, PL, zs], [X, PL, FONDZ], [-X, PL, FONDZ]])} fill="#171d1c" />
-      <polygon points={poly([[-X, SOL, zs], [X, SOL, zs], [X, SOL, FONDZ], [-X, SOL, FONDZ]])} fill="#25282a" />
-      {tuiles}
-      {/* tags */}
-      {[[-X, 2.0, '#3b5bd6'], [X, 3.4, '#c43b9a'], [-X, 6.2, '#d6b33b'], [X, 7.1, '#3bd68a']].map(([sx, zz, col], k) =>
-        visible(zz) ? (
-          <polygon key={k} points={poly([[sx, -60, zz], [sx, -180, zz + 0.25], [sx, -40, zz + 0.55], [sx, 120, zz + 0.8], [sx, 60, zz + 0.3]])} fill={col} opacity="0.35" />
-        ) : null
-      )}
-      {/* flaque */}
-      {visible(5) && <polygon points={poly([[-200, SOL, 5], [150, SOL, 4.9], [260, SOL, 5.5], [-100, SOL, 5.8]])} fill="#0c1416" />}
-      {/* néons */}
-      {neons.map((zz, k) =>
-        visible(zz) ? (
-          <g key={zz} opacity={0.15 + 0.85 * nl(k)}>
-            <ellipse cx={proj(0, SOL, zz + 0.3)[0]} cy={proj(0, SOL, zz + 0.3)[1]} rx={600 * scale(zz + 0.3)} ry={170 * scale(zz + 0.3)} fill="url(#st-neon)" opacity={nl(k)} />
-            <polygon points={poly([[-30, PL + 20, zz], [30, PL + 20, zz], [30, PL + 20, zz + 0.6], [-30, PL + 20, zz + 0.6]])} fill="#eafff7" />
-          </g>
-        ) : null
-      )}
-    </g>
-  );
-  const m = marche(f, 0.3, f < 90 ? 0.8 : 0);
-  return (
-    <AbsoluteFill style={{background: '#000'}}>
-      <svg viewBox="0 0 1080 1920" width={1080} height={1920}>
-        <g transform={`rotate(${interpolate(f, [0, 90, 170], [2, 4, -5], ease)} 540 960) translate(540 960) scale(1.07) translate(-540 -960)`}>
-        {zone}
-        {visible(z) && (
-          <Perso cam={cam} id="p7" x={0} z={z} lum={lumG} teinte={[0.8, 0.95, 0.9]} lift={m.bob} legG={m.legG} legD={m.legD} epauleG={m.bras} epauleD={m.bras} worry={0.6} sweat={0.6} breath={Math.sin(f / 6) * 3} pupilX={Math.sin(f / 25) * 4} />
-        )}
-        </g>
-        <rect width="1080" height="1920" fill="#000" opacity={0.2 + (1 - lumG) * 0.35} />
-        <Finition f={f} />
-      </svg>
-    </AbsoluteFill>
-  );
-};
-
-// ---------- 8. Les lampadaires s'éteignent ----------
-const extinction = (l) => 30 + (14 - l.z) * 5.5;
-const Lampadaires = () => {
-  const f = useCurrentFrame();
-  const lampe = (l) => {
-    if (l.z > 14) return 0;
-    const t = extinction(l);
-    if (f >= t) return 0;
-    if (f > t - 8) return flick(f, `x${l.z}${l.cote}`, t - 8, t, 0.1);
-    return 1;
-  };
-  const z = interpolate(f, [140, 175], [-6, -6.45], ease);
-  const cam = makeCam(orbite(150, -6, interpolate(f, [0, 180], [1.25, 1.5]), interpolate(f, [0, 180], [-32, 22], ease), -20, {pitch: -3}));
-  const decor = rue(cam, f, {lampe});
-  const lum = lumiere(z, lampe, 0.32);
-  const recul = interpolate(f, [140, 150], [0, 1], clamp);
-  const zy = interpolate(f, [95, 175], [5, -2.5], clamp);
-  return (
-    <Plan
-      f={f}
-      decor={decor}
-      noir={interpolate(f, [20, 150], [0.12, 0.45], clamp)}
-      roll={interpolate(f, [0, 180], [3, -5], ease)}
-      items={[
-        {
-          z,
-          el: (
-            <Perso cam={cam} id="p8" x={150} z={z} dos lum={lum} teinte={CHAUD} breath={Math.sin(f / 5) * 4} epauleG={-5 * recul} epauleD={5 * recul} coudeG={-25 * recul} coudeD={25 * recul} shiver={recul ? (random(`s8${f}`) - 0.5) * 8 : 0} />
-          ),
-        },
-      ]}
-      dessus={f >= 95 ? <YeuxRouges cam={cam} id="yr8" x={330} y={-380} z={zy} ouvert={f % 50 < 3 ? 0.1 : 1} /> : null}
-    />
-  );
-};
-
-// ---------- 9. La course ----------
-const Course = () => {
-  const f = useCurrentFrame();
-  const z = interpolate(f, [0, 120], [-9, -17]);
-  const sh = (random(`c${f}`) - 0.5) * 18;
-  const cam = makeCam({x: 150 + Math.sin(f / 8) * 20 + sh, y: 60 + sh * 0.5, z: z - 1.15, pitch: -7, yaw: Math.sin(f / 14) * 7});
-  const lampe = (l) => (l.z > z + 2.2 ? 0 : 1);
-  const decor = rue(cam, f, {lampe});
-  const m = marche(f, 0.75, 1);
-  return (
-    <Plan
-      f={f}
-      decor={decor}
-      noir={0.17}
-      roll={Math.sin(f / 6) * 4 + sh * 0.15}
-      items={[
-        {
-          z,
-          el: (
-            <Perso cam={cam} id="p9" x={150} z={z} lum={lumiere(z, lampe)} teinte={CHAUD} lift={m.bob * 2.2} legG={m.legG} legD={m.legD} epauleG={m.bras * 3} epauleD={m.bras * 3} coudeG={-70 + m.bras * 3} coudeD={70 + m.bras * 3} worry={1} scream={0.45} sweat={1} eyes={1.2} />
-          ),
-        },
-      ]}
-      dessus={<YeuxRouges cam={cam} id="yr9" x={560} y={-520} z={z + 3.2 - f * 0.009} taille={1.3} />}
-    />
-  );
-};
-
-// ---------- Le chauffeur (derrière le pare-brise) ----------
-const chauffeur = (cam, f, sourire) => (z) => {
-  if (!cam.visible(z, -760, -330)) return null;
-  const [px, py] = cam.proj(-760, -330, z);
-  const s = cam.scale(z, -760, -330);
-  const L = 30 + 70 * sourire;
-  return (
-    <g transform={`translate(${px} ${py}) scale(${s})`}>
-      <defs>
-        <radialGradient id="ch-oeil">
-          <stop offset="0" stopColor="#fff" />
-          <stop offset="0.35" stopColor="#ff3b3b" />
-          <stop offset="1" stopColor="#ff0000" stopOpacity="0" />
-        </radialGradient>
-      </defs>
-      <path d="M-260,330 Q-240,120 -90,90 L90,90 Q240,120 260,330 Z" fill="#020303" />
-      <rect x="-28" y="40" width="56" height="70" fill="#020303" />
-      <g transform={`rotate(${-8 + Math.sin(f / 12) * 3} 0 60)`}>
-        <ellipse cx="0" cy="-30" rx="92" ry="118" fill="#020303" />
-        {[-34, 34].map((x) => (
-          <g key={x}>
-            <ellipse cx={x} cy="-55" rx="34" ry="18" fill="url(#ch-oeil)" />
-            <ellipse cx={x} cy="-55" rx="7" ry="4" fill="#fff" />
-          </g>
-        ))}
-        {sourire > 0.02 && (
-          <g>
-            <path d={`M${-L},12 Q0,${12 + 80 * sourire} ${L},12 Q0,${12 + 30 * sourire} ${-L},12 Z`} fill="#f2f2e8" />
-            {[...Array(7)].map((_, k) => {
-              const x = -L + ((k + 1) * 2 * L) / 8;
-              return <line key={k} x1={x} y1={12} x2={x} y2={12 + 60 * sourire * (1 - Math.abs(x) / (L + 1))} stroke="#020303" strokeWidth="3" />;
-            })}
-          </g>
-        )}
-      </g>
-    </g>
-  );
-};
-
-// ---------- 10. Le bus ligne 0 arrive ----------
-const BusArrive = () => {
-  const f = useCurrentFrame();
-  const zBus = interpolate(f, [25, 125], [7, -19.2], {...clamp, easing: Easing.out(Easing.cubic)});
-  const z = interpolate(f, [0, 20], [-19.6, -20], {...clamp, easing: Easing.out(Easing.quad)});
-  const cam = makeCam({x: 400 + Math.sin(f / 40) * 10, y: 230, z: interpolate(f, [0, 180], [-21.2, -21.0]), pitch: -9, yaw: interpolate(f, [40, 130], [-4, -20], ease)});
-  const decor = rue(cam, f, {lampe: () => 0});
-  const approche = interpolate(zBus, [-19.2, 7], [1, 0], clamp);
-  const soulage = interpolate(f, [100, 115, 135, 145], [0, 1, 1, 0], clamp);
-  const peur = interpolate(f, [140, 150], [0, 1], clamp);
-  const flash = interpolate(f, [90, 108, 125], [0, 0.55, 0], clamp);
-  return (
-    <Plan
-      f={f}
-      decor={decor}
-      noir={0.3 - 0.15 * approche}
-      roll={interpolate(f, [0, 180], [-3, 2], ease)}
-      items={[
-        f >= 25 && bus(cam, f, {zp: zBus, sens: 'avant', numero: '0', interieur: '#7dffb0', phares: 1, led: flick(f, 'led', 130, 180, 0.2), chauffeur: f > 120 ? chauffeur(cam, f, 0) : null}),
-        {
-          z,
-          el: (
-            <Perso cam={cam} id="p10" x={200} z={z} lum={0.3 + 0.7 * approche} teinte={[1, 0.98, 0.92]} breath={Math.sin(f / 4) * 7 * (1 - approche * 0.5)} worry={f < 100 ? 0.7 : peur} smile={soulage * 0.6} pupilX={f > 35 && f < 100 ? -5 : f > 140 ? -4 : 0} tilt={f > 140 ? -4 : 0} eyes={1 + 0.25 * peur} sweat={1} />
-          ),
-        },
-      ]}
-      dessus={<rect width="1080" height="1920" fill="#fffbe8" opacity={flash} />}
-    />
-  );
-};
-
-// ---------- 11. Les portes, le chauffeur ----------
-const Chauffeur = () => {
+// ---------- 7. Le post-it ----------
+const PostIt = () => {
   const f = useCurrentFrame();
   const cam = makeCam({
-    x: interpolate(f, [30, 130], [400, -600], ease),
-    y: interpolate(f, [30, 130], [230, -480], ease),
-    z: interpolate(f, [30, 130], [-21.0, -19.72], ease),
-    pitch: interpolate(f, [30, 130], [-9, 0], ease),
-    yaw: interpolate(f, [30, 130], [-20, 0], ease),
+    x: interpolate(f, [0, 120], [260, 330], ease),
+    y: interpolate(f, [0, 120], [-190, -40], ease),
+    z: interpolate(f, [0, 120], [1.85, 3.78], ease),
+    yaw: interpolate(f, [0, 120], [4, 0], ease),
   });
-  const decor = rue(cam, f, {lampe: () => 0});
-  const porte = interpolate(f, [0, 25], [0, 1], {...clamp, easing: Easing.out(Easing.quad)});
-  const sourire = interpolate(f, [75, 140], [0, 1], ease);
-  const zone = cam.visible(-18.75) ? (
-    <polygon points={cam.poly([...Array(16)].map((_, i) => [-20 + Math.cos((i / 16) * 6.283) * 500, SOL - 1, -18.75 + Math.sin((i / 16) * 6.283) * 0.5]))} fill="#7dffb0" opacity={0.3 * porte} />
-  ) : null;
+  const neon = flick(f, 'ne7', 0, 150, 0.15);
+  const decor = vague(cam, f, {neon});
   return (
     <Plan
       f={f}
       decor={decor}
-      noir={0.07}
-      roll={interpolate(f, [30, 130], [2, -3], ease)}
+      noir={0.04}
+      roll={interpolate(f, [0, 150], [0, -5], ease)}
+      items={[{z: 2.75, el: <Perso cam={cam} id="v7" x={170} z={2.75} dos lum={0.45 + 0.4 * neon} teinte={[0.8, 0.95, 0.88]} breath={Math.sin(f / 7) * 3} />}]}
+    />
+  );
+};
+
+// ---------- 8. Le vieux bus arrive ----------
+const VIEUX = {sens: 'avant', numero: '- -', interieur: '#5a1a12', vieux: true};
+const BusVieux = () => {
+  const f = useCurrentFrame();
+  const zBus = interpolate(f, [15, 140], [26, 2.0], {...clamp, easing: Easing.out(Easing.cubic)});
+  const approche = interpolate(zBus, [2, 26], [1, 0], clamp);
+  const cam = makeCam({x: 430, y: 240, z: interpolate(f, [0, 180], [0.25, 0.45]), pitch: -8, yaw: interpolate(f, [30, 140], [-3, -17], ease)});
+  const neon = flick(f, 'ne8', 0, 180, 0.2);
+  const decor = vague(cam, f, {neon});
+  const flash = interpolate(f, [95, 115, 135], [0, 0.35, 0], clamp);
+  return (
+    <Plan
+      f={f}
+      decor={decor}
+      noir={0.06}
+      roll={interpolate(f, [0, 180], [2, -3], ease)}
       items={[
-        bus(cam, f, {zp: -19.2, sens: 'avant', numero: '0', interieur: '#7dffb0', phares: 0.7, porte, led: flick(f, 'led2', 0, 150, 0.3), chauffeur: chauffeur(cam, f, sourire)}),
-        {z: -18.7, el: zone},
-        {
-          z: -20,
-          el: <Perso cam={cam} id="p11" x={200} z={-20} lum={0.85} teinte={[0.8, 1, 0.88]} breath={Math.sin(f / 5) * 5} worry={1} eyes={1.25} pupilX={-5} tilt={-4} sweat={1} />,
-        },
+        bus(cam, f, {...VIEUX, zp: zBus, phares: 1, led: flick(f, 'led8', 0, 180, 0.1)}),
+        {z: 2.3, el: <Perso cam={cam} id="v8" x={230} z={2.3} lum={0.4 + 0.5 * approche} teinte={[0.95, 0.92, 0.85]} breath={Math.sin(f / 6) * 3} worry={0.6} pupilX={f > 40 ? -5 : 0} tilt={f > 40 ? -4 : 0} eyes={1 + 0.15 * approche} />},
+      ]}
+      dessus={<rect width="1080" height="1920" fill="#fff6dc" opacity={flash} />}
+    />
+  );
+};
+
+// ---------- 9. Les portes s'ouvrent ----------
+const Portes = () => {
+  const f = useCurrentFrame();
+  const cam = makeCam(orbite(230, 2.3, 0.95, interpolate(f, [0, 165], [-26, 18], ease), -150, {pitch: 1}));
+  const neon = flick(f, 'ne9', 0, 165, 0.2);
+  const decor = vague(cam, f, {neon});
+  const porte = interpolate(f, [8, 40], [0, 1], {...clamp, easing: Easing.out(Easing.quad)});
+  const zone = <polygon points={cam.poly([...Array(16)].map((_, i) => [-20 + Math.cos((i / 16) * 6.283) * 500, SOL - 1, 2.45 + Math.sin((i / 16) * 6.283) * 0.5]))} fill="#ff2a12" opacity={0.25 * porte * (0.7 + 0.3 * neon)} />;
+  const regard = f < 45 ? 0 : f < 90 ? -1 : f < 135 ? 1 : 0;
+  return (
+    <Plan
+      f={f}
+      decor={decor}
+      noir={0.06}
+      roll={interpolate(f, [0, 165], [3, -3], ease)}
+      items={[
+        bus(cam, f, {...VIEUX, zp: 2.0, phares: 0.6, porte, led: flick(f, 'led9', 0, 165, 0.1)}),
+        {z: 2.5, el: zone},
+        {z: 2.3, el: <Perso cam={cam} id="v9" x={230} z={2.3} lum={0.75} teinte={[1, 0.85, 0.8]} breath={Math.sin(f / 6) * 4} worry={0.8} pupilX={regard * 5} pupilY={regard > 0 ? -2 : 0} tilt={regard * 5} />},
       ]}
     />
   );
 };
 
-// ---------- 12. Fin ----------
-const Fin = () => {
+// ---------- 10. Un souffle dans la nuque ----------
+const Souffle = () => {
   const f = useCurrentFrame();
-  const cam = makeCam({x: 200, y: -136, z: interpolate(f, [0, 72], [-20.62, -20.5])});
-  const decor = rue(cam, f, {lampe: () => 0});
-  const regard = interpolate(f, [22, 30, 48, 56], [0, 1, 1, 0], clamp);
-  if (f >= 72) {
-    const op = interpolate(f, [78, 84], [0, 1], clamp) * (random(`fin${f}`) > 0.12 ? 1 : 0.4);
-    return (
-      <AbsoluteFill style={{background: '#000'}}>
-        <svg viewBox="0 0 1080 1920" width={1080} height={1920}>
-          <text x="540" y="900" textAnchor="middle" fontFamily="Georgia, 'DejaVu Serif', serif" fontWeight="900" fontSize="170" fill="#d4141c" opacity={op} letterSpacing="10">
-            LIGNE 0
-          </text>
-          <text x="540" y="1030" textAnchor="middle" fontFamily="'DejaVu Sans', Arial, sans-serif" fontWeight="700" fontSize="56" fill="#e8e8e8" opacity={interpolate(f, [88, 96], [0, 1], clamp)} letterSpacing="18">
-            ÉPISODE 1
-          </text>
-          <Finition f={f} />
-        </svg>
-      </AbsoluteFill>
-    );
-  }
+  const cam = makeCam({x: 230, y: -175, z: interpolate(f, [0, 135], [1.8, 1.92], ease)});
+  const decor = vague(cam, f, {neon: flick(f, 'ne10', 0, 135, 0.3)});
+  const peur = interpolate(f, [25, 40], [0, 1], clamp);
+  const bouffees = [22, 68, 108].map((t, k) => {
+    const r = f - t;
+    if (r < 0 || r > 30) return null;
+    return [-1, 1].map((c) => {
+      const p = cam.proj(230 + c * (90 + r * 6), -70 - r * 2, 2.33);
+      const s = cam.scale(2.33, 230, -70);
+      return <ellipse key={`${k}${c}`} cx={p[0]} cy={p[1]} rx={(40 + r * 5) * s} ry={(22 + r * 3) * s} fill="#e8eef0" opacity={0.3 * (1 - r / 30)} />;
+    });
+  });
   return (
     <Plan
       f={f}
       decor={decor}
-      noir={0.02}
-      roll={interpolate(f, [0, 70], [-7, 0], ease)}
+      noir={0.08}
+      roll={interpolate(f, [0, 135], [-4, -11], ease)}
       items={[
-        bus(cam, f, {zp: -19.2, sens: 'avant', numero: '0', interieur: '#7dffb0', phares: 0.3, porte: 1, chauffeur: chauffeur(cam, f, 1)}),
-        {
-          z: -20,
-          el: <Perso cam={cam} id="p12" x={200} z={-20} lum={0.85} teinte={[0.8, 1, 0.88]} breath={Math.sin(f / 5) * 4} worry={1} eyes={f === 62 || f === 63 ? 0.1 : 1.15} pupilX={-6 * regard} tilt={-5 * regard} sweat={1} />,
-        },
+        bus(cam, f, {...VIEUX, zp: 2.0, phares: 0.6, porte: 1}),
+        {z: 2.33, el: <g>{bouffees}</g>},
+        {z: 2.3, el: <Perso cam={cam} id="v10" x={230} z={2.3} lum={0.75} teinte={[1, 0.85, 0.8]} breath={Math.sin(f / 4) * 3} worry={0.6 + 0.4 * peur} eyes={1 + 0.35 * peur} pupilX={peur * 4} pupilY={-2 * peur} sweat={peur} shiver={peur ? (random(`s10${f}`) - 0.5) * 10 : 0} />},
       ]}
+    />
+  );
+};
+
+// ---------- 11. La créature ----------
+const CreatureScene = () => {
+  const f = useCurrentFrame();
+  const sh = f > 55 && f < 95 ? (random(`c11${f}`) - 0.5) * 30 : 0;
+  const cam = makeCam({
+    x: 230 + sh,
+    y: interpolate(f, [0, 165], [250, 330], ease) + sh * 0.4,
+    z: interpolate(f, [0, 165], [1.35, 0.6], ease),
+    pitch: interpolate(f, [0, 165], [-12, -30], ease),
+  });
+  const decor = vague(cam, f, {neon: f < 12 ? 1 : f < 18 ? 0.1 : flick(f, 'ne11', 18, 165, 0.2)});
+  const monte = interpolate(f, [12, 60], [0, 1], {...clamp, easing: Easing.out(Easing.cubic)});
+  const peur = interpolate(f, [55, 65], [0, 1], clamp);
+  const flash = interpolate(f, [12, 14, 22], [0, 0.6, 0], clamp);
+  return (
+    <Plan
+      f={f}
+      decor={decor}
+      noir={0.04}
+      roll={interpolate(f, [0, 165], [0, -6], ease)}
+      items={[
+        {
+          z: 3.2,
+          el: (
+            <g transform={`translate(${cam.proj(230, SOL, 3.2).join(' ')}) scale(${cam.scale(3.2, 230, -1200)})`}>
+              <Creature f={f} monte={monte} gueule={interpolate(f, [70, 120], [0.3, 1], ease)} />
+            </g>
+          ),
+        },
+        {z: 2.3, el: <Perso cam={cam} id="v11" x={230} z={2.3} lum={0.8} teinte={[0.9, 0.9, 1]} breath={Math.sin(f / 4) * 3} worry={1} eyes={1 + 0.35 * peur} scream={peur} epauleG={35 * peur} coudeG={130 * peur} epauleD={-35 * peur} coudeD={-130 * peur} sweat={1} shiver={peur ? (random(`s11${f}`) - 0.5) * 8 : 0} />},
+      ]}
+      dessus={<rect width="1080" height="1920" fill="#e9f7ff" opacity={flash} />}
+    />
+  );
+};
+
+// ---------- 12. Le dilemme ----------
+const Choix = ({f, debut, x, y, texte, emoji, couleur}) => {
+  const p = spring({frame: f - debut, fps: 30, config: {damping: 9}});
+  if (f < debut) return null;
+  return (
+    <g transform={`translate(${x} ${y}) scale(${p}) rotate(${(1 - p) * -12})`}>
+      <rect x="-290" y="-90" width="580" height="180" rx="28" fill="#0b0b0e" opacity="0.85" stroke={couleur} strokeWidth="6" />
+      <image href={staticFile(`emoji/${emoji}.svg`)} x="-265" y="-55" width="110" height="110" />
+      <text x="-130" y="20" textAnchor="start" fontFamily="'DejaVu Sans', Arial, sans-serif" fontWeight="900" fontSize="54" fill="#fff">
+        {texte}
+      </text>
+    </g>
+  );
+};
+const Dilemme = () => {
+  const f = useCurrentFrame();
+  const cam = makeCam({x: 120, y: -120, z: interpolate(f, [0, 195], [0.05, 0.45], ease), yaw: 1, pitch: -7});
+  const decor = vague(cam, f, {neon: flick(f, 'ne12', 0, 195, 0.25)});
+  const regard = f < 80 ? -1 : f < 130 ? 1 : 0;
+  return (
+    <Plan
+      f={f}
+      decor={decor}
+      noir={0.05}
+      roll={interpolate(f, [0, 195], [-3, 0], ease)}
+      items={[
+        bus(cam, f, {...VIEUX, zp: 2.0, phares: 0.6, porte: 1}),
+        {z: 2.5, el: <polygon points={cam.poly([...Array(16)].map((_, i) => [-20 + Math.cos((i / 16) * 6.283) * 500, SOL - 1, 2.45 + Math.sin((i / 16) * 6.283) * 0.5]))} fill="#ff2a12" opacity="0.25" />},
+        {
+          z: 3.6,
+          el: (
+            <g transform={`translate(${cam.proj(620, SOL, 3.6).join(' ')}) scale(${cam.scale(3.6, 620, -1200)})`}>
+              <Creature f={f} monte={1} gueule={0.6} />
+            </g>
+          ),
+        },
+        {z: 2.3, el: <Perso cam={cam} id="v12" x={230} z={2.3} lum={0.8} teinte={[1, 0.88, 0.85]} breath={Math.sin(f / 5) * 4} worry={1} eyes={1.2} pupilX={regard * 5} tilt={regard * 4} sweat={1} />},
+      ]}
+      dessus={
+        <g>
+          <Choix f={f} debut={14} x={320} y={260} texte="TU MONTES ?" emoji="1f68c" couleur="#ff3b2a" />
+          <Choix f={f} debut={82} x={760} y={860} texte="TU RESTES ?" emoji="1f479" couleur="#8fd3ff" />
+          {f >= 125 && (
+            <g transform={`translate(540 1680) scale(${spring({frame: f - 125, fps: 30, config: {damping: 10}})})`}>
+              <rect x="-400" y="-70" width="800" height="140" rx="70" fill="#fff" />
+              <image href={staticFile('emoji/1f4ac.svg')} x="-370" y="-48" width="96" height="96" />
+              <text x="40" y="18" textAnchor="middle" fontFamily="'DejaVu Sans', Arial, sans-serif" fontWeight="900" fontSize="46" fill="#111">
+                DIS-LE EN COMMENTAIRE
+              </text>
+            </g>
+          )}
+        </g>
+      }
     />
   );
 };
 
 const COMPOSANTS = {
   busPart: BusPart,
-  horaires: Horaires,
-  telephone: Telephone,
-  rueVide: RueVide,
-  balancoire: Balancoire,
-  pas: Pas,
-  souterrain: Souterrain,
-  lampadaires: Lampadaires,
-  course: Course,
-  busArrive: BusArrive,
-  chauffeur: Chauffeur,
-  fin: Fin,
+  aPied: APied,
+  ruelle: Ruelle,
+  poussette: PoussetteScene,
+  poubelles: Poubelles,
+  arret: Arret,
+  postit: PostIt,
+  busVieux: BusVieux,
+  portes: Portes,
+  souffle: Souffle,
+  creature: CreatureScene,
+  dilemme: Dilemme,
 };
 
 export const DernierBus = () => (

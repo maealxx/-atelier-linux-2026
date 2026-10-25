@@ -55,7 +55,8 @@ export const makeCam = (cam) => {
     if (b[2] < PROCHE) b = b.map((v, k) => v + (a[k] - v) * ((PROCHE - b[2]) / (a[2] - b[2])));
     return [ecran(a), ecran(b)];
   };
-  const fuite = ecran(versCam(cam.x, cam.y, cam.z + 100));
+  // point de fuite de la direction regardée (sert au centre de la brume)
+  const fuite = ecran(versCam(cam.x + sy * cp * 1e5, cam.y + sp * 1e5, cam.z + cy * cp * 100));
   return {...cam, proj, poly, seg, scale, visible, profondeur, fuite};
 };
 
