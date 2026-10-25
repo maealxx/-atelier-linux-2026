@@ -194,7 +194,7 @@ const Prenom = () => {
   const cams = [
     () => ({x: 700 + tremble(f, 30 * choc, 'p0'), y: -150, z: 4.6, yaw: 6}),
     () => ({x: 560 + tremble(f, 40 * choc, 'p1'), y: 250, z: 4.3, yaw: 14, pitch: -14}),
-    () => ({x: 420, y: 395, z: 5.7 + (0.06 * t) / d, yaw: 62, pitch: -4}),
+    () => ({x: 770, y: 392, z: 5.5 + (0.08 * t) / d, yaw: 6, pitch: -3}),
     () => camFace(PP.x, PP.z, 1, 0.3, t, d, {dy: -15, push: 0.05}),
     () => ({x: 820, y: -250, z: 3.4, yaw: 1}),
     () => camFace(PP.x, z, 1, 0.55, t, d, {dy: -10, push: 0.2}),
@@ -245,13 +245,13 @@ const Fenetre = () => {
   if (i >= 2) {
     const cams = {
       2: () => ({x: 0, y: NOTRE.y1 - 180, z: 9.72, yaw: 180 + Math.sin(f / 30) * 3, pitch: 46 + (10 * t) / d}),
-      3: () => ({x: -650, y: -2700, z: 9.35, yaw: 180, pitch: 60}),
-      4: () => ({x: -700, y: -1700, z: 8.95, yaw: 180, pitch: 60}),
+      3: () => ({x: -500, y: -2500, z: 9.85, yaw: 184, pitch: 48}),
+      4: () => ({x: -650, y: -1500, z: 9.3, yaw: 178, pitch: 45}),
     };
     const cam = makeCam(cams[i]());
     const decor = quartier(cam, f, {livreur});
     return (
-      <Plan f={f} cam={cam} decor={decor} noir={0.08} zoom={[1, 1, 1 + (0.15 * t) / d, 1.25 + (0.25 * t) / d, 1.5 + (0.2 * t) / d][i]} roll={[0, 0, -4 + (6 * t) / d, 2, -2][i]} dessus={i === 2 ? <BordFenetre f={f} /> : null} />
+      <Plan f={f} cam={cam} decor={decor} noir={0.08} zoom={[1, 1, 1 + (0.15 * t) / d, 1.1 + (0.25 * t) / d, 1.25 + (0.15 * t) / d][i]} roll={[0, 0, -4 + (6 * t) / d, 2, -2][i]} dessus={i === 2 ? <BordFenetre f={f} /> : null} />
     );
   }
   // il traverse le salon jusqu'à la fenêtre, puis ouvre les rideaux
@@ -282,15 +282,15 @@ const Arrete = () => {
   const forme = interpolate(f, [bornes[2] + 10, bornes[2] + 40], [0.15, 1], clamp);
   const livreur = {...VRAI, pupilY: -7 - 3 * plusHaut, eyes: 1 + 0.35 * (1 - coucou), worry: 1 - coucou, smile: 0.4 * coucou * (f < stop ? 1 : 0), epauleD: -150 * coucou, coudeD: f < stop ? -10 + Math.sin(f / 3) * 30 : -10 * coucou, tilt: -4 * plusHaut};
   const cams = [
-    () => ({x: -700, y: -1700, z: 8.95, yaw: 180, pitch: 60}),
+    () => ({x: -650, y: -1500, z: 9.3, yaw: 178, pitch: 45}),
     () => ({x: -1250, y: 120, z: 5.6, yaw: 18, pitch: -22}),
-    () => ({x: -700, y: -250, z: 7.0, yaw: 6, pitch: -56 - (9 * t) / d}),
+    () => ({x: 350, y: -150, z: 7.7, yaw: -6, pitch: -63 - (6 * t) / d}),
     () => ({x: 250, y: -4650, z: 7.9 + (0.25 * t) / d, yaw: -4, pitch: -12}),
   ];
   const cam = makeCam(cams[i]());
   const dansFenetre = i >= 2 ? <Perso cam={cam} id="l8f" x={0} y={NOTRE.y1 + 330} z={10.5} lum={0.8} teinte={SOIR} worry={1} eyes={1.2} pupilY={7} epauleG={10} epauleD={-10} ombre={0} /> : null;
   const decor = quartier(cam, f, {livreur, forme: i >= 2 ? forme : 0, dansFenetre});
-  return <Plan f={f} cam={cam} decor={decor} noir={0.1} zoom={i === 0 ? 1.7 : punch(t)} roll={[-2, 4, -3 + (4 * t) / d, 3][i]} />;
+  return <Plan f={f} cam={cam} decor={decor} noir={0.1} zoom={i === 0 ? 1.35 : i === 2 ? 1.5 + (0.2 * t) / d : punch(t)} roll={[-2, 4, -3 + (4 * t) / d, 3][i]} />;
 };
 
 // ---------- 9. « Ne sortez surtout pas » ----------
@@ -439,14 +439,14 @@ const Dilemme = () => {
   const {i, t, d, bornes} = decoupe('dilemme', f);
   const PD = {x: 300, z: 4.2};
   // le monstre sort du couloir en rampant au plafond, puis fonce vers lui
-  const km = interpolate(f, [bornes[3], DUREES.dilemme], [0, 1], clamp);
-  const xm = 2900 - 1900 * km;
-  const zm = 1.2 + 1.0 * Math.max(0, km - 0.5) * 2;
+  const k4 = interpolate(f, [bornes[4], DUREES.dilemme], [0, 1], clamp);
+  const xm = i === 3 ? interpolate(f, [bornes[3], bornes[4]], [3100, 1700], clamp) : 1350 - 850 * k4;
+  const zm = i === 3 ? 1.2 : 1.2 + 1.6 * k4;
   const cams = [
     () => orbite(4550, MONSTRE.z, 0.8, 72 + (36 * t) / d, 100, {pitch: -34}),
     () => ({x: 3470, y: -150, z: 1.2, yaw: -90}),
     () => ({x: -1200, y: -380, z: 1.0 + (0.3 * t) / d, yaw: 30, pitch: 7}),
-    () => ({x: PD.x + 60, y: -150, z: PD.z + 0.1, yaw: 158, pitch: -20}),
+    () => ({x: -200, y: -150, z: 1.22, yaw: 88, pitch: -14}),
     () => ({x: -150, y: -60, z: 5.4 - (0.2 * t) / d, yaw: 158, pitch: -16}),
   ];
   const cam = makeCam(cams[i]());
@@ -455,10 +455,10 @@ const Dilemme = () => {
   const items = [];
   if (i === 1) items.push({z: 1.2, x: 3000, el: <Perso cam={cam} id="l13" x={3000} z={1.2} lum={0.55} teinte={SOIR} worry={1} eyes={1.4} scream={1} sweat={1} epauleG={30} coudeG={120} epauleD={-30} coudeD={-120} shiver={tremble(f, 9, 'l13')} />});
   if (i >= 3) {
-    const m = monstreSalon(cam, f, xm, zm, -90 - 30 * Math.max(0, km - 0.5) * 2);
+    const m = monstreSalon(cam, f, xm, zm, -90 + 65 * k4);
     items.push({z: zm, x: xm, y: PLAF, el: xm > COULOIR.x0 ? parOuverture(cam, m.el) : m.el});
   }
-  if (i >= 2) items.push({z: PD.z, x: PD.x, el: <Perso cam={cam} id="l14" x={PD.x} z={PD.z} dos={i === 4} lum={0.6} teinte={SOIR} worry={1} eyes={1.35} sweat={1} pupilX={-5} pupilY={-5} breath={Math.sin(f / 3) * 4} shiver={tremble(f, 4, 'l14')} />});
+  if (i === 2 || i === 4) items.push({z: PD.z, x: PD.x, el: <Perso cam={cam} id="l14" x={PD.x} z={PD.z} dos={i === 4} lum={0.6} teinte={SOIR} worry={1} eyes={1.35} sweat={1} pupilX={-5} pupilY={-5} breath={Math.sin(f / 3) * 4} shiver={tremble(f, 4, 'l14')} />});
   return (
     <Plan f={f} cam={cam} decor={decor} noir={0.16} zoom={(i === 2 ? 1.35 : 1) * punch(t)} roll={[-4, 6, 0, -5, 0][i]} items={items}
       dessus={

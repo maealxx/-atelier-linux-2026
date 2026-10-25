@@ -382,7 +382,7 @@ export const appart = (cam, f, {tv = 1, lampes = 1, choc = 0, fente = 0, cadre =
         {ry(cam, SOL - 1, px0, px1, 5.86, 5.999, '#dfeaff', 'lfs', 0.08 * (1 - fente))}
       </g>
       {/* paillasson intérieur */}
-      {ry(cam, SOL - 1, px0 + 20, px1 - 20, 5.35, 5.85, '#5a4a2a', 'pai')}
+      {ry(cam, SOL - 1, px0 + 20, px1 - 20, 5.35, 5.85, '#3e3222', 'pai')}
       {/* console, miroir rond, bol à clés, petite lampe */}
       {plaque(cam, [180, -520, 5.99], [1, 0, 0], [0, 1, 0], 360, 360, <g><circle cx="180" cy="180" r="178" fill="#8a7a5a" /><circle cx="180" cy="180" r="160" fill="#2a3442" /><path d="M80,120 L160,60 L190,80 L100,150 Z" fill="#fff" opacity="0.08" /></g>, 'miroir')}
       {/* patères + vestes */}
@@ -885,6 +885,19 @@ export const quartier = (cam, f, {lampe = 1, livreur = null, forme = 0, dansFene
       {boite(cam, -2700, -1900, 40, 230, 9.62, 9.68, ['#5a3a24', '#4a2e1c', '#3e2618'], 'bd')}
       {ligne(cam, [-2650, 260, 9.4], [-2650, SOL, 9.4], 10, '#222', 'b1')}
       {ligne(cam, [-1950, 260, 9.4], [-1950, SOL, 9.4], 10, '#222', 'b2')}
+    </g>
+  )));
+  // colonne Morris + sacs poubelle
+  items.push(item(8.3, 1900, -400, (
+    <g key="morris">
+      {boite(cam, 1700, 2100, -900, SOL, 8.1, 8.5, ['#1e3a2a', '#24402e', '#1c3426'], 'col')}
+      {cam.z < 8.1 && plaque(cam, [1720, -820, 8.099], [1, 0, 0], [0, 1, 0], 360, 700, <g><rect width="360" height="700" fill="#e8d8b8" /><rect x="20" y="20" width="320" height="300" fill="#8a2a2a" /><text x="180" y="420" fontSize="60" textAnchor="middle" fontWeight="900" fill="#2a1a14" fontFamily="'DejaVu Sans', Arial">CONCERT</text><rect x="20" y="460" width="320" height="220" fill="#2a4a6a" /></g>, 'aff')}
+      {boite(cam, 1680, 2120, -980, -900, 8.08, 8.52, ['#1a3022', '#1e3a2a', '#18301f'], 'chap')}
+    </g>
+  )));
+  items.push(item(9.5, 1250, SOL, (
+    <g key="sacs">
+      {[[900, 9.6], [1050, 9.7], [1600, 9.6]].map(([x, z], k) => billboard(cam, x, SOL, z, <g><path d="M-90,0 Q-110,-120 -40,-170 L0,-200 L40,-170 Q110,-120 90,0 Z" fill="#111" /><path d="M-20,-190 L0,-230 L20,-190" stroke="#222" strokeWidth="10" fill="none" /></g>, `sp${k}`))}
     </g>
   )));
   items.push(item(8.2, 400, SOL, (
