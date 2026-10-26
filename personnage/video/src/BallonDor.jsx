@@ -268,9 +268,10 @@ const Trophee = () => {
 const Discours = () => {
   const f = useCurrentFrame();
   const {i, t, d} = decoupe('discours', f);
-  const ZD = LUTRIN.z + 0.35;
+  const ZD = LUTRIN.z;
+  const XD = LUTRIN.x - 470;
   const cams = [
-    () => ({x: 1300, y: -600 + (40 * t) / d, z: 8.3 + (0.2 * t) / d, yaw: 16, pitch: 4}),
+    () => camFace(XD, ZD, -1, 1.25, t, d, {dx: 180, dy: -60, push: 0.2}),
     () => ({x: 0, y: -1300, z: -7 + (1 * t) / d, yaw: 0, pitch: -8}),
     () => ({x: 1400, y: -800, z: 7.8, yaw: 186, pitch: 9}),
   ];
@@ -278,7 +279,7 @@ const Discours = () => {
   const decor = theatre(cam, f, {ecran: 'visage', tourne: () => 0, lumiere: 0.8});
   return (
     <Plan f={f} cam={cam} decor={decor} noir={0.04} zoom={punch(t)} roll={[-2, 0, 3][i]}
-      items={[{z: ZD, x: LUTRIN.x, el: <Perso cam={cam} id="b9" x={LUTRIN.x} y={SCENE_Y} z={ZD} dos={false} lum={1} teinte={SCENE_L} couleurs={COSTUME} smile={0.35} worry={0.7} eyes={1.15} pupilX={Math.sin(f / 12) * 6} sweat={1} breath={Math.sin(f / 6) * 3} />}]}
+      items={[{z: ZD, x: XD, el: <Perso cam={cam} id="b9" x={XD} y={SCENE_Y} z={ZD} epauleD={-40} coudeD={-100} dos={false} lum={1} teinte={SCENE_L} couleurs={COSTUME} smile={0.35} worry={0.7} eyes={1.15} pupilX={Math.sin(f / 12) * 6} sweat={1} breath={Math.sin(f / 6) * 3} />}]}
     />
   );
 };
