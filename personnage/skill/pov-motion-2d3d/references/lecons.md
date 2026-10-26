@@ -57,3 +57,10 @@
 - **Emojis dans le téléphone** : la police ne les a pas (carrés vides). Pas d'emoji dans les textes du téléphone, sauf en image (`public/emoji`).
 - **Écran partagé** : `clipPath: inset(420px 0 540px 0)` puis `translateY(-420px)` (haut) / `translateY(540px)` (bas) pour garder le centre de chaque image.
 - **Guillemets « » dans scenes.json** : Kokoro plante (« produced no phonemes ») ; guide.py les retire.
+
+## Retours de « La tente » (26/10)
+- **Perso assis** (dans un sac, dans un bus) : sa jambe dépasse sous le sol. Coupe-le avec un clipPath du plan vertical à sa profondeur, au-dessus du sol (`moiAssis`).
+- **Deux visages éloignés en même temps** : trop petits dans un seul plan. Fais un écran partagé haut/bas avec un gros plan chacun.
+- **Arbres autour de la caméra** : avec des sapins en anneau, une caméra placée hors de la clairière se retrouve au milieu des troncs. Laisse un secteur sans arbres du côté des caméras.
+- **Voix sous 60 s** : cale à la vitesse 1.0 au lieu de 1.05.
+- **Guillemets « » seuls dans les sous-titres** : filtre-les dans `assembler.sh` (`m[2].strip('«» ')`).

@@ -11,9 +11,18 @@ import {DUREE_ROULETTE_1000, Roulette1000} from './Roulette1000';
 import {DUREE_VAISSEAU, LeVaisseau} from './LeVaisseau';
 import {DernierTrain, DUREE_DERNIER_TRAIN} from './DernierTrain';
 import {DUREE_HYPERGAMIE, Hypergamie} from './Hypergamie';
+import {DUREE_TENTE, LaTente} from './LaTente';
 
 export const Root = () => (
   <>
+    <Composition
+      id="LaTente"
+      component={LaTente}
+      durationInFrames={DUREE_TENTE}
+      fps={30}
+      width={1080}
+      height={1920}
+    />
     <Composition
       id="Hypergamie"
       component={Hypergamie}
