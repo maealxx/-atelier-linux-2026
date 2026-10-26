@@ -15,7 +15,7 @@ start, t = {}, 0
 for s in tl["scenes"]:
     start[s["nom"]] = t
     t += s["frames"]
-args = [a for a in sys.argv[1:] if not a.startswith("--")]
+args = [a for a in sys.argv[1:] if a and not a.startswith("--")]
 DUREE = float(args[1]) if len(args) > 1 else t / FPS
 rng = np.random.default_rng(5)
 sfx = np.zeros(int(DUREE * SR) + SR)
