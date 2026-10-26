@@ -16,5 +16,5 @@ cat > out/dt_st.json <<JSON
  "emojis": [["dernier", "1f687"], ["réseau", "1f4f5"], ["grille", "1f512"], ["néons", "1f526"], ["prénom", "1f628"], ["rails", "1f440"], ["respiration", "1f910"], ["inconnu", "1f4f1"], ["visage", "1f631"]]}
 JSON
 python3 voix/soustitres.py out/dt_st.json
-ffmpeg -loglevel error -y -i out/dt_soustitre.mp4 -af "acompressor=threshold=-22dB:ratio=3:attack=5:release=150,loudnorm=I=-15:TP=-1:LRA=9" -c:a aac -b:a 192k -c:v libx264 -b:v 2900k -maxrate 3600k -bufsize 7M -preset slow -pix_fmt yuv420p "$SORTIE"
+ffmpeg -loglevel error -y -i out/dt_soustitre.mp4 -af "acompressor=threshold=-22dB:ratio=3:attack=5:release=150,loudnorm=I=-15:TP=-1:LRA=9" -c:a aac -b:a 192k -c:v libx264 -b:v 2650k -maxrate 3400k -bufsize 7M -preset slow -pix_fmt yuv420p "$SORTIE"
 ls -la "$SORTIE"
