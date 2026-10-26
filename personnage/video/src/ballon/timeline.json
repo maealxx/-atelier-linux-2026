@@ -1,0 +1,4 @@
+{"fps": 30, "voix": null, "scenes": [
+ {"nom": "tv", "frames": 165}, {"nom": "tel", "frames": 150}, {"nom": "arrivee", "frames": 165}, {"nom": "enveloppe", "frames": 150},
+ {"nom": "salle", "frames": 135}, {"nom": "joueurs", "frames": 135}, {"nom": "marche", "frames": 150}, {"nom": "trophee", "frames": 150},
+ {"nom": "discours", "frames": 165}, {"nom": "contrat", "frames": 165}, {"nom": "match", "frames": 180}, {"nom": "fin", "frames": 180}]}

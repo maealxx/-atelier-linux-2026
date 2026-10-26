@@ -7,6 +7,7 @@ import {DUREE_SOIREE, Soiree} from './Soiree';
 import {DUREE_LIVREUR, Livreur} from './Livreur';
 import {DUREE_ROULETTE, Roulette} from './Roulette';
 import {DUREE_GABARIT, Gabarit} from './Gabarit';
+import {BallonDor, DUREE_BALLON} from './BallonDor';
 
 export const Root = () => (
   <>
@@ -38,6 +39,14 @@ export const Root = () => (
       id="Soiree"
       component={Soiree}
       durationInFrames={DUREE_SOIREE}
+      fps={30}
+      width={1080}
+      height={1920}
+    />
+    <Composition
+      id="BallonDor"
+      component={BallonDor}
+      durationInFrames={DUREE_BALLON}
       fps={30}
       width={1080}
       height={1920}

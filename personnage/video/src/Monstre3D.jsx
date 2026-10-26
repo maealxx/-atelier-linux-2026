@@ -96,8 +96,8 @@ const boite = (vue, c, [u, v, w], [a, b, e], cols) => {
 // Options en plus pour l'hôte : tenue 'hote', y (sol sous ses pieds), masque 0 → 1 (posé sur le visage), ventre 0 → 1 (la bouche se déchire jusqu'au ventre)
 // tenue 'livreur' : cou (allongement du cou, en unités), penche (tête penchée, en degrés),
 // plafond : accroché au plafond la tête en bas (y = hauteur du plafond)
-export const surveillant3D = (cam, {x, z, y = SOL, angle = 0, ouvre = 0, pose = 0, f = 0, echelle = 1, tenue = 'surveillant', masque = 0, ventre = 0, cou = 0, penche = 0, plafond = false, bras = null}) => {
-  const COUL = tenue === 'hote' ? HOTE : tenue === 'livreur' ? LIVREUR : tenue === 'vrai' ? VRAI : SURVEILLANT;
+export const surveillant3D = (cam, {x, z, y = SOL, angle = 0, ouvre = 0, pose = 0, f = 0, echelle = 1, tenue = 'surveillant', masque = 0, ventre = 0, cou = 0, penche = 0, plafond = false, bras = null, couleurs = null, casque = true, sac = true}) => {
+  const COUL = {...(tenue === 'hote' ? HOTE : tenue === 'livreur' ? LIVREUR : tenue === 'vrai' ? VRAI : SURVEILLANT), ...(couleurs || {})};
   const humain = tenue === 'vrai';
   const base = [x, y, z * 1000];
   const P = debout(f);
@@ -177,7 +177,7 @@ export const surveillant3D = (cam, {x, z, y = SOL, angle = 0, ouvre = 0, pose = 
     morceaux.push({d: prof(fa.centre), el: <polygon key={`t${i}`} points={fa.coins.map((c) => pr(c).join(',')).join(' ')} fill={fa.col} stroke="#2b2f33" strokeWidth="1" />});
   });
   // le sac isotherme sur le dos du faux livreur
-  if (tenue === 'livreur' || humain) {
+  if (tenue === 'livreur' || (humain && sac)) {
     const cs = add(centreT, mul(avant, -(62 + 125) * echelle));
     boite(vue, cs, [cote, mul(v, -1), avant], [150 * echelle, 150 * echelle, 125 * echelle], {devant: '#1f6a3c', derriere: '#2a8a4a', cote: '#1a5a32', dessus: '#14462a', dessous: '#14462a'}).forEach((fa, i) => {
       if (!fa.coins.every(vis)) return;
@@ -334,7 +334,7 @@ export const surveillant3D = (cam, {x, z, y = SOL, angle = 0, ouvre = 0, pose = 
   // le vrai livreur : casque vert, yeux, chaussures
   if (humain) {
     const haut = mul(bas, -1);
-    boite(vue, add(add(T, mul(haut, 92 * echelle)), mul(dir, -8 * echelle)), [droite, bas, dir], [56 * echelle, 46 * echelle, 92 * echelle], {devant: '#2c9a5a', derriere: '#23804a', cote: '#257f4a', dessus: '#33b066', dessous: '#1e6a3e'}).forEach((fa, i) => {
+    if (casque) boite(vue, add(add(T, mul(haut, 92 * echelle)), mul(dir, -8 * echelle)), [droite, bas, dir], [56 * echelle, 46 * echelle, 92 * echelle], {devant: '#2c9a5a', derriere: '#23804a', cote: '#257f4a', dessus: '#33b066', dessous: '#1e6a3e'}).forEach((fa, i) => {
       if (!fa.coins.every(vis)) return;
       morceaux.push({d: prof(fa.centre) - 4, el: <polygon key={`cq${i}`} points={fa.coins.map((q) => pr(q).join(',')).join(' ')} fill={fa.col} stroke="#145a30" strokeWidth="1" />});
     });

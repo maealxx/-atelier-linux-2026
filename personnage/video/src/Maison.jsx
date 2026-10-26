@@ -486,7 +486,7 @@ const DiscoInterieur = ({cam, f}) => {
 // ===================== Le téléphone et ses messages =====================
 // Interface de messagerie en plein écran (coordonnées écran). messages : [{debut, texte} | {debut, photo: true, texte}]
 // verrouille : écran verrouillé (grande heure + notification) au lieu de la conversation
-export const Telephone = ({f, messages = [], notif = null, echelle = 1, x = 540, y = 980, vibre = 0, nom = 'Lucas 🎧', verrouille = false}) => {
+export const Telephone = ({f, messages = [], notif = null, notifs = [], echelle = 1, x = 540, y = 980, vibre = 0, nom = 'Lucas 🎧', verrouille = false}) => {
   const shake = vibre > 0 ? Math.sin(f * 2.4) * 10 * vibre : 0;
   const bulles = messages.filter((m) => f >= m.debut);
   const ecrit = messages.find((m) => f >= m.debut - 32 && f < m.debut);
@@ -562,6 +562,15 @@ export const Telephone = ({f, messages = [], notif = null, echelle = 1, x = 540,
           <text x="-130" y="30" fontSize="26" fill="#333" fontFamily="'DejaVu Sans', Arial">{notif.texte}</text>
         </g>
       )}
+      {/* pile de notifications (la plus récente en haut) */}
+      {notifs.filter((n) => f >= n.debut).reverse().slice(0, 6).map((n, k) => (
+        <g key={`ns${n.debut}`} transform={`translate(0 ${-60 + k * 128 + (1 - spring({frame: f - n.debut, fps: 30, config: {damping: 13}})) * -200})`} opacity={1 - k * 0.08}>
+          <rect x="-235" y="-58" width="470" height="116" rx="26" fill="#e8ecf4" opacity="0.95" />
+          <circle cx="-185" cy="0" r="28" fill={n.couleur || '#3ad86a'} />
+          <text x="-140" y="-8" fontSize="26" fill="#111" fontWeight="900" fontFamily="'DejaVu Sans', Arial">{n.nom}</text>
+          <text x="-140" y="28" fontSize="24" fill="#333" fontFamily="'DejaVu Sans', Arial">{n.texte}</text>
+        </g>
+      ))}
       {/* reflet + lueur de l'écran */}
       <path d="M-255,-200 L-60,-535 L40,-535 L-255,-40 Z" fill="#fff" opacity="0.04" />
       <ellipse cx="-230" cy="150" rx="48" ry="95" fill="#d9a888" transform="rotate(-20 -230 150)" />

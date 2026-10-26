@@ -310,7 +310,7 @@ export const chambre = (cam, f, {porte = 0, monstre = null, rideau = 1}) => {
 // tv : écran allumé ; lampes : intensité des lampes ; choc : la porte d'entrée tremble ; fente : ombre sous la porte (0 → 1)
 // cadre : 0 accroché → 1 tombé ; fenteChambre : ombre qui passe sous la porte de la chambre (-1 → 1, null = rien)
 // porteChambre : 0 → 1 ; monstre : élément 3D dans la chambre ; rideau : rideau du salon ouvert (0 → 1)
-export const appart = (cam, f, {tv = 1, lampes = 1, choc = 0, fente = 0, cadre = 0, fenteChambre = null, porteChambre = 0, monstre = null, rideau = 0, lumiereChambre = 0.5} = {}) => {
+export const appart = (cam, f, {tv = 1, lampes = 1, choc = 0, fente = 0, cadre = 0, fenteChambre = null, porteChambre = 0, monstre = null, rideau = 0, lumiereChambre = 0.5, tvContenu = null} = {}) => {
   const items = [];
   const L = lampes;
   // ---------- couloir + chambre (au fond, derrière l'ouverture du mur droit) ----------
@@ -433,7 +433,7 @@ export const appart = (cam, f, {tv = 1, lampes = 1, choc = 0, fente = 0, cadre =
       {ligne(cam, [1500, -380, COULOIR.z0], [1500, -380, COULOIR.z1], 16, '#d8d0c4', 'oc3')}
       {/* la TV accrochée au mur */}
       {rx(cam, 1497, 2.35, 3.95, -330, 20, '#08080a', 'tvc')}
-      {tv > 0 && plaque(cam, [1495, -315, 3.92], [0, 0, -1], [0, 1, 0], 1540, 320, <g transform="scale(1.185 0.571)">{tvImage(f)}</g>, 'tvi')}
+      {tv > 0 && plaque(cam, [1495, -315, 3.92], [0, 0, -1], [0, 1, 0], 1540, 320, <g>{tvContenu || <g transform="scale(1.185 0.571)">{tvImage(f)}</g>}</g>, 'tvi')}
       {plaque(cam, [1499, -560, 3.9], [0, 0, -1], [0, 1, 0], 1500, 170, <g><rect width="1500" height="10" y="160" fill="#2a2420" />{[...Array(16)].map((_, k) => <rect key={k} x={40 + k * 52 + (k > 9 ? 200 : 0)} y={160 - 110 - (k % 3) * 18} width="40" height={110 + (k % 3) * 18} fill={['#7a3b2e', '#2e5a7a', '#6a6a2e', '#3d6a4a', '#5a3a6a'][k % 5]} />)}<circle cx="1300" cy="110" r="46" fill="#2a5a3a" /></g>, 'etag')}
       {/* mur avant : cuisine */}
       {rz(cam, 0, -1500, 1500, PLAF, SOL, '#41362f', 'mav')}
