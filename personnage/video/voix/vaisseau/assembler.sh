@@ -16,5 +16,5 @@ cat > out/va_st.json <<JSON
  "emojis": [["capsule", "1f6f8"], ["glacé", "1f976"], ["griffes", "1f631"], ["Terre", "1f30d"], ["rampe", "1f440"], ["brillent", "1f47d"], ["visage", "1f628"], ["plafond", "1f47e"], ["secours", "1f680"]]}
 JSON
 python3 voix/soustitres.py out/va_st.json
-ffmpeg -loglevel error -y -i out/va_soustitre.mp4 -af "loudnorm=I=-18:TP=-1.5:LRA=11" -c:a aac -b:a 192k -c:v libx264 -b:v 3200k -maxrate 4M -bufsize 8M -preset slow -pix_fmt yuv420p "$SORTIE"
+ffmpeg -loglevel error -y -i out/va_soustitre.mp4 -af "loudnorm=I=-18:TP=-1.5:LRA=11" -c:a aac -b:a 192k -c:v libx264 -b:v 2900k -maxrate 3600k -bufsize 7M -preset slow -pix_fmt yuv420p "$SORTIE"
 ls -la "$SORTIE"
