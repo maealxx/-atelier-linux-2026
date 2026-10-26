@@ -47,7 +47,16 @@
 - Quand un objet est la star (la roue), on le montre **sous tous les angles** : dessus, ras, macro qui suit la bille, orbite, case en gros plan.
 - La première image doit déjà être en pleine action (bille lancée, chrono qui tourne) avec la question en haut.
 
+## Rendu propre et « shaders » (retour du 27/10, « La tente »)
+- Maé veut un rendu **plus propre, moins brouillon, avec des shaders**. Toujours :
+  - **lumière en dégradés lisses** plutôt qu'en facettes (un `radialGradient` en `userSpaceOnUse` centré sur la source, posé sur chaque pan : voir `tenteInt`) ;
+  - **moins de petits détails parasites** (herbe, lucioles, étoiles qui clignotent fort), grain du SVG faible (`<Plan grain={0.025}>`) ;
+  - halo doux (copie floutée) derrière les sources vives (flammes) ;
+  - la **passe de post-traitement** `voix/postfx.sh` (bloom, étalonnage ciné ombres bleues / lumières chaudes, légère aberration chromatique, vignette, grain fin) entre le rendu et le mixage, dans `assembler.sh`.
+- Pas de GPU dans l'environnement : les « shaders » sont faits par ffmpeg (CPU). Le dire si elle demande du GLSL.
+
 ## Son
+- **Pas de crépitement de feu** (demande du 27/10).
 - La **voix ElevenLabs** de Maé, légèrement accélérée (environ 5 %), avec les blancs raccourcis sans les supprimer. Elle doit rester agréable.
 - **Pas de pause dans le script audio** (26/10) : pas de `[pause]` / `[long pause]`, presque pas de « … ». Sinon on perd du temps de parole et la vidéo est trop longue.
 - **Ne pas remonter le volume des chuchotements** (elle l'a demandé). Si un premier jet de voix contient trop de souffles, elle refait la voix : dis-le-lui.

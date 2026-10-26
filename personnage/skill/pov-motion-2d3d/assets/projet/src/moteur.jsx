@@ -106,7 +106,7 @@ export const Perso = ({cam, id, x, z, y = 432, lum = 1, teinte = [1, 1, 1], sx =
 };
 
 // Vignette + grain, par-dessus toute l'image
-export const Finition = ({f, id = 'fin', vignette = 0.9}) => (
+export const Finition = ({f, id = 'fin', vignette = 0.9, grain = 0.09}) => (
   <g>
     <defs>
       <radialGradient id={`${id}-v`} cx="540" cy="960" r="1150" gradientUnits="userSpaceOnUse">
@@ -119,7 +119,7 @@ export const Finition = ({f, id = 'fin', vignette = 0.9}) => (
       </filter>
     </defs>
     <rect x="0" y="0" width="1080" height="1920" fill={`url(#${id}-v)`} />
-    <rect x="0" y="0" width="1080" height="1920" filter={`url(#${id}-g)`} opacity="0.09" />
+    <rect x="0" y="0" width="1080" height="1920" filter={`url(#${id}-g)`} opacity={grain} />
   </g>
 );
 

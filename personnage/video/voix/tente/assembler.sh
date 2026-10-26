@@ -9,7 +9,8 @@ python3 voix/tente/mixage.py out/te_audio.wav $FIN $VOIX
 python3 -c "
 import json,sys; fin=float(sys.argv[1]) if sys.argv[1] else 1e9
 json.dump([m for m in json.load(open('voix/tente/mots.json')) if m[0] < fin - 0.2 and m[2].strip('«» ')], open('out/te_mots.json','w'), ensure_ascii=False)" "$FIN"
-ffmpeg -loglevel error -y -i out/te_brut.mp4 -i out/te_audio.wav -map 0:v -map 1:a -c:v copy -c:a aac -b:a 192k -shortest out/te_avec_son.mp4
+bash voix/postfx.sh out/te_brut.mp4 out/te_post.mp4 0.55
+ffmpeg -loglevel error -y -i out/te_post.mp4 -i out/te_audio.wav -map 0:v -map 1:a -c:v copy -c:a aac -b:a 192k -shortest out/te_avec_son.mp4
 cat > out/te_st.json <<JSON
 {"video": "out/te_avec_son.mp4", "words": "out/te_mots.json", "out": "out/te_soustitre.mp4", "mode": "burn", "work": "$WK",
  "couleurs": ["&H2A2AFF&"], "sfx": false,

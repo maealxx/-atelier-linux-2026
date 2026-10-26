@@ -218,9 +218,8 @@ for c in np.cumsum(rng.uniform(0.03, 0.25, 400)):
     i0 = int(c * SR)
     n = int(0.015 * SR)
     crep[i0 : i0 + n] += filtre(bruit(0.015), "highpass", 1500)[: len(crep[i0 : i0 + n])] * rng.uniform(0.5, 2.5)
-pose(crep * env(len(crep), 0.05, 0.02), 0, 0.09)
+# (pas de crépitement : retiré à la demande de Maé)
 pose(filtre(bruit(0.7), "lowpass", 900) * np.exp(-ts(0.7) * 5), t_off - 0.05, 0.4)
-pose(filtre(bruit(2.5), "highpass", 3000) * np.exp(-ts(2.5) * 1.5), t_off + 0.1, 0.05)
 d = 3.0
 pose(sum(np.sin(2 * np.pi * f_ * ts(d)) for f_ in (73.4, 77.8)) * env(int(d * SR), 0.05, 1.5) / 2, t_off, 0.1)
 hibou(3.2, 0.03)

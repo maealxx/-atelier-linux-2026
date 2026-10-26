@@ -270,6 +270,8 @@ export const feuDeCamp = (cam, f, {feu = 1, fumee = 0, braises = 1} = {}) => {
       const x = (j - 1.5) * 50;
       return <path key={j} d={`M${x - 50},0 Q${x - 40},${-h * 0.5} ${x + 10 * Math.sin(f / 2 + j)},${-h} Q${x + 40},${-h * 0.5} ${x + 50},0 Z`} fill="#fff2a0" opacity="0.9" />;
     });
+    // halo doux derrière les flammes (copie floutée), puis les flammes nettes
+    els.push(<g key="flg" transform={`translate(${px} ${py}) scale(${s})`} filter="url(#fo-flou)" opacity="0.8">{fl}</g>);
     els.push(<g key="fl" transform={`translate(${px} ${py}) scale(${s})`}>{fl}{coeur}</g>);
     // étincelles qui montent
     for (let j = 0; j < 16; j++) {
@@ -307,7 +309,7 @@ export const clairiere = (cam, f, {feu = 1, fumee = 0, braises = 1, lumiereTente
     const z = 70 + (random(`sz${k}`) - 0.5) * 120;
     if (!cam.visible(z, x, y)) continue;
     const [px, py] = cam.proj(x, y, z);
-    fond.push(<circle key={`e${k}`} cx={px} cy={py} r={1 + 1.8 * random(`sr${k}`)} fill="#fff" opacity={0.4 + 0.5 * Math.abs(Math.sin(f / 17 + k))} />);
+    fond.push(<circle key={`e${k}`} cx={px} cy={py} r={1 + 1.8 * random(`sr${k}`)} fill="#fff" opacity={0.55 + 0.25 * Math.sin(f / 40 + k)} />);
   }
   fond.push(halo(cam, ...LUNE, 16000, 'fo-lune', 1, 'lune'));
   if (cam.visible(LUNE[2], LUNE[0], LUNE[1])) {
@@ -323,7 +325,7 @@ export const clairiere = (cam, f, {feu = 1, fumee = 0, braises = 1, lumiereTente
   fond.push(tache(cam, FEU.x, SOL - 1, FEU.z, 3600, 3.6, 'fo-solfeu', 0.85 * v, 'solfeu'));
   fond.push(tache(cam, FEU.x, SOL - 2, FEU.z, 650, 0.65, 'fo-ombre', 0.6, 'cendre'));
   // touffes d'herbe et cailloux près de la caméra
-  for (let k = 0; k < 70; k++) {
+  for (let k = 0; k < 26; k++) {
     const x = (random(`gx${k}`) - 0.5) * 5200;
     const z = 3 + random(`gz${k}`) * 9;
     if (Math.abs(x) < 800 && z > TENTE.z0 - 0.3 && z < TENTE.z1 + 0.3) continue;
@@ -357,8 +359,8 @@ export const clairiere = (cam, f, {feu = 1, fumee = 0, braises = 1, lumiereTente
     items.push({z, x, y: SOL - 80, el: halo(cam, x, SOL - 80, z, 1800, 'fo-brume', 0.55, `bm${k}`)});
   }
   // lucioles
-  for (let k = 0; k < 14; k++) {
-    const x = (random(`lx${k}`) - 0.5) * 6000 + Math.sin(f / 25 + k) * 300;
+  for (let k = 0; k < 7; k++) {
+    const x = (random(`lx${k}`) - 0.5) * 6000 + Math.sin(f / 40 + k) * 300;
     const z = 5 + random(`lz${k}`) * 10 + Math.cos(f / 30 + k) * 0.3;
     const y = SOL - 300 - random(`ly${k}`) * 900 + Math.sin(f / 15 + k) * 80;
     items.push({z, x, y, el: halo(cam, x, y, z, 90, 'fo-luciole', lucioles * (0.4 + 0.6 * Math.abs(Math.sin(f / 11 + k * 2))), `lu${k}`)});
@@ -403,41 +405,47 @@ export const tenteInt = (cam, f, {lampe = 1, porte = 0, ombre = 0, torche = 0} =
     return rgb(mix(nuit, toile, Math.min(1, l * 1.2)), 0.55 + 1.1 * l);
   };
   // pans de toile découpés en petits morceaux (dégradé de lumière réaliste)
-  const N = 6;
-  [-1, 1].forEach((s) => {
-    for (let a = 0; a < N; a++) for (let b = 0; b < N; b++) {
-      const u0 = a / N;
-      const u1 = (a + 1) / N;
-      const w0 = b / N;
-      const w1 = (b + 1) / N;
-      const P = (u, w) => [s * X * (1 - u), SOL + (H - SOL) * u, z0 + (z1 - z0) * w];
-      const c = P((u0 + u1) / 2, (w0 + w1) / 2);
-      fond.push(quad(cam, [P(u0, w0), P(u1, w0), P(u1, w1 + 0.002), P(u0, w1 + 0.002)], teinte(c), `t${s}${a}${b}`));
-    }
-  });
-  // le fond (triangle arrière) et le sol (tapis de sol gris)
-  for (let a = 0; a < N; a++) {
-    const y0 = SOL + ((H - SOL) * a) / N;
-    const y1 = SOL + ((H - SOL) * (a + 1)) / N;
-    const w0 = X * (1 - a / N);
-    const w1 = X * (1 - (a + 1) / N);
-    fond.push(quad(cam, [[-w0, y0, z1], [w0, y0, z1], [w1, y1, z1], [-w1, y1, z1]], teinte([0, (y0 + y1) / 2, z1]), `ar${a}`));
-  }
-  for (let a = 0; a < N; a++) for (let b = 0; b < N; b++) {
-    const xa = -X + (2 * X * a) / N;
-    const xb = -X + (2 * X * (a + 1)) / N;
-    const za = z0 + ((z1 - z0) * b) / N;
-    const zb = z0 + ((z1 - z0) * (b + 1)) / N;
-    fond.push(quad(cam, [[xa, SOL, za], [xb + 2, SOL, za], [xb + 2, SOL, zb + 0.002], [xa, SOL, zb + 0.002]], rgb(mix([20, 22, 28], [90, 92, 98], Math.min(1, L([(xa + xb) / 2, SOL, (za + zb) / 2]) * 1.3)), 0.6 + 0.8 * L([(xa + xb) / 2, SOL, (za + zb) / 2])), `s${a}${b}`));
-  }
-  // la porte (triangle avant) : arche de la porte, fermeture éclair qui s'ouvre sur la nuit
-  for (let a = 0; a < N; a++) {
-    const y0 = SOL + ((H - SOL) * a) / N;
-    const y1 = SOL + ((H - SOL) * (a + 1)) / N;
-    const w0 = X * (1 - a / N);
-    const w1 = X * (1 - (a + 1) / N);
-    fond.push(quad(cam, [[-w0, y0, z0], [w0, y0, z0], [w1, y1, z0], [-w1, y1, z0]], teinte([0, (y0 + y1) / 2, z0]), `av${a}`));
-  }
+  // éclairage lisse : chaque pan est peint d'une couleur de nuit, puis d'un dégradé radial centré sur la lanterne
+  // (même centre pour tous les pans, donc la lumière passe d'un pan à l'autre sans facettes)
+  const lv = cam.visible(LANTERNE.z, LANTERNE.x, LANTERNE.y);
+  const [lx, ly] = cam.proj(LANTERNE.x, LANTERNE.y, LANTERNE.z);
+  const lr = 1500 * cam.scale(LANTERNE.z, LANTERNE.x, LANTERNE.y);
+  const cx = lv ? lx : 540;
+  const cy = lv ? ly : -400;
+  const rr = lv ? Math.max(lr, 700) : 2200;
+  fond.push(
+    <defs key="lum">
+      <radialGradient id="ti-toile" cx={cx} cy={cy} r={rr} gradientUnits="userSpaceOnUse">
+        <stop offset="0" stopColor="#ffd9a0" stopOpacity="0.98" />
+        <stop offset="0.3" stopColor="#e88a3c" stopOpacity="0.9" />
+        <stop offset="0.65" stopColor="#a8481a" stopOpacity="0.55" />
+        <stop offset="1" stopColor="#5a2410" stopOpacity="0.15" />
+      </radialGradient>
+      <radialGradient id="ti-sol" cx={cx} cy={cy} r={rr} gradientUnits="userSpaceOnUse">
+        <stop offset="0" stopColor="#b8a690" stopOpacity="0.9" />
+        <stop offset="0.5" stopColor="#6a5a4a" stopOpacity="0.55" />
+        <stop offset="1" stopColor="#2a2420" stopOpacity="0.1" />
+      </radialGradient>
+    </defs>,
+  );
+  const pan = (pts, nuit, grad, ombre, key) => {
+    const p = cam.poly(pts);
+    if (!p) return null;
+    return (
+      <g key={key}>
+        <polygon points={p} fill={nuit} />
+        <polygon points={p} fill={`url(#${grad})`} opacity={lampe} />
+        {ombre > 0 && <polygon points={p} fill="#000" opacity={ombre} />}
+      </g>
+    );
+  };
+  fond.push(pan([[-X, SOL, z0], [0, H, z0], [0, H, z1], [-X, SOL, z1]], '#1a1c2c', 'ti-toile', 0.06, 'pg'));
+  fond.push(pan([[X, SOL, z0], [0, H, z0], [0, H, z1], [X, SOL, z1]], '#1e2234', 'ti-toile', 0, 'pd'));
+  fond.push(pan([[-X, SOL, z1], [0, H, z1], [X, SOL, z1]], '#181a28', 'ti-toile', 0.12, 'par'));
+  fond.push(pan([[-X, SOL, z0], [X, SOL, z0], [X, SOL, z1], [-X, SOL, z1]], '#0e0f14', 'ti-sol', 0, 'psol'));
+  fond.push(pan([[-X, SOL, z0], [0, H, z0], [X, SOL, z0]], '#1c2032', 'ti-toile', 0.04, 'pav'));
+  // coutures de la toile (fines, régulières)
+  [0.33, 0.66].forEach((u, k) => [-1, 1].forEach((sg) => fond.push(ligne(cam, [sg * X * (1 - u), SOL + (H - SOL) * u, z0], [sg * X * (1 - u), SOL + (H - SOL) * u, z1], lw(cam, 4, [sg * X * (1 - u), 0, (z0 + z1) / 2]), '#3a1808', `cou${k}${sg}`, 0.35))));
   const arche = [...Array(13)].map((_, k) => {
     const a = Math.PI * (k / 12);
     return [-Math.cos(a) * 300, SOL - 500 * Math.sin(a), z0 + 0.003];

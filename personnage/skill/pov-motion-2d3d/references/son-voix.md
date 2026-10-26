@@ -43,6 +43,9 @@ Usage : `bash voix/<projet>/assembler.sh <outils>/st ../<nom>.mp4`. Le script :
 ## 4 bis. Volume avec des screamers
 Les impacts des screamers fixent la crête : la voix paraît basse (moyenne −21 dB). Mets un compresseur avant la normalisation : `acompressor=threshold=-22dB:ratio=3:attack=5:release=150,loudnorm=I=-15:TP=-1:LRA=9` (voir `voix/vaisseau/assembler.sh`). Vise environ −18 dB de moyenne et un débit vidéo de 2,9 Mb/s pour 77 s (moins de 30 Mo).
 
+## 4 ter. Passe « shader » (post-traitement)
+`bash voix/postfx.sh out/<x>_brut.mp4 out/<x>_post.mp4 0.55` : bloom (hautes lumières floutées en mode écran), étalonnage (`colorbalance` + `eq`), aberration chromatique (`rgbashift`), vignette, grain temporel. À appeler dans `assembler.sh` avant le mux (voir `voix/tente/assembler.sh`). Le 3e argument règle la force du bloom.
+
 ## 5. Vérifier
 - `ffmpeg -i x.mp4 -af volumedetect -f null -` : moyenne autour de −16 dB, crête sous −0,5 dB.
 - Planche d'images : `ffmpeg -i x.mp4 -vf "fps=1/4,scale=216:-1,tile=8x2" -frames:v 1 planche.png`. Les sous-titres doivent tomber sur les bons plans.

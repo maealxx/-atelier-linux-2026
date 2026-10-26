@@ -32,7 +32,7 @@ export const camFace = (x, z, dir, dist, t, d, {dx = 0, dy = 0, push = 0.1, pitc
 
 // Assemble une image : décor + éléments triés en profondeur + voile noir + éléments par-dessus + finition
 // Avec `cam`, les éléments sont triés selon leur vraie distance à la caméra (indispensable en contrechamp).
-export const Plan = ({f, decor, items = [], noir = 0, dessus = null, roll = 0, zoom = 1, cam = null}) => {
+export const Plan = ({f, decor, items = [], noir = 0, dessus = null, roll = 0, zoom = 1, cam = null, grain = 0.09, vignette = 0.9}) => {
   const loin = (o) => (cam ? cam.profondeur(o.z, o.x ?? cam.x, o.y ?? cam.y) : o.z);
   const tous = [...decor.items, ...items].filter((o) => o && o.el).sort((a, b) => loin(b) - loin(a));
   return (
@@ -47,7 +47,7 @@ export const Plan = ({f, decor, items = [], noir = 0, dessus = null, roll = 0, z
         </g>
         <rect x="0" y="0" width="1080" height="1920" fill="#000" opacity={noir} />
         {dessus}
-        <Finition f={f} />
+        <Finition f={f} grain={grain} vignette={vignette} />
       </svg>
     </AbsoluteFill>
   );
