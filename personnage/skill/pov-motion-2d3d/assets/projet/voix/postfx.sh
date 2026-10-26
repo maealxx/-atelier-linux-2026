@@ -3,7 +3,7 @@
 # Usage : bash voix/postfx.sh <entrée.mp4> <sortie.mp4> [force_bloom=0.55]
 set -euo pipefail
 IN="$1"; OUT="$2"; B="${3:-0.55}"
-FX="split=2[base][hl];\
+FX="format=gbrp,split=2[base][hl];\
 [hl]lutrgb=r='clip((val-140)*2.2,0,255)':g='clip((val-140)*2.2,0,255)':b='clip((val-140)*2.2,0,255)',gblur=sigma=26,gblur=sigma=10[bloom];\
 [base][bloom]blend=all_mode=screen:all_opacity=${B}[b1];\
 [b1]colorbalance=rs=-0.04:gs=-0.01:bs=0.07:rm=0.01:bm=-0.01:rh=0.06:gh=0.02:bh=-0.05,\
