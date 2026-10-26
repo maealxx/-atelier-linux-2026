@@ -5,6 +5,7 @@ import {Personnage} from './Personnage';
 import {DUREE_SALLE_ZERO, SalleZero} from './SalleZero';
 import {DUREE_SOIREE, Soiree} from './Soiree';
 import {DUREE_LIVREUR, Livreur} from './Livreur';
+import {DUREE_ROULETTE, Roulette} from './Roulette';
 
 export const Root = () => (
   <>
@@ -36,6 +37,14 @@ export const Root = () => (
       id="Soiree"
       component={Soiree}
       durationInFrames={DUREE_SOIREE}
+      fps={30}
+      width={1080}
+      height={1920}
+    />
+    <Composition
+      id="Roulette"
+      component={Roulette}
+      durationInFrames={DUREE_ROULETTE}
       fps={30}
       width={1080}
       height={1920}
