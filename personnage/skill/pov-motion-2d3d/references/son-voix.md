@@ -3,6 +3,9 @@
 ## 1. Le texte de référence
 Le fichier `voix/<projet>/scenes.json` contient `[["nomScene", "texte de la scène"], …]`. Le texte doit correspondre **mot pour mot** à ce que la voix dit (sans les balises ElevenLabs). Les noms de scène sont les mêmes que dans `plans.json` et dans le composant.
 
+## 1 bis. Sans la voix : la voix guide
+`python3 voix/<projet>/guide.py <outils>/tts` lit `scenes.json` avec Kokoro, puis `caler_voix.py voix/<projet>/guide.wav 1.15 <projet> 0.3 0` donne des durées proches de la voix de Maé. La vidéo se rend sans voix (bruitages + sous-titres provisoires). Vérifie quelle voix ElevenLabs elle a utilisée (le nom est dans le fichier : « Paul K », « Ilan »…) et signale-le si ce n'est pas la voix habituelle.
+
 ## 2. Caler la voix d'ElevenLabs
 `python3 voix/caler_voix.py voix/<projet>/brut.mp3 <vitesse> <projet> <blanc_max> <boost_max>`
 
@@ -36,6 +39,9 @@ Usage : `bash voix/<projet>/assembler.sh <outils>/st ../<nom>.mp4`. Le script :
 2. fait le mux avec l'image (`out/<x>_brut.mp4`) ;
 3. incruste les sous-titres avec `voix/soustitres.py` : Montserrat Black, majuscules, 1 à 3 mots, ligne active rouge `&H2A2AFF&`, pop, emojis ;
 4. compresse en x264 à 3,2 Mb/s (environ 26 Mo par minute).
+
+## 4 bis. Volume avec des screamers
+Les impacts des screamers fixent la crête : la voix paraît basse (moyenne −21 dB). Mets un compresseur avant la normalisation : `acompressor=threshold=-22dB:ratio=3:attack=5:release=150,loudnorm=I=-15:TP=-1:LRA=9` (voir `voix/vaisseau/assembler.sh`). Vise environ −18 dB de moyenne et un débit vidéo de 2,9 Mb/s pour 77 s (moins de 30 Mo).
 
 ## 5. Vérifier
 - `ffmpeg -i x.mp4 -af volumedetect -f null -` : moyenne autour de −16 dB, crête sous −0,5 dB.

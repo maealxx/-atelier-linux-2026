@@ -41,7 +41,17 @@ Remplis les murs (couleurs, cadres, lambris, fenêtres) pour éviter les zones v
 
 **Les objets posés sur la table** (jetons, enveloppe, râteau) doivent être dessinés **dans l'item de la table**, après le tapis (voir `Vue` dans `Roulette1000.jsx`). Sinon, vus du côté du croupier, ils passent sous le tapis.
 
-## Positions utiles
+## Le vaisseau alien (Vaisseau.jsx)
+| Décor | Contenu | Options utiles |
+|---|---|---|
+| `hall()` | **Salle des capsules** : long hall hexagonal (X ±1600, Z −1 → 26, plafond −1000, pans coupés), nervures métalliques tous les 3 Z avec néon et 2 gyrophares rouges, tuyaux et câbles, grilles d'aération (`GRILLES`), vapeur froide au sol, allée en caillebotis à liserés bleus, écrans muraux à diodes, porte blindée (Z −1), **hublot** au fond (Z 26) avec étoiles et Terre en vraie parallaxe. | `alarme` (gyrophares), `neons(z)`, `brume` |
+| `capsule(cam, f, cote, z, k, opts)` | Capsule couchée le long d'un mur (`POD_Z`), socle, coque, matelas, dormeur (tête `Dormeur`, 5 visages), couvercle en verre demi-cylindrique qui bascule. | `ouvre` (0 → 1), `vide`, `griffee` (fêlures + griffes), `buee`, `lumiere`, `regard` (yeux du dormeur) |
+| `couloirV()` | Couloir de fuite (X ±650, Z 0 → 48, plafond −650), néons tous les 3 Z, portes coulissantes blindées (`PORTES_V`) à bandes jaunes et voyant, gyrophares. | `neon(z)`, `porte(z)` (0 ouverte → 1 fermée), `alarme` |
+| `salleEcrans()` | Salle de contrôle (X ±1400, Z 0 → 8, plafond −700) couverte de petits écrans animés, console lumineuse, **grand écran** (Z 8) qui affiche une autre vue 3D en direct (`flux`, voir `fluxHall` dans LeVaisseau.jsx), porte qui coulisse (mur gauche), **sas de la capsule de secours** (mur droit) avec intérieur éclairé. | `flux`, `porte`, `sas`, `alarme`, `lumiere` |
+
+Vue « allongé dans la capsule » : `Couche` (LeVaisseau.jsx) dessine le bonhomme couché vu d'au-dessus, derrière une vitre embuée (`Buee`).
+
+
 - `appart` : devant la TV `(820, Z 1.9)`, devant la porte `(850, 5.45)`, à la fenêtre `(-1220, 2.6)`, dans le couloir `(3000, 1.2)`.
 - `quartier` : livreur sous le lampadaire `(-760, Z 7.35)`. Plongée depuis la fenêtre : `{x: 0, y: NOTRE.y1 - 180, z: 9.72, yaw: 180, pitch: 46 → 56}`.
 - `casino` : joueur devant la case ROUGE `JOUEUR` = (359, Z 4.05), croupier `CROUPIER` = (−230, Z 5.95), case ROUGE `ROUGE_CASE` = (359, Z 4.675). Vue de dessus de la roue : `{x: −760, y: TABLE_Y − 1000, z: 4.98, pitch: 89}`.
@@ -53,4 +63,5 @@ Remplis les murs (couleurs, cadres, lambris, fenêtres) pour éviter les zones v
 - `Soiree.jsx` : manoir, fenêtres rouges, téléphone, monstre « hôte ».
 - `Livreur.jsx` : appart, judas, rue vue d'en haut, humain 3D, monstre au plafond.
 - `Roulette1000.jsx` : casino, **roue 3D sous tous les angles** (dessus, ras, macro qui suit la bille, orbite), chrono du tour avec centièmes, BPM + vignette rouge qui bat, flashback sépia, croupier 2D. Les tours de roue et le cœur sont décrits dans `src/roulette1000/evenements.json` (lu aussi par le mixage).
+- `LeVaisseau.jsx` : vaisseau, capsules, couloir, salle des écrans avec caméra de surveillance, alien 3D, deux screamers, voix guide puis vraie voix.
 - `Gabarit.jsx` : petit modèle neutre (salon → message → rue) pour démarrer n'importe quel thème.

@@ -28,6 +28,11 @@
 - Ne place pas un perso sur le trajet d'un meuble (le canapé…) : vérifie le chemin de marche.
 - Un **halo de lampe trop proche de la caméra** remplit l'image d'une tache marron : éloigne la caméra de la lampe.
 
+- **Trait épais près de la caméra** (tuyau, câble, nervure) : sa largeur calculée au milieu du segment explose quand ce point passe derrière la caméra → disque géant. Plafonne la profondeur (`lw` de Vaisseau.jsx : `w / max(0.35, profondeur)`).
+- **Contour (stroke) d'un polygone découpé au plan proche** (hublot dans le dos de la caméra) : il dessine une forme géante. Ne dessine l'anneau que si tous ses points sont visibles.
+- **Néon de plafond collé à la caméra** : grande tache blanche. Saute les néons à moins de 1,1 Z de la caméra.
+- **Écran qui montre une autre vue 3D** : rends le décor avec une 2e caméra dans un `<svg viewBox>` imbriqué dans une `plaque` (voir `fluxHall` + `salleEcrans({flux})`).
+
 ## Rendu des écrans
 - La notification du téléphone verrouillé cachait l'heure : elle est maintenant sous la date (translate −60).
 - Pour zoomer sur une bulle, remonte `y` du téléphone (≈ 960 − echelle × 440), sinon la bulle sort du cadre.

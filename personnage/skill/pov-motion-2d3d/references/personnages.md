@@ -35,6 +35,12 @@ Ce sont des squelettes en volume (os épais + boîtes orientées, faces cachées
 - `bras` : remplace des articulations (`{coudeD: [x,y,z], mainD: […]}` dans le repère du perso). Exemple pour faire coucou : `coudeD [270,-900,30]`, `mainD [290±70,-1170,40]`.
 - Pour un nouveau monstre ou perso : ajoute une palette (`const MA_TENUE = {jambe, bras, main, gilet, gilet2, peau, peau2, cheveux, rouge}`) et ses accessoires dans `surveillant3D`, en suivant le modèle de `'hote'` ou `'vrai'`.
 
+## L'alien en vraie 3D : `alien3D(cam, {...}) → {z, el}` (src/Alien3D.jsx)
+Environ 3 m (1100 unités à `echelle` 1), noir brillant, tête allongée vers l'arrière, mâchoire qui s'ouvre (dents, langue-mâchoire, bave), longs doigts griffus, tubes dorsaux, côtes, queue qui ondule, yeux verts qui brillent.
+- `x, z, y, angle` (0 = regarde vers +Z), `echelle`, `f`, `id` (unique : sert aux dégradés).
+- `gueule` (0 → 1), `penche` (degrés), `elan` (0 → 1 : se penche et tend les bras), `rampe` (0 → 1 : à quatre pattes), `souffle`, `yeux` (0 → 1).
+- `tete: {dir, haut}` : **seulement la tête** orientée dans le monde (pour un screamer depuis une grille, un trou, une porte). Pour la montrer derrière une grille, dessine-la dans un `clipPath` de l'ouverture puis redessine les barreaux par-dessus.
+
 ## Autres créatures 2D
 - `Creature` (src/Decors.jsx) : la grosse créature du « Dernier bus ».
 - `Surveillant` (src/Lycee.jsx) : l'ancien surveillant en 2D.

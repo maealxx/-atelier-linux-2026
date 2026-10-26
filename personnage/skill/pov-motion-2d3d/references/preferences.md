@@ -13,6 +13,11 @@
 - Monstres et créatures en **vraie 3D** (`surveillant3D`), pas en dessin plat. Les humains vus en plongée ou contre-plongée aussi (tenue `'vrai'`).
 - **Plus de 3D et de perspective** dans les décors : volumes, balcons, meubles en boîtes, bâtiments immenses, manoir « salle des fêtes » très grand.
 
+## Accroche et texte (retour du 26/10, « Le vaisseau »)
+- **Les 5 premières secondes** doivent être visuellement stimulantes : action, mouvement, lumière forte dès la 1re image. Le réveil dans la capsule (buée, plafond) était trop calme pour une ouverture.
+- **Plus de « tu fais ça »** (actions du spectateur), **moins de description du décor**, qui peut ennuyer. Ex. à éviter : « L'air est glacé, et ça sent le métal brûlé », « Autour de toi, des dizaines de capsules alignées ». À préférer : « Tu arraches les tuyaux de ton bras », « Tu poses un pied par terre ».
+- Ce qu'elle a aimé : le décor 3D du vaisseau, les capsules, le hublot avec la Terre, les deux screamers, la salle des écrans avec la caméra de surveillance en direct, l'alien en 3D.
+
 ## Rythme et caméra (son retour le plus positif : « c'est pile ce que je voulais »)
 - **Correction du 26/10 (roulette)** : « certains plans sont trop dynamiques, ça fait mal à la tête ». Garde des plans de **2 à 3 s**, un coup de zoom léger (`punch(t, 0.04)`), un roulis faible et fixe (±2°), des mouvements de caméra lents. Évite les caméras qui suivent un objet qui tourne vite (la bille) : fige-les et laisse l'objet traverser le cadre. Cette consigne passe avant les « plans de 1 à 2 s » ci-dessous.
 - Des **plans de 1 à 2 s**, avec un point de vue différent à chaque plan : large, visage, subjectif, ras du sol, plongée, contre-plongée, par-dessus l'épaule, orbite, drone, insert.
@@ -28,6 +33,8 @@
 - Les couloirs ne doivent pas être répétitifs : varie les portes, affiches, casiers, éclairages.
 - Une rue de nuit doit être **vivante** : vitrines éclairées (laverie, snack), enseignes qui clignotent, voitures, arbres, flaques, pluie, colonne Morris.
 - Les ombres et silhouettes « horreur » doivent être **crédibles** : floues, bras ballants, tête qui se tord, révélées une par une avec un son. Les photos sont prises au flash, avec du grain et une silhouette de trop.
+
+- **Lumières d'ambiance** pour le réalisme : plusieurs petites sources en plus de la principale (diodes, écrans, liserés au sol, reflets, taches de lumière, lueur de porte, rim light colorée sur les persos).
 
 ## Téléphone et messages
 - Notification sur l'écran verrouillé, puis la conversation, avec « écrit… » avant chaque bulle.
