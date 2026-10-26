@@ -101,7 +101,8 @@ def bornes(nom):
 
 TOURS = [dict(t, debut=G(t["debut"]), saut=G(t["saut"]), fin=G(t["fin"])) for t in EV["tours"]]
 SILENCE = (rep("silence", "tombe") / FPS + 0.05, start["twist"] / FPS + 0.08)  # silence total
-SEPIA = (bornes("erreur")[2], bornes("erreur")[5] + 0.6 * (bornes("erreur")[6] - bornes("erreur")[5]))
+B_ER = bornes("erreur")
+SEPIA = (B_ER[2], B_ER[3] + 0.7 * (B_ER[4] - B_ER[3]))  # plans 3 et 4 (fondu à 70 % du dernier), comme Roulette1000.jsx
 
 # ---------- ambiance de casino : brouhaha, jetons, machines à sous, musique lounge qui monte ----------
 tt = ts(DUREE)
