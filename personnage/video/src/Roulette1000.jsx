@@ -32,11 +32,23 @@ const K = CROUPIER;
 const RC = ROUGE_CASE;
 
 // ===================== la roue et la bille (global, en images) =====================
-const OMEGA = 1.1 / 30;
 const TOURS = EV.tours.map((t, i) => ({...t, debut: G(t.debut), saut: G(t.saut), fin: G(t.fin), prev: i ? EV.tours[i - 1].num : 5}));
+// vitesse de la roue (rad/image) : rapide quand la bille est lancée, très lente quand elle est posée
+const omega = (fg) => {
+  let v = 0.22;
+  TOURS.forEach((T) => {
+    const fin = T.fin ?? T.debut + 600;
+    if (fg >= T.debut && fg < fin) v = Math.max(v, 0.22 + 0.9 * Math.pow(1 - (fg - T.debut) / (fin - T.debut), 1.5));
+  });
+  return v / 30;
+};
+const F0 = -400;
+const ANGLE = [0];
+for (let f = F0 + 1; f <= 4000; f++) ANGLE.push(ANGLE[ANGLE.length - 1] + omega(f));
+const angleRoue = (fg) => ANGLE[Math.max(0, Math.min(ANGLE.length - 1, Math.round(fg) - F0))];
 const mod2pi = (a) => ((a % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
 const etatRoue = (fg) => {
-  const th = OMEGA * fg;
+  const th = angleRoue(fg);
   let i = TOURS.length - 1;
   while (i > 0 && fg < TOURS[i].debut) i--;
   const T = TOURS[i];
@@ -89,7 +101,6 @@ const vise = (p, c, extra = {}) => {
   const dz = (c[2] - p[2]) * 1000;
   return {x: p[0], y: p[1], z: p[2], yaw: deg(Math.atan2(dx, dz)), pitch: deg(Math.atan2(dy, Math.hypot(dx, dz))), ...extra};
 };
-const mix = (a, b, k) => a.map((v, i) => v + (b[i] - v) * k);
 const CW = [W.x, TABLE_Y, W.z]; // centre de la roue
 // au-dessus de la roue, qui tourne lentement
 const camDessus = (t, d, haut = 1150, rot = 30, base = 0, cible = CW) => ({x: cible[0], y: TABLE_Y - haut, z: cible[2] - 0.02, yaw: base + (rot * t) / d, pitch: 89});
@@ -177,8 +188,7 @@ const Vue = ({f, fg, cam, i, t, d, o = {}, roll = 0, zoom = 1, dessus = null}) =
   if (o.mains) items.push(mains(cam, fg, o.mains));
   if (o.billets) items.push(...billets(cam, fg));
   // micro-secousse de stress (douce) : un petit roulis qui tremble
-  const st = stress(fg);
-  const r = roll + Math.sin(fg * 1.7) * 0.35 * st;
+  const r = roll;
   return <Plan f={f} cam={cam} decor={decor} items={items} noir={o.noir ?? 0.06} zoom={zoom} roll={r} dessus={<g>{dessus}<Hud fg={fg} o={o} /></g>} />;
 };
 
@@ -237,11 +247,6 @@ const Chrono = ({fg, y = 330}) => {
       <text x="52" y="36" fontSize="98" textAnchor="middle" fontFamily={MONT} fill={col} letterSpacing="2" style={{fontVariantNumeric: 'tabular-nums'}}>
         {txt}
       </text>
-      {sec < 2.2 && fini === 0 && (
-        <text x="0" y="128" fontSize="40" textAnchor="middle" fontFamily={MONT} fill="#ffd23e" stroke="#000" strokeWidth="8" paintOrder="stroke">
-          RIEN NE VA PLUS
-        </text>
-      )}
     </g>
   );
 };
@@ -269,41 +274,6 @@ const Coeur = ({fg}) => {
       <polyline points={pts.join(' ')} transform="translate(30 40) scale(0.86 0.4)" fill="none" stroke={col} strokeWidth="5" opacity="0.8" />
     </g>
   );
-};
-// texte qui claque (pop + léger angle)
-const Claque = ({f, debut, y, texte, couleur = '#fff', taille = 96, fond = null, angle = -4, fin = 9999, contour = '#000'}) => {
-  if (f < debut || f > fin) return null;
-  const p = spring({frame: f - debut, fps: 30, config: {damping: 9, stiffness: 160}});
-  const lignes = texte.split('\n');
-  return (
-    <g transform={`translate(540 ${y}) rotate(${angle * p}) scale(${p})`}>
-      {fond && <rect x={-Math.max(...lignes.map((l) => l.length)) * taille * 0.36 - 40} y={-taille * 0.95} width={Math.max(...lignes.map((l) => l.length)) * taille * 0.72 + 80} height={taille * 1.25 * lignes.length + 20} rx="30" fill={fond} opacity="0.92" />}
-      {lignes.map((l, k) => (
-        <text key={k} y={k * taille * 1.12} fontSize={taille} textAnchor="middle" fontFamily={MONT} fill={couleur} stroke={contour} strokeWidth={taille * 0.12} paintOrder="stroke">
-          {l}
-        </text>
-      ))}
-    </g>
-  );
-};
-// pastille du résultat : « 17 NOIR »
-const Resultat = ({f, debut, num, y = 760}) => {
-  if (f < debut) return null;
-  const p = spring({frame: f - debut, fps: 30, config: {damping: 8}});
-  const col = couleurDe(num);
-  const bg = col === 'rouge' ? '#d0141e' : col === 'noir' ? '#16161a' : '#14a84a';
-  return (
-    <g transform={`translate(540 ${y}) scale(${p}) rotate(${(1 - p) * -14})`}>
-      <rect x="-300" y="-110" width="600" height="220" rx="110" fill={bg} stroke="#ffd23e" strokeWidth="12" />
-      <text x="-170" y="52" fontSize="150" textAnchor="middle" fontFamily={MONT} fill="#fff">{num}</text>
-      <text x="95" y="40" fontSize="96" textAnchor="middle" fontFamily={MONT} fill="#fff">{col === 'rouge' ? 'ROUGE' : col === 'noir' ? 'NOIR' : 'VERT'}</text>
-    </g>
-  );
-};
-const Emoji = ({f, debut, code, x, y, taille = 150}) => {
-  if (f < debut) return null;
-  const p = spring({frame: f - debut, fps: 30, config: {damping: 8}});
-  return <image href={staticFile(`emoji/${code}.svg`)} x={x - (taille * p) / 2} y={y - (taille * p) / 2 + Math.sin((f - debut) / 6) * 8} width={taille * p} height={taille * p} />;
 };
 // l'interface globale : chrono, BPM, vignette rouge qui bat
 const Hud = ({fg, o}) => {
@@ -338,103 +308,73 @@ const scene = (nom, rendu) => {
   return C;
 };
 
+// Plans de 2 à 3 s, caméra qui bouge doucement, petit coup de zoom (Maé : « trop dynamique, ça fait mal à la tête »).
+// Aucun texte ajouté à l'écran en plus des sous-titres : seulement le chrono, le cœur et le dilemme final.
+const doux = (t) => punch(t, 0.04);
+// caméra figée sur la position de la bille à une image donnée (la bille passe dans le cadre, la vue ne tourne pas)
+const figee = (fg0, ...args) => camBille(etatRoue(fg0), ...args);
+
 // 1. Imagine. 1 000 € sur le rouge, la bille tourne déjà.
 const Mise = scene('mise', ({f, fg, i, t, d, R}) => {
-  const e = etatRoue(fg);
   const glisse = interpolate(f, [R('poser', 40) - 14, R('rouge', 74)], [0, 1], ease);
   const J = {x: RC.x, z: RC.z - 0.32 * (1 - glisse), n: 10};
   const cams = [
-    () => camDessus(t, d, 1000, 40, 10),
-    () => vise([RC.x + 260, TABLE_Y - 150, RC.z - 0.42], [RC.x - 20, TABLE_Y - 20, RC.z]),
-    () => vise([P.x + 230, -300, P.z - 0.8 + (0.25 * t) / d], [W.x, TABLE_Y, W.z]),
-    () => camFace(P.x, P.z, 1, 0.55, t, d, {dy: -10, push: 0.15}),
-    () => vise([2400 - (500 * t) / d, -1150 + (200 * t) / d, 1.0 + (0.6 * t) / d], [-150, 0, 5.0]),
+    () => camDessus(t, d, 1000, 12, 10),
+    () => vise([RC.x + 260, TABLE_Y - 150 - (30 * t) / d, RC.z - 0.42], [RC.x - 20, TABLE_Y - 20, RC.z]),
+    () => camFace(P.x, P.z, 1, 0.6, t, d, {dy: -10, push: 0.08}),
   ];
   const cam = makeCam(cams[i]());
-  const titreP = spring({frame: f, fps: 30, config: {damping: 11}});
   return (
-    <Vue f={f} fg={fg} cam={cam} i={i} t={t} d={d} zoom={punch(t, 0.14)} roll={[0, 4, -3, 2, -2][i]}
-      o={{jetons: J, mise: glisse, joueur: i === 3 ? {sweat: 1, pupilX: -6, pupilY: 4} : {}, coeur: f >= R('tout', 129), chronoY: f < R('tout', 129) ? 380 : 330}}
-      dessus={
-        <g>
-          {f < R('tout', 129) && (
-            <g transform={`translate(540 125) scale(${titreP})`}>
-              <text y="0" fontSize="84" textAnchor="middle" fontFamily={MONT} fill="#fff" stroke="#000" strokeWidth="12" paintOrder="stroke">ET SI TU MISAIS</text>
-              <text y="104" fontSize="104" textAnchor="middle" fontFamily={MONT} fill="#ff2a3a" stroke="#000" strokeWidth="12" paintOrder="stroke">1 000 € ?</text>
-            </g>
-          )}
-          {e && null}
-        </g>
-      }
-    />
+    <Vue f={f} fg={fg} cam={cam} i={i} t={t} d={d} zoom={doux(t)} roll={[0, 2, -1][i]}
+      o={{jetons: J, mise: glisse, joueur: i === 2 ? {sweat: 1, pupilX: -6, pupilY: 4} : {}}} />
   );
 });
 
 // 2. Ton cœur cogne. Tu te vois déjà avec 2 000 €…
-const Coeur2 = scene('coeur', ({f, fg, i, t, d, R}) => {
+const Coeur2 = scene('coeur', ({f, fg, i, t, d}) => {
   const cams = [
-    () => camRas(200 + (50 * t) / d, 520, 140),
-    () => orbite(P.x, P.z, 0.95, 150 + (45 * t) / d, -180, {pitch: 4}),
-    () => camFace(P.x, P.z, 1, 1.25, t, d, {dy: 140, pitch: -9, push: 0.25}),
+    () => camRas(200 + (15 * t) / d, 560, 150),
+    () => orbite(P.x, P.z, 1.0, 165 + (20 * t) / d, -200, {pitch: 4}),
   ];
   const cam = makeCam(cams[i]());
-  const reve = i > 0;
+  const reve = i === 1;
   return (
-    <Vue f={f} fg={fg} cam={cam} i={i} t={t} d={d} zoom={punch(t)} roll={[-5, 3, -2][i]}
+    <Vue f={f} fg={fg} cam={cam} i={i} t={t} d={d} zoom={doux(t)} roll={[-2, 1][i]}
       o={{billets: reve, joueur: reve ? {smile: 0.9, worry: 0, eyes: 1.15, epauleG: 30, coudeG: 110, epauleD: -30, coudeD: -110, sweat: 0} : {}, lustres: reve ? 1.4 : 1}}
-      dessus={
-        <g>
-          {reve && <rect width="1080" height="1920" fill="#ffd23e" opacity={0.08 + 0.04 * Math.sin(f / 4)} />}
-          <Claque f={f} debut={R('deux', 58)} y={760} texte="2 000 €" couleur="#ffd23e" taille={150} />
-          <Emoji f={f} debut={R('téléphone', 98) - 4} code="1f4f1" x={250} y={1000} taille={170} />
-          <Emoji f={f} debut={R('vacances', 123) - 4} code="1f334" x={830} y={1020} taille={170} />
-        </g>
-      }
-    />
+      dessus={reve && <rect width="1080" height="1920" fill="#ffd23e" opacity="0.08" />} />
   );
 });
 
 // 3. La bille saute. Rouge, noir, rouge… elle vacille… et tombe.
-const Bille = scene('bille', ({f, fg, i, t, d, R}) => {
+const Bille = scene('bille', ({f, fg, i, t, d, bornes}) => {
   const e = etatRoue(fg);
   const cams = [
-    () => camBille(e, 260, 190, 0.35),
-    () => camFace(P.x, P.z, 1, 0.34, t, d, {dy: -25, push: 0.06}),
-    () => camBille(e, 200, 110, -0.7),
-    () => camCase(e, 520 - (120 * t) / d, 160, 0.5),
-    () => camCase(e, 300 - (90 * t) / d, 230, -0.3),
+    () => figee(START.bille + bornes[0], 330, 230, 0.35),
+    () => camFace(P.x, P.z, 1, 0.36, t, d, {dy: -25, push: 0.04}),
+    () => camDessus(t, d, 700 - (80 * t) / d, 6, 40),
   ];
   const cam = makeCam(cams[i]());
   const [bx] = billeMonde(e);
   return (
-    <Vue f={f} fg={fg} cam={cam} i={i} t={t} d={d} zoom={punch(t, 0.16)} roll={[6, -3, -7, 4, 0][i]}
+    <Vue f={f} fg={fg} cam={cam} i={i} t={t} d={d} zoom={doux(t)} roll={[2, -1, 0][i]}
       o={{joueur: {eyes: 1.5, pupilX: interpolate(bx, [W.x - 300, W.x + 300], [-9, 9], clamp), pupilY: 5, worry: 1}}} />
   );
 });
 
 // 4. Noir. Dix-sept. Le râteau emporte tes jetons.
-const Perte = scene('perte', ({f, fg, i, t, d, bornes, R}) => {
+const Perte = scene('perte', ({f, fg, i, t, d, R}) => {
   const e = etatRoue(fg);
   const k = interpolate(f, [R('râteau', 45), R('jetons', 87) + 4], [0, 1], ease);
   const tete = [RC.x + (K.x - 120 - RC.x) * k, RC.z + 0.06 + (5.3 - RC.z - 0.06) * k];
   const J = {x: tete[0], z: tete[1] - 0.06, n: k < 0.98 ? 10 : 0};
   const cams = [
-    () => camCase(e, 380 - (140 * t) / d, 200, 0.2),
-    () => vise([K.x + 420, -700 + (80 * t) / d, K.z + 0.45], [(RC.x + K.x) / 2 + 60, TABLE_Y, (RC.z + 5.3) / 2]),
-    () => camFace(P.x, P.z, 1, 0.6, t, d, {dy: 10, push: 0.2}),
+    () => camCase(e, 330 - (40 * t) / d, 200, 0.2),
+    () => vise([K.x + 420, -700 + (40 * t) / d, K.z + 0.45], [(RC.x + K.x) / 2 + 60, TABLE_Y, (RC.z + 5.3) / 2]),
   ];
   const cam = makeCam(cams[i]());
   return (
-    <Vue f={f} fg={fg} cam={cam} i={i} t={t} d={d} zoom={punch(t, i === 0 ? 0.22 : 0.12)} roll={[0, -4, 5][i]}
-      o={{jetons: J, rateau: f >= R('râteau', 45) - 8 ? tete : null, joueur: {worry: 1, eyes: 1.4, scream: i === 2 ? 0.8 : 0.3, epauleG: 35, coudeG: 130, epauleD: -35, coudeD: -130},
-        croupierPose: {epauleD: -50, coudeD: -40}, tableau: {nouveau: f, eclat: 1}, mise: 0.6 * (1 - k)}}
-      dessus={
-        <g>
-          {f < bornes[2] && <Resultat f={f} debut={R('noir', 2)} num={17} y={760} />}
-          <Claque f={f} debut={Math.max(R('emporte', 69), bornes[2])} y={600} texte="- 1 000 €" couleur="#ff2a3a" taille={130} />
-        </g>
-      }
-    />
+    <Vue f={f} fg={fg} cam={cam} i={i} t={t} d={d} zoom={doux(t)} roll={[0, -2][i]}
+      o={{jetons: J, rateau: f >= R('râteau', 45) - 8 ? tete : null, croupierPose: {epauleD: -50, coudeD: -40}, tableau: {nouveau: f, eclat: 1}, mise: 0.6 * (1 - k)}} />
   );
 });
 
@@ -442,113 +382,63 @@ const Perte = scene('perte', ({f, fg, i, t, d, bornes, R}) => {
 const Relance = scene('relance', ({f, fg, i, t, d, R}) => {
   const ENV = {x: 640, z: 4.56};
   const cams = [
-    () => camFace(P.x, P.z, 1, 0.42, t, d, {dx: -40, dy: -20, push: 0.1}),
-    () => vise([(TABLEAU.x0 + TABLEAU.x1) / 2 + 380 - (120 * t) / d, -640, TABLEAU.z - 1.0 + (0.25 * t) / d], [(TABLEAU.x0 + TABLEAU.x1) / 2, -690, TABLEAU.z]),
-    () => orbite(W.x, W.z, 0.75, 210 - (60 * t) / d, -620, {pitch: 38}),
-    () => vise([ENV.x + 120, TABLE_Y - 380, ENV.z - 0.28], [ENV.x, TABLE_Y, ENV.z]),
-    () => vise([ENV.x - 160, TABLE_Y - 210 + (60 * t) / d, ENV.z - 0.2], [ENV.x, TABLE_Y - 20, ENV.z + 0.02]),
+    () => camFace(P.x, P.z, 1, 0.48, t, d, {dx: -40, dy: -20, push: 0.06}),
+    () => vise([(TABLEAU.x0 + TABLEAU.x1) / 2 + 330 - (60 * t) / d, -640, TABLEAU.z - 1.0 + (0.1 * t) / d], [(TABLEAU.x0 + TABLEAU.x1) / 2, -690, TABLEAU.z]),
+    () => orbite(W.x, W.z, 0.75, 200 - (20 * t) / d, -620, {pitch: 38}),
+    () => vise([ENV.x + 60, TABLE_Y - 330 + (60 * t) / d, ENV.z - 0.26], [ENV.x, TABLE_Y, ENV.z]),
   ];
   const cam = makeCam(cams[i]());
   const tente = interpolate(f, [R('rouge', 112) - 10, R('rouge', 112) + 30], [0, 1], clamp);
+  const ouverte = interpolate(f, [R('largent', 193) - 4, R('largent', 193) + 8], [0, 1], clamp);
   return (
-    <Vue f={f} fg={fg} cam={cam} i={i} t={t} d={d} zoom={punch(t)} roll={[-6, 3, 4, -2, 7][i]}
-      o={{jetons: false, env: {...ENV, ouverte: i === 4 ? 1 : 0}, joueur: {worry: 0.9, pupilX: 8, pupilY: -3, brows: 4}, tableau: {eclat: i === 1 ? 1 : 0.3},
-        allume: i === 2 ? (n) => (couleurDe(n) === 'rouge' ? tente * (0.5 + 0.5 * Math.sin(f / 3 + n)) : 0) : null, mise: 0, vignette: i === 0 ? 1.3 : 1}}
-      dessus={
-        <g>
-          {i === 0 && <rect width="1080" height="1920" fill="#000" opacity="0.25" />}
-          <Claque f={f} debut={R('cinq', 76)} fin={R('le', 106) + 6} y={1100} texte={"5 NOIRS\nD'AFFILÉE"} couleur="#fff" taille={110} fond="#141418" />
-          <Claque f={f} debut={R('forcément', 126)} fin={R('il', 158) - 2} y={1100} texte={'LE ROUGE VA\nTOMBER… ?'} couleur="#ff3a3a" taille={100} />
-          <Claque f={f} debut={R('reste', 167)} y={760} texte="1 000 €" couleur="#ffd23e" taille={140} fin={R('largent', 193) - 2} />
-          <Claque f={f} debut={R('loyer', 210)} y={760} texte="LE LOYER 😬" couleur="#ff3a3a" taille={120} />
-        </g>
-      }
-    />
+    <Vue f={f} fg={fg} cam={cam} i={i} t={t} d={d} zoom={doux(t)} roll={[-2, 1, 2, -1][i]}
+      o={{jetons: false, env: {...ENV, ouverte}, joueur: {worry: 1, eyes: 1.3, pupilX: 8, pupilY: -3, epauleG: 35, coudeG: 130, epauleD: -35, coudeD: -130}, tableau: {eclat: i === 1 ? 1 : 0.3},
+        allume: i === 2 ? (n) => (couleurDe(n) === 'rouge' ? tente * (0.6 + 0.4 * Math.sin(f / 8 + n)) : 0) : null, mise: 0, vignette: i === 0 ? 1.3 : 1}}
+      dessus={i === 0 && <rect width="1080" height="1920" fill="#000" opacity="0.2" />} />
   );
 });
 
-// 6. Sauf que c'est faux. La roue n'a aucune mémoire. Monte-Carlo, 1913 : 26 noirs de suite.
-const Erreur = scene('erreur', ({f, fg, i, t, d, bornes, R}) => {
-  const e = etatRoue(fg);
-  const sepia = i >= 2 ? (i === 5 ? interpolate(t, [d * 0.6, d], [0.85, 0], clamp) : 0.85) : 0;
-  const compte = Math.round(interpolate(f, [R('noir', 150), R('suite', 192) + 6], [1, 26], clamp));
+// 6. Sauf que c'est faux. La roue n'a aucune mémoire. Monte-Carlo, 1913 : 26 noirs de suite, des fortunes perdues.
+const Erreur = scene('erreur', ({f, fg, i, t, d, R}) => {
+  const sepia = i >= 2 ? (i === 3 ? interpolate(t, [d * 0.7, d], [0.85, 0], clamp) : 0.85) : 0;
   const sweep = interpolate(f, [R('misant', 259) - 6, R('rouge', 278) + 8], [0, 1], ease);
   const piles = [[RC.x, RC.z, 12], [RC.x + 90, RC.z + 0.05, 8], [RC.x - 80, RC.z - 0.03, 15], [RC.x + 30, RC.z + 0.09, 6]].map(([x, z, n]) => ({x: x + (K.x - 100 - x) * sweep, z: z + (5.3 - z) * sweep, n: sweep > 0.97 ? 0 : n, c: '#e8e0c8'}));
   const cams = [
-    () => camFace(P.x, P.z, 1, 0.85, t, d, {dx: -60, dy: -30, push: 0.3}),
-    () => camDessus(t, d, 1300 - (300 * t) / d, -60, 120),
-    () => vise([-2400 + (700 * t) / d, -900, 2.0], [-400, -100, 6.5]),
-    () => camDessus(t, d, 760, 25, 300),
-    () => vise([1250 - (250 * t) / d, -480, 6.7], [900, -150, 4.2]),
-    () => vise([RC.x + 330, TABLE_Y - 170, RC.z - 0.5], [RC.x - 80, TABLE_Y - 20, RC.z + 0.15]),
+    () => camFace(P.x, P.z, 1, 0.85, t, d, {dx: -60, dy: -30, push: 0.12}),
+    () => camDessus(t, d, 1250 - (120 * t) / d, -15, 120),
+    () => vise([-2300 + (300 * t) / d, -900, 2.0], [-400, -100, 6.5]),
+    () => vise([1250 - (150 * t) / d, -480, 6.7], [700, -100, 4.4]),
   ];
   const cam = makeCam(cams[i]());
-  const points = [...Array(26)].map((_, k) => (
-    <circle key={k} cx={540 - 12.5 * 34 + k * 34} cy={1060} r={k < compte ? 14 : 9} fill={k < compte ? '#16161a' : '#444'} stroke={k < compte ? '#fff' : 'none'} strokeWidth="3" />
-  ));
   return (
-    <Vue f={f} fg={fg} cam={cam} i={i} t={t} d={d} zoom={punch(t, i === 0 ? 0.25 : 0.12)} roll={[0, 3, -3, 5, -2, 4][i]}
-      o={{jetons: false, sepia, autresJetons: i === 5 ? piles : [], rateau: i === 5 ? [piles[0].x, piles[0].z + 0.06] : null, gens: {peur: i >= 4 ? 1 : 0}, chrono: false,
-        joueur: i === 0 ? {worry: 1, eyes: 1.3, brows: 0} : i >= 2 ? false : {}, mise: 0}}
-      dessus={
-        <g>
-          <Claque f={f} debut={R('faux', 23)} fin={R('la', 36) + 2} y={760} texte="❌ FAUX" couleur="#ff2a3a" taille={170} angle={-9} />
-          <Claque f={f} debut={R('aucune', 53)} fin={R('en', 85) - 2} y={760} texte={'AUCUNE\nMÉMOIRE'} couleur="#fff" taille={110} fond="#141418" />
-          <Claque f={f} debut={R('mille', 91)} fin={R('le', 144) - 2} y={700} texte="1913" couleur="#ffe2a8" taille={170} angle={0} />
-          <Claque f={f} debut={R('monte-carlo', 123)} fin={R('le', 144) - 2} y={860} texte="MONTE-CARLO" couleur="#fff" taille={92} angle={0} />
-          {f >= R('noir', 150) && f < R('et', 207) && (
-            <g>
-              <Claque f={f} debut={R('noir', 150)} y={820} texte={`${compte} NOIRS`} couleur="#fff" taille={130} fond="#16161a" angle={0} />
-              {points}
-            </g>
-          )}
-          <Claque f={f} debut={R('fortunes', 242)} y={760} texte="💸 DES FORTUNES" couleur="#ffd23e" taille={96} angle={-3} />
-        </g>
-      }
-    />
+    <Vue f={f} fg={fg} cam={cam} i={i} t={t} d={d} zoom={doux(t)} roll={[0, 1, -1, 1][i]}
+      o={{jetons: false, sepia, autresJetons: i === 3 ? piles : [], rateau: i === 3 ? [piles[0].x, piles[0].z + 0.06] : null, gens: {peur: i === 3 ? 1 : 0}, chrono: false,
+        joueur: i === 0 ? {worry: 1, eyes: 1.3} : false, mise: 0}} />
   );
 });
 
 // 7. 18 rouges sur 37 cases, le zéro, à la longue c'est le casino qui gagne.
 const Chiffre = scene('chiffre', ({f, fg, i, t, d, R}) => {
-  const vague = (n) => {
-    const k = phi(n) / (2 * Math.PI);
-    return Math.max(0, Math.sin((f / 30 - k) * Math.PI * 2)) ** 3;
-  };
+  const vague = (n) => Math.max(0, Math.sin((f / 45 - phi(n) / (2 * Math.PI)) * Math.PI * 2)) ** 3;
   const allumes = [
     (n) => vague(n),
     (n) => (couleurDe(n) === 'rouge' ? interpolate(f, [R('dix-huit', 57) - 6, R('dix-huit', 57) + 4], [0, 1], clamp) : 0),
-    null,
-    (n) => (n === 0 ? 0.6 + 0.4 * Math.sin(f / 3) : 0),
-    null,
+    (n) => (n === 0 ? 0.6 + 0.4 * Math.sin(f / 5) : 0),
     null,
   ];
   const e = etatRoue(fg);
-  const zero = (() => {
-    const a = e.th + phi(0);
-    return [W.x + 612 * E * Math.cos(a), TABLE_Y, W.z + (612 * E * Math.sin(a)) / 1000];
-  })();
+  const a0 = e.th + phi(0);
+  const zero = [W.x + 612 * E * Math.cos(a0), TABLE_Y, W.z + (612 * E * Math.sin(a0)) / 1000];
   const cams = [
-    () => orbite(W.x, W.z, 0.7, 120 + (70 * t) / d, -360, {pitch: 26}),
-    () => camDessus(t, d, 900, 20, 200),
-    () => camRas(40 + (80 * t) / d, 430, 70),
-    () => vise([zero[0] + 210, zero[1] - 260, zero[2] - 0.12], zero),
-    () => vise([0, -900 - (500 * t) / d, 2.2 - (1.2 * t) / d], [-300, 0, 5.2]),
-    () => camFace(K.x, K.z, -1, 0.55, t, d, {dy: -10, push: 0.15}),
+    () => orbite(W.x, W.z, 0.7, 120 + (25 * t) / d, -360, {pitch: 26}),
+    () => camDessus(t, d, 900, 8, 200),
+    () => vise([zero[0] + 230, zero[1] - 300, zero[2] - 0.14], zero),
+    () => camFace(K.x, K.z, -1, 0.6, t, d, {dy: -10, push: 0.08}),
   ];
   const cam = makeCam(cams[i]());
   return (
-    <Vue f={f} fg={fg} cam={cam} i={i} t={t} d={d} zoom={punch(t)} roll={[3, 0, -6, 4, -2, 3][i]}
-      o={{jetons: false, allume: allumes[i], chrono: false, croupierPose: i === 5 ? {smile: 0.7, brows: 4} : {}, banque: i === 5 ? Math.floor(t / 3) : 0, mise: 0}}
-      dessus={
-        <g>
-          <Claque f={f} debut={R('trente-sept', 9)} fin={R('seulement', 42) - 2} y={760} texte="37 CASES" couleur="#fff" taille={130} />
-          <Claque f={f} debut={R('dix-huit', 57)} fin={R('à', 92) - 2} y={760} texte="18 / 37" couleur="#ff2a3a" taille={170} />
-          <Claque f={f} debut={R('avantage', 160) - 4} fin={R('et', 182) - 2} y={760} texte={'LE 0 VERT\n= POUR LE CASINO'} couleur="#3aff7a" taille={84} fond="#0b1a10" angle={0} />
-          <Claque f={f} debut={R('gagne', 236) - 2} y={760} texte="🏦 LE CASINO GAGNE" couleur="#ffd23e" taille={84} />
-        </g>
-      }
-    />
+    <Vue f={f} fg={fg} cam={cam} i={i} t={t} d={d} zoom={doux(t)} roll={[1, 0, -1, 1][i]}
+      o={{jetons: false, allume: allumes[i], chrono: false, croupierPose: i === 3 ? {smile: 0.7, brows: 4} : {}, banque: i === 3 ? Math.floor(t / 4) : 0, mise: 0}} />
   );
 });
 
@@ -558,113 +448,86 @@ const Tapis = scene('tapis', ({f, fg, i, t, d, R}) => {
   const env = {x: 640 + (RC.x - 640) * k, z: 4.56 + (RC.z - 4.56) * k};
   const lance = f >= R('lance', 96) - 6;
   const cams = [
-    () => camFace(P.x, P.z, 1, 0.46, t, d, {dy: 20, push: 0.18, pitch: -3}),
-    () => vise([RC.x + 360, TABLE_Y - 110, RC.z - 0.36], [RC.x + 60, TABLE_Y - 10, RC.z]),
+    () => vise([RC.x + 360, TABLE_Y - 130, RC.z - 0.38], [RC.x + 80, TABLE_Y - 10, RC.z]),
     () => vise([K.x - 120, -420, K.z + 0.75], [W.x, TABLE_Y, W.z]),
   ];
   const cam = makeCam(cams[i]());
   return (
-    <Vue f={f} fg={fg} cam={cam} i={i} t={t} d={d} zoom={punch(t)} roll={[-7, 3, -3][i]}
-      o={{jetons: false, env, mise: k, joueur: {brows: 8, worry: 0.2, eyes: 1.1, pupilY: 3}, croupierPose: lance ? {epauleD: -95, coudeD: -30} : {}}}
-      dessus={<Claque f={f} debut={R('loyer', 51)} fin={R('croupier', 87) - 6} y={760} texte="LOYER ➜ ROUGE" couleur="#ff2a3a" taille={110} fond="#141418" />}
-    />
+    <Vue f={f} fg={fg} cam={cam} i={i} t={t} d={d} zoom={doux(t)} roll={[1, -1][i]}
+      o={{jetons: false, env, mise: k, croupierPose: lance ? {epauleD: -95, coudeD: -30} : {}}} />
   );
 });
 
 // 9. Tout le monde se tait. Tu serres la table. La bille ralentit… rouge, noir, rouge…
-const Tension = scene('tension', ({f, fg, i, t, d, R}) => {
-  const e = etatRoue(fg);
+const Tension = scene('tension', ({f, fg, i, t, d}) => {
   const cams = [
-    () => vise([-1300 + (200 * t) / d, -480, 6.5], [P.x + 300, -180, P.z]),
-    () => camFace(P.x, P.z, 1, 0.5 - (0.12 * t) / d, t, d, {dx: 30 - (60 * t) / d, dy: -15, push: 0}),
+    () => vise([-1300 + (80 * t) / d, -480, 6.5], [P.x + 300, -180, P.z]),
     () => vise([P.x + 40, -40, 3.62], [P.x, TABLE_Y + 10, 4.4]),
-    () => camBille(e, 190, 130, 0.3),
-    () => camBille(e, 150, 95, -0.5),
-    () => camFace(P.x, P.z, 1, 0.3, t, d, {dy: -25, push: 0}),
-    () => camBille(e, 130, 80, 0.8),
+    () => camRas(15 + (8 * t) / d, 560, 170),
+    () => camFace(P.x, P.z, 1, 0.34, t, d, {dy: -25, push: 0.03}),
   ];
   const cam = makeCam(cams[i]());
-  const env = {x: RC.x, z: RC.z};
   return (
-    <Vue f={f} fg={fg} cam={cam} i={i} t={t} d={d} zoom={punch(t, i >= 4 ? 0.22 : 0.12)} roll={[2, -4, 0, 6, -7, 3, 8][i]}
-      o={{jetons: false, env, mise: 1, joueur: i === 2 ? false : {eyes: 1.5, worry: 1, sweat: 1, pupilX: i === 5 ? 9 : 0, pupilY: 5}, gens: {fige: 1}, mains: i === 2 ? {serre: 1, tremble: 10} : null,
-        noir: 0.08 + 0.18 * (i / 6), lustres: 1 - 0.4 * (i / 6)}}
-    />
+    <Vue f={f} fg={fg} cam={cam} i={i} t={t} d={d} zoom={doux(t)} roll={[1, 0, 2, -1][i]}
+      o={{jetons: false, env: {x: RC.x, z: RC.z}, mise: 1, joueur: i === 1 ? false : {eyes: 1.5, worry: 1, sweat: 1, pupilX: 4, pupilY: 5}, gens: {fige: 1}, mains: i === 1 ? {serre: 1, tremble: 6} : null,
+        noir: 0.08 + 0.06 * i, lustres: 1 - 0.12 * i}} />
   );
 });
 
 // 10. Elle tombe. (silence total) : la bille tombe, puis il ferme les yeux (on ne voit pas la case)
 const Silence = scene('silence', ({f, fg, i, t, d}) => {
-  const e = etatRoue(fg);
-  const cam = makeCam(i === 0 ? camBille(e, 120, 70, 0.5) : camFace(P.x, P.z, 1, 0.3 - (0.06 * t) / d, t, d, {dy: -25, push: 0}));
+  const cam = makeCam(i === 0 ? figee(TOURS[1].fin - 12, 260, 160, 0.4) : camFace(P.x, P.z, 1, 0.32, t, d, {dy: -25, push: 0.02}));
   return (
-    <Vue f={f} fg={fg} cam={cam} i={i} t={t} d={d} zoom={1.05 + (0.08 * t) / d} roll={[-3, 2][i]}
+    <Vue f={f} fg={fg} cam={cam} i={i} t={t} d={d} zoom={1.02} roll={0}
       o={{jetons: false, env: {x: RC.x, z: RC.z}, mise: 1, noir: 0.35, lustres: 0.4, lampe: 0.5, joueur: {eyes: 0.08, worry: 1, sweat: 1, brows: 6}}} />
   );
 });
 
 // 11. Rouge. Trois. Tu récupères 2 000 €. Ton cœur explose !
-const Twist = scene('twist', ({f, fg, i, t, d, bornes, R}) => {
+const Twist = scene('twist', ({f, fg, i, t, d, R}) => {
   const e = etatRoue(fg);
-  const flash = interpolate(f, [R('rouge', 3), R('rouge', 3) + 2, R('rouge', 3) + 12], [0, 0.85, 0], clamp) + interpolate(f, [R('explose', 98), R('explose', 98) + 2, R('explose', 98) + 10], [0, 0.6, 0], clamp);
+  const flash = interpolate(f, [R('rouge', 3), R('rouge', 3) + 3, R('rouge', 3) + 16], [0, 0.6, 0], clamp);
   const k = interpolate(f, [R('récupères', 40) - 6, R('euros', 70)], [0, 1], ease);
   const J = {x: RC.x - 280 * k, z: RC.z - 0.1 * k, n: 10 + Math.round(10 * k)};
   const cams = [
-    () => camCase(e, 300 - (90 * t) / d, 160, 0.1),
-    () => vise([RC.x + 300, TABLE_Y - 150, RC.z - 0.48], [RC.x, TABLE_Y - 30, RC.z - 0.06]),
-    () => orbite(P.x, P.z, 1.35, 158 + (44 * t) / d, -420, {pitch: 7}),
+    () => camCase(e, 300 - (40 * t) / d, 170, 0.1),
+    () => orbite(P.x, P.z, 1.35, 165 + (25 * t) / d, -420, {pitch: 7}),
   ];
   const cam = makeCam(cams[i]());
-  const saute = i === 2 ? -Math.abs(Math.sin(t / 4)) * 120 : 0;
+  const saute = i === 1 ? -Math.abs(Math.sin(t / 5)) * 100 : 0;
   return (
-    <Vue f={f} fg={fg} cam={cam} i={i} t={t} d={d} zoom={punch(t, 0.2)} roll={[0, 4, -6][i]}
-      o={{jetons: J, env: k < 0.5 ? {x: RC.x - 60, z: RC.z + 0.04} : null, mise: 1, allume: i === 0 ? (n) => (n === 3 ? 0.6 + 0.4 * Math.sin(f / 2) : 0) : null, lustres: 1.5, billets: i === 2,
+    <Vue f={f} fg={fg} cam={cam} i={i} t={t} d={d} zoom={doux(t)} roll={[0, -1][i]}
+      o={{jetons: J, env: k < 0.5 ? {x: RC.x - 60, z: RC.z + 0.04} : null, mise: 1, allume: i === 0 ? (n) => (n === 3 ? 0.6 + 0.4 * Math.sin(f / 4) : 0) : null, lustres: 1.4, billets: i === 1,
         joueur: {smile: 1, worry: 0, eyes: 1.3, sweat: 0, epauleG: 150, coudeG: 20, epauleD: -150, coudeD: -20, lift: saute}, gens: {}}}
-      dessus={
-        <g>
-          <rect width="1080" height="1920" fill="#fff" opacity={flash} />
-          {f < bornes[1] + 6 && <Resultat f={f} debut={R('rouge', 3)} num={3} y={760} />}
-          <Claque f={f} debut={R('deux', 58)} y={1060} texte="+ 2 000 €" couleur="#3aff7a" taille={140} />
-        </g>
-      }
-    />
+      dessus={<rect width="1080" height="1920" fill="#fff" opacity={flash} />} />
   );
 });
 
 // 12. Et c'est exactement ça, le piège. Ton cerveau croit que t'as une technique.
 const Piege = scene('piege', ({f, fg, i, t, d, R}) => {
-  const fige = interpolate(f, [R('piège', 48) - 6, R('piège', 48) + 10], [1, 0.25], clamp);
+  const fige = interpolate(f, [R('piège', 48) - 6, R('piège', 48) + 14], [1, 0.25], clamp);
   const cams = [
-    () => camFace(P.x, P.z, 1, 0.62 - (0.25 * t) / d, t, d, {dy: -15, push: 0}),
-    () => vise([P.x + 120, -330, P.z - 0.55 - (0.9 * t) / d], [W.x + 200, TABLE_Y - 40, W.z]),
-    () => camFace(P.x, P.z, 1, 0.42, t, d, {dx: 40, dy: -5, push: 0.12, pitch: 2}),
+    () => camFace(P.x, P.z, 1, 0.62 - (0.15 * t) / d, t, d, {dy: -15, push: 0}),
+    () => vise([P.x + 120, -330, P.z - 0.55 - (0.6 * t) / d], [W.x + 200, TABLE_Y - 40, W.z]),
   ];
   const cam = makeCam(cams[i]());
   return (
-    <Vue f={f} fg={fg} cam={cam} i={i} t={t} d={d} zoom={punch(t, 0.08)} roll={[0, -3, 5][i]}
-      o={{jetons: {x: RC.x - 280, z: RC.z - 0.1, n: 20}, mise: 1, rouge: '#ff0018', joueur: i === 2 ? {smile: 0.55, brows: 7, worry: 0, eyes: 0.8, sweat: 0} : {smile: i === 0 ? fige : 0.3, worry: 0.6, sweat: 0}, chrono: false,
-        allume: i === 1 ? (n) => (couleurDe(n) === 'rouge' ? 0.4 + 0.4 * Math.sin(f / 4) : 0) : null}}
-      dessus={
-        <g>
-          <Claque f={f} debut={R('piège', 48)} fin={R('maintenant', 64) + 4} y={760} texte="LE PIÈGE" couleur="#ff2a3a" taille={170} angle={-6} />
-          <Claque f={f} debut={R('technique', 133) - 4} y={1080} texte={'« J\'AI UNE\nTECHNIQUE »'} couleur="#ffd23e" taille={100} fond="#141418" angle={3} />
-          <Emoji f={f} debut={R('cerveau', 90)} code="1f92f" x={830} y={560} taille={190} />
-        </g>
-      }
-    />
+    <Vue f={f} fg={fg} cam={cam} i={i} t={t} d={d} zoom={doux(t)} roll={[0, -1][i]}
+      o={{jetons: {x: RC.x - 280, z: RC.z - 0.1, n: 20}, mise: 1, rouge: '#ff0018', joueur: i === 0 ? {smile: fige, worry: 0.6, sweat: 0} : {smile: 0.55, brows: 7, worry: 0, sweat: 0}, chrono: false,
+        allume: i === 1 ? (n) => (couleurDe(n) === 'rouge' ? 0.4 + 0.4 * Math.sin(f / 6) : 0) : null}} />
   );
 });
 
-// 13. Alors… tu t'arrêtes là, ou tu rejoues tout ?
+// 13. Alors… tu t'arrêtes là, ou tu rejoues tout ? (le dilemme habituel, seul texte en plus des sous-titres)
 const Dilemme = scene('dilemme', ({f, fg, i, t, d, R}) => {
   const cams = [
-    () => camFace(P.x, P.z, 1, 0.75, t, d, {dx: 80, dy: 0, push: 0.2}),
-    () => camDessus(t, d, 1000, 40, 10),
+    () => camFace(P.x, P.z, 1, 0.75, t, d, {dx: 80, dy: 0, push: 0.1}),
+    () => camDessus(t, d, 1000, 12, 10),
   ];
   const cam = makeCam(cams[i]());
   const dis = R('tout', 88);
   return (
-    <Vue f={f} fg={fg} cam={cam} i={i} t={t} d={d} zoom={punch(t)} roll={[-3, 0][i]}
+    <Vue f={f} fg={fg} cam={cam} i={i} t={t} d={d} zoom={doux(t)} roll={0}
       o={{jetons: {x: RC.x - 280, z: RC.z - 0.1, n: 20}, mise: 1, chrono: false, joueur: {worry: 0.6, smile: 0.3, pupilX: -8, eyes: 1.1}}}
       dessus={
         <g>

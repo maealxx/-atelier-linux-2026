@@ -14,6 +14,7 @@
 - **Plus de 3D et de perspective** dans les décors : volumes, balcons, meubles en boîtes, bâtiments immenses, manoir « salle des fêtes » très grand.
 
 ## Rythme et caméra (son retour le plus positif : « c'est pile ce que je voulais »)
+- **Correction du 26/10 (roulette)** : « certains plans sont trop dynamiques, ça fait mal à la tête ». Garde des plans de **2 à 3 s**, un coup de zoom léger (`punch(t, 0.04)`), un roulis faible et fixe (±2°), des mouvements de caméra lents. Évite les caméras qui suivent un objet qui tourne vite (la bille) : fige-les et laisse l'objet traverser le cadre. Cette consigne passe avant les « plans de 1 à 2 s » ci-dessous.
 - Des **plans de 1 à 2 s**, avec un point de vue différent à chaque plan : large, visage, subjectif, ras du sol, plongée, contre-plongée, par-dessus l'épaule, orbite, drone, insert.
 - Un **coup de zoom** (`punch`) à chaque coupe et un **roulis** (image penchée) qui change.
 - Quand l'action se répète (une marche, une attente), on change de point de vue ou de décor.
@@ -44,6 +45,9 @@
 - **Ne pas remonter le volume des chuchotements** (elle l'a demandé). Si un premier jet de voix contient trop de souffles, elle refait la voix : dis-le-lui.
 - Bruitages discrets qui ne couvrent pas la voix. Une **ambiance forte au début** quand il y a une coupure (ex. musique de fête), pour le contraste. Utilise des silences totaux aux moments clés.
 - **Pas de « TAP TAP »** ni d'onomatopées écrites à l'écran.
+
+## Textes à l'écran
+- **Aucun texte ajouté en plus des sous-titres** (demande du 26/10) : pas de titre, pas de chiffres qui claquent, pas de pastille de résultat, pas d'emojis qui pop. On garde seulement les éléments d'interface demandés (chrono, cœur/BPM) et le dilemme final.
 
 ## Sous-titres
 - Montserrat Black, majuscules, 1 à 3 mots, ligne active en **rouge**, pop d'apparition, quelques emojis Twemoji (7 à 9) sur les moments forts.
