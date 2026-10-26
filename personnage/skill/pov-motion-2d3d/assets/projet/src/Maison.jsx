@@ -486,7 +486,8 @@ const DiscoInterieur = ({cam, f}) => {
 // ===================== Le téléphone et ses messages =====================
 // Interface de messagerie en plein écran (coordonnées écran). messages : [{debut, texte} | {debut, photo: true, texte}]
 // verrouille : écran verrouillé (grande heure + notification) au lieu de la conversation
-export const Telephone = ({f, messages = [], notif = null, echelle = 1, x = 540, y = 980, vibre = 0, nom = 'Lucas 🎧', verrouille = false}) => {
+// heure, date, initiale (avatar), barres (null : pas d'indicateur ; 0 : « Aucun service » ; 1 → 4 barres de réseau)
+export const Telephone = ({f, messages = [], notif = null, echelle = 1, x = 540, y = 980, vibre = 0, nom = 'Lucas 🎧', verrouille = false, heure = '23:47', date = 'samedi 25 octobre', initiale = 'L', barres = null}) => {
   const shake = vibre > 0 ? Math.sin(f * 2.4) * 10 * vibre : 0;
   const bulles = messages.filter((m) => f >= m.debut);
   const ecrit = messages.find((m) => f >= m.debut - 32 && f < m.debut);
@@ -507,7 +508,13 @@ export const Telephone = ({f, messages = [], notif = null, echelle = 1, x = 540,
       <rect x="-255" y="-535" width="510" height="1070" rx="56" fill="#0b0f16" />
       {/* barre du haut */}
       <rect x="-60" y="-522" width="120" height="26" rx="13" fill="#000" />
-      <text x="-200" y="-500" fontSize="26" fill="#cfd6e4" fontFamily="'DejaVu Sans', Arial" fontWeight="700">23:47</text>
+      <text x="-200" y="-500" fontSize="26" fill="#cfd6e4" fontFamily="'DejaVu Sans', Arial" fontWeight="700">{heure}</text>
+      {barres !== null && (
+        <g transform="translate(90 -497)">
+          {[0, 1, 2, 3].map((k) => <rect key={k} x={k * 13} y={-8 - k * 6} width="9" height={8 + k * 6} rx="2" fill="#cfd6e4" opacity={k < barres ? 1 : 0.25} />)}
+          {barres === 0 && <path d="M-6,-30 L50,4" stroke="#ff4a4a" strokeWidth="5" />}
+        </g>
+      )}
       <g transform="translate(160 -515)">
         <rect width="44" height="22" rx="5" fill="none" stroke="#cfd6e4" strokeWidth="3" />
         <rect x="4" y="4" width="24" height="14" rx="2" fill="#cfd6e4" />
@@ -516,8 +523,9 @@ export const Telephone = ({f, messages = [], notif = null, echelle = 1, x = 540,
         <g textAnchor="middle" fontFamily="'DejaVu Sans', Arial">
           <rect x="-255" y="-480" width="510" height="1010" rx="50" fill="#141a2c" />
           <circle cx="120" cy="260" r="260" fill="#2a1a40" opacity="0.6" />
-          <text y="-250" fontSize="130" fontWeight="300" fill="#e8ecff">23:47</text>
-          <text y="-185" fontSize="30" fill="#aab3d6">samedi 25 octobre</text>
+          <text y="-250" fontSize="130" fontWeight="300" fill="#e8ecff">{heure}</text>
+          <text y="-185" fontSize="30" fill="#aab3d6">{date}</text>
+          {barres === 0 && <text y="-130" fontSize="34" fontWeight="700" fill="#ff6a6a">Aucun service</text>}
         </g>
       )}
       {!verrouille && <g>
@@ -525,7 +533,7 @@ export const Telephone = ({f, messages = [], notif = null, echelle = 1, x = 540,
       <rect x="-255" y="-475" width="510" height="110" fill="#121824" />
       <text x="-225" y="-405" fontSize="40" fill="#5aa0ff" fontFamily="'DejaVu Sans', Arial">‹</text>
       <circle cx="-150" cy="-420" r="34" fill="#3a6ad8" />
-      <text x="-150" y="-406" fontSize="38" textAnchor="middle" fill="#fff" fontWeight="900" fontFamily="'DejaVu Sans', Arial">L</text>
+      <text x="-150" y="-406" fontSize="38" textAnchor="middle" fill="#fff" fontWeight="900" fontFamily="'DejaVu Sans', Arial">{initiale}</text>
       <text x="-100" y="-428" fontSize="32" fill="#fff" fontWeight="700" fontFamily="'DejaVu Sans', Arial">{nom}</text>
       <text x="-100" y="-392" fontSize="22" fill="#7ad48a" fontFamily="'DejaVu Sans', Arial">{ecrit ? 'écrit…' : 'en ligne'}</text>
       {/* bulles de messages (reçues, à gauche) */}

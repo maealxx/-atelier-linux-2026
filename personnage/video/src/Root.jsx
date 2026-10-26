@@ -9,9 +9,18 @@ import {DUREE_ROULETTE, Roulette} from './Roulette';
 import {DUREE_GABARIT, Gabarit} from './Gabarit';
 import {DUREE_ROULETTE_1000, Roulette1000} from './Roulette1000';
 import {DUREE_VAISSEAU, LeVaisseau} from './LeVaisseau';
+import {DernierTrain, DUREE_DERNIER_TRAIN} from './DernierTrain';
 
 export const Root = () => (
   <>
+    <Composition
+      id="DernierTrain"
+      component={DernierTrain}
+      durationInFrames={DUREE_DERNIER_TRAIN}
+      fps={30}
+      width={1080}
+      height={1920}
+    />
     <Composition
       id="Personnage"
       component={Personnage}

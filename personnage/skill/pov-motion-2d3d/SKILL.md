@@ -1,6 +1,6 @@
 ---
 name: pov-motion-2d3d
-description: Moteur de motion design 2,5D / 3D de Maé pour ses vidéos TikTok verticales (9:16) en POV : le bonhomme 2D (t-shirt corail, jean bleu), les personnages et monstres en vraie 3D (dont l'alien), les décors déjà construits (rue, ruelle, métro, lycée, manoir, appart, palier, quartier vu d'en haut, casino et roulette 3D, vaisseau alien), le téléphone avec messages, la vue judas, et le montage dynamique en plans courts avec zooms, roulis et sous-titres. Utilise ce skill dès que Maé veut une nouvelle vidéo animée « dans le même style » que ses vidéos POV (Le dernier bus, Salle zéro, La soirée, Le livreur, La roulette, Le vaisseau), quel que soit le thème : horreur, humour, histoire vraie, quotidien, faits divers, motivation, explication… Aussi pour réutiliser le bonhomme ou un décor, poser sa voix ElevenLabs sur une animation, refaire une partie 2, ou quand elle dit « fais comme d'hab », même si elle ne cite ni Remotion ni le skill.
+description: Moteur de motion design 2,5D / 3D de Maé pour ses vidéos TikTok verticales (9:16) en POV : le bonhomme 2D (t-shirt corail, jean bleu), les personnages et monstres en vraie 3D (dont l'alien), les décors déjà construits (rue, ruelle, métro, lycée, manoir, appart, palier, quartier vu d'en haut, casino et roulette 3D, vaisseau alien, station de métro avec escalators et métro 3D), le téléphone avec messages, la vue judas, et le montage dynamique en plans courts avec zooms, roulis et sous-titres. Utilise ce skill dès que Maé veut une nouvelle vidéo animée « dans le même style » que ses vidéos POV (Le dernier bus, Salle zéro, La soirée, Le livreur, La roulette, Le vaisseau, Le dernier train), quel que soit le thème : horreur, humour, histoire vraie, quotidien, faits divers, motivation, explication… Aussi pour réutiliser le bonhomme ou un décor, poser sa voix ElevenLabs sur une animation, refaire une partie 2, ou quand elle dit « fais comme d'hab », même si elle ne cite ni Remotion ni le skill.
 ---
 
 # Motion 2D/3D POV : le moteur des vidéos de Maé
@@ -21,7 +21,7 @@ Travaille en français, ton jeune et direct. Fais valider le script avant de lan
 
 1. Si Maé a déjà le dépôt `maealxx/-atelier-linux-2026`, travaille dans `personnage/video/` et crée une branche `claude/<sujet>` à partir de la plus récente. Sinon, crée un projet neuf à partir du moteur.
 2. Lance `bash scripts/installer.sh <dossier_projet> <scratchpad>/outils`. Le script copie le moteur si le dossier est vide, puis installe Remotion, Kokoro (voix guide), la police et les emojis. Tu peux le relancer sans risque.
-3. Pour une nouvelle vidéo, copie `src/Gabarit.jsx` en `src/<MaVideo>.jsx` et ajoute une `<Composition>` dans `src/Root.jsx`. Crée aussi `src/<projet>/plans.json` et `voix/<projet>/scenes.json`. Les vidéos d'exemple (`DernierBus`, `SalleZero`, `Soiree`, `Livreur`, `Roulette1000`, `LeVaisseau`) servent de modèles complets : copie leurs plans plutôt que de repartir de zéro.
+3. Pour une nouvelle vidéo, copie `src/Gabarit.jsx` en `src/<MaVideo>.jsx` et ajoute une `<Composition>` dans `src/Root.jsx`. Crée aussi `src/<projet>/plans.json` et `voix/<projet>/scenes.json`. Les vidéos d'exemple (`DernierBus`, `SalleZero`, `Soiree`, `Livreur`, `Roulette1000`, `LeVaisseau`, `DernierTrain`) servent de modèles complets : copie leurs plans plutôt que de repartir de zéro.
 
 ## Étape 1 : le script
 

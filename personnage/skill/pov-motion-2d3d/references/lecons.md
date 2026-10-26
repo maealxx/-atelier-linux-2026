@@ -41,3 +41,12 @@
 ## Son
 - Une crête à −0,0 dB sature : normalise le mix à 0,85-0,95, puis vérifie avec `volumedetect`.
 - Tu ne peux pas écouter : mesure (moyenne, crête, RMS par tranche) et dis-le.
+
+## Retours du « Dernier train » (26/10)
+- **Pose « mains au visage »** (`epauleG 35, coudeG 130…`) : elle lève les bras (on dirait qu'il se rend). Les valeurs inverses cachent les mains derrière le corps. Pour « plaqué contre un mur », garde les bras le long du corps (`±6 / ±10`).
+- **Une chose dans le noir est invisible** si elle n'a pas sa propre lumière : mets un halo rouge derrière elle (contre-jour) et assombris-la sans la noircir (`chose` de DernierTrain.jsx, `nuit` ≈ 0.7, flou 1 à 2).
+- **Phares en gros plan** : le halo de 2600 unités remplit l'image de blanc. Baisse `phares` (≈ 0.25) quand la caméra tourne autour de la face avant.
+- **Caméra dans la caisse du train** : depuis l'intérieur, le flanc n'est pas dessiné et l'intérieur n'est visible que par les ouvertures. Dès que la caméra passe X > 60, prends `wagon()` comme décor.
+- **Piliers devant la caméra** : vérifie la ligne de vue (X du pilier à la profondeur du pilier) avant de placer une caméra le long du quai.
+- **Haut-parleur ou petite lumière filmée de près** : un halo de plus de 600 unités devient une grosse tache orange.
+- La voix ElevenLabs sans `[pause]` donne ~78 s pour 215 mots (vitesse 1.05, blancs à 0,24 s).
