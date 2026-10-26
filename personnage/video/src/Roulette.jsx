@@ -112,9 +112,11 @@ const camera = (f) => {
 };
 
 // ----- dessin de la roue -----
-const pt = (r, a, y) => [C.x + r * Math.cos(a), y, C.z + (r * Math.sin(a)) / 1000];
-const Roue = ({cam, f}) => {
-  const th = angleRoue(f);
+// RoueDessin est réutilisable : centre (cx, cz), hauteur du plateau y0, échelle ech, angle de la roue th,
+// bille {r, a, hop} (rayon et angle dans le repère de la roue), allume(n) → 0..1 fait briller une case.
+export {ORDRE, ROUGES, SECT, phi, yAt};
+export const RoueDessin = ({cam, th, b, cx = C.x, cz = C.z, y0 = 0, ech = 1, allume = null}) => {
+  const pt = (r, a, y) => [cx + r * ech * Math.cos(a), y0 + y * ech, cz + (r * ech * Math.sin(a)) / 1000];
   const L = []; // {d, el}
   const quad = (pts, fill, key, extra = {}) => {
     const p = cam.poly(pts);
@@ -145,8 +147,9 @@ const Roue = ({cam, f}) => {
     const a0 = th + (k - 0.5) * SECT;
     const a1 = th + (k + 0.5) * SECT;
     const col = couleurDe(num);
-    quad([pt(700, a0, 20), pt(700, a1, 20), pt(820, a1, 20), pt(820, a0, 20)], TEINTE[col], `nb${k}`, {biais: 0.01});
-    quad([pt(520, a0, 60), pt(520, a1, 60), pt(700, a1, 60), pt(700, a0, 60)], TEINTE_FOND[col], `ca${k}`, {biais: 0.015});
+    const lu = allume ? allume(num) : 0;
+    quad([pt(700, a0, 20), pt(700, a1, 20), pt(820, a1, 20), pt(820, a0, 20)], lu > 0 ? mele(TEINTE[col], '#ffe27a', lu * 0.55) : TEINTE[col], `nb${k}`, {biais: 0.01});
+    quad([pt(520, a0, 60), pt(520, a1, 60), pt(700, a1, 60), pt(700, a0, 60)], lu > 0 ? mele(TEINTE_FOND[col], '#ff5a4a', lu * 0.6) : TEINTE_FOND[col], `ca${k}`, {biais: 0.015});
     quad([pt(700, a0, 20), pt(700, a1, 20), pt(700, a1, 60), pt(700, a0, 60)], '#2a2a2e', `bo${k}`, {biais: 0.012});
     // séparation métallique (petit mur)
     quad([pt(520, a0, 60), pt(700, a0, 60), pt(700, a0, 30), pt(520, a0, 30)], '#9aa0aa', `se${k}`, {trait: '#6a6e76', lw: 1});
@@ -172,22 +175,21 @@ const Roue = ({cam, f}) => {
     const s = cam.scale(B[2], B[0], B[1]);
     return (
       <g key={`cr${k}`}>
-        <line x1={sa[0][0]} y1={sa[0][1]} x2={sa[1][0]} y2={sa[1][1]} stroke="#d8dce4" strokeWidth={Math.max(2, 26 * s)} strokeLinecap="round" />
-        <circle cx={pb[0]} cy={pb[1]} r={Math.max(2, 34 * s)} fill="#e8ecf2" />
-        <circle cx={pb[0] - 8 * s} cy={pb[1] - 10 * s} r={Math.max(1, 12 * s)} fill="#fff" />
+        <line x1={sa[0][0]} y1={sa[0][1]} x2={sa[1][0]} y2={sa[1][1]} stroke="#d8dce4" strokeWidth={Math.max(2, 26 * s * ech)} strokeLinecap="round" />
+        <circle cx={pb[0]} cy={pb[1]} r={Math.max(2, 34 * s * ech)} fill="#e8ecf2" />
+        <circle cx={pb[0] - 8 * s * ech} cy={pb[1] - 10 * s * ech} r={Math.max(1, 12 * s * ech)} fill="#fff" />
       </g>
     );
   });
   const axe = cam.seg(pt(0, 0, -230), pt(0, 0, -400));
   const sommet = cam.proj(...pt(0, 0, -420));
-  const sAxe = cam.scale(C.z, 0, -400);
+  const sAxe = cam.scale(cz, cx, y0 - 400 * ech) * ech;
   // la bille
-  const b = bille(f);
   const aw = th + b.a;
   const yb = yAt(b.r) - 27 - b.hop;
   const pb = pt(b.r, aw, yb);
   const qb = cam.proj(...pb);
-  const sb = cam.scale(pb[2], pb[0], pb[1]);
+  const sb = cam.scale(pb[2], pb[0], pb[1]) * ech;
   const qo = cam.proj(...pt(b.r, aw, yAt(b.r) - 2));
   L.push({
     d: cam.profondeur(pb[2], pb[0], pb[1]) - 0.01,
@@ -204,16 +206,16 @@ const Roue = ({cam, f}) => {
     const a = th + k * SECT;
     const tx = [-Math.sin(a), 0, Math.cos(a)];
     const ny = [Math.cos(a), 0, Math.sin(a)];
-    const w = 100;
-    const h = 100;
+    const w = 100 * ech;
+    const h = 100 * ech;
     const c = pt(760, a, 19);
-    const P0 = [c[0] - (tx[0] * w) / 2 - (ny[0] * h) / 2, 19, c[2] - (tx[2] * w) / 2000 - (ny[2] * h) / 2000];
-    const corners = [P0, [P0[0] + tx[0] * w, 19, P0[2] + (tx[2] * w) / 1000], [P0[0] + ny[0] * h, 19, P0[2] + (ny[2] * h) / 1000]];
+    const P0 = [c[0] - (tx[0] * w) / 2 - (ny[0] * h) / 2, c[1], c[2] - (tx[2] * w) / 2000 - (ny[2] * h) / 2000];
+    const corners = [P0, [P0[0] + tx[0] * w, c[1], P0[2] + (tx[2] * w) / 1000], [P0[0] + ny[0] * h, c[1], P0[2] + (ny[2] * h) / 1000]];
     if (!corners.every((q) => cam.visible(q[2], q[0], q[1]))) return null;
     const o = cam.proj(...corners[0]);
     const u = cam.proj(...corners[1]);
     const v = cam.proj(...corners[2]);
-    const mtx = [(u[0] - o[0]) / w, (u[1] - o[1]) / w, (v[0] - o[0]) / h, (v[1] - o[1]) / h, o[0], o[1]];
+    const mtx = [(u[0] - o[0]) / 100, (u[1] - o[1]) / 100, (v[0] - o[0]) / 100, (v[1] - o[1]) / 100, o[0], o[1]];
     L.push({
       d: cam.profondeur(c[2], c[0], c[1]) + 0.004,
       el: (
@@ -237,6 +239,13 @@ const Roue = ({cam, f}) => {
       <circle cx={sommet[0] - 10 * sAxe} cy={sommet[1] - 12 * sAxe} r={Math.max(2, 14 * sAxe)} fill="#fff" />
     </g>
   );
+};
+
+const Roue = ({cam, f}) => <RoueDessin cam={cam} th={angleRoue(f)} b={bille(f)} />;
+const mele = (a, b, k) => {
+  const h = (c) => [1, 3, 5].map((i) => parseInt(c.slice(i, i + 2), 16));
+  const [p, q] = [h(a), h(b)];
+  return `rgb(${p.map((v, i) => Math.round(v + (q[i] - v) * k)).join(',')})`;
 };
 
 // ----- la table, le tapis de mise, les jetons, le croupier, la salle -----

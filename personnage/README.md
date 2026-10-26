@@ -9,6 +9,7 @@ Ce dossier contient tout le matériel pour refaire des vidéos dans le même sty
 | `personnage.mp4` | 5 s : il tombe, salue, saute (fond clair) |
 | `metro.mp4` | 5 s : seul dans le métro de nuit, la silhouette aux yeux rouges |
 | `dernier-bus.mp4` | **« Le dernier bus » partie 1**, 61 s, voix ElevenLabs, sous-titres, bruitages |
+| `roulette-1000.mp4` | **« Et si tu misais 1 000 € ? »**, 70 s : casino, roue 3D, chrono du tour au centième, BPM du perso (`Roulette1000`) |
 | `dernier-bus-voix.md` | le script audio de « Le dernier bus » |
 
 ## Les personnages (`video/src/`)

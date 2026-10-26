@@ -18,6 +18,9 @@ C'est un billboard : il est dessiné face à la caméra (ou de dos), avec des pi
 ## Le livreur 2D : `<LivreurPerso … visiere casque sac />` (src/Appart.jsx)
 C'est le bonhomme avec une veste sombre, un casque (`visiere: 'ouverte' | 'noire'`) et un sac isotherme. Il accepte les mêmes props de pose. C'est la base d'un perso « avec accessoire » : copie-le pour faire un pompier, un policier, un serveur, etc.
 
+## Le croupier 2D : `<Croupier … />` (src/Casino.jsx)
+Le bonhomme en chemise blanche, gilet noir à boutons dorés et nœud papillon rouge, mêmes props de pose. Même principe que `LivreurPerso` pour faire un serveur, un barman, un vigile…
+
 ## Persos et monstres en vraie 3D : `surveillant3D(cam, {...}) → {z, el}` (src/Monstre3D.jsx)
 Ce sont des squelettes en volume (os épais + boîtes orientées, faces cachées éliminées), justes sous tous les angles. Ajoute `{z: res.z, x, y, el: res.el}` aux items.
 - `x, z, y` (sol sous les pieds, ou plafond si `plafond`), `angle` (0 = regarde vers +Z, 180 = vers −Z), `echelle` (1 ≈ 1060 unités de haut ; 0.7 pour un humain normal), `f`.

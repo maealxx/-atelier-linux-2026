@@ -33,6 +33,12 @@
 - **Prendre le temps de montrer les messages** (au moins 2 s lisibles, zoom sur la bulle).
 - Sons : vibreur, notification, clics de frappe, pop de bulle. Une alerte peut être rouge, avec une bulle qui apparaît lentement.
 
+## Tension et stress (« Et si tu misais 1 000 € ? »)
+- Maé a demandé un **chrono avec millisecondes** (centièmes) qui décompte le tour de roulette : grand, en haut, rouge sous 3 s, « RIEN NE VA PLUS » sous 2 s, clignote à 00:00.00.
+- Pour **ressentir le stress du perso** : compteur de BPM avec tracé ECG, vignette rouge qui bat au rythme du cœur, battements audibles au même BPM, sueur, tremblement, yeux qui suivent la bille, silence total au moment clé (avec ses yeux fermés plutôt que la case visible).
+- Quand un objet est la star (la roue), on le montre **sous tous les angles** : dessus, ras, macro qui suit la bille, orbite, case en gros plan.
+- La première image doit déjà être en pleine action (bille lancée, chrono qui tourne) avec la question en haut.
+
 ## Son
 - La **voix ElevenLabs** de Maé, légèrement accélérée (environ 5 %), avec les blancs raccourcis sans les supprimer. Elle doit rester agréable.
 - **Ne pas remonter le volume des chuchotements** (elle l'a demandé). Si un premier jet de voix contient trop de souffles, elle refait la voix : dis-le-lui.

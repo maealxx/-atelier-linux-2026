@@ -5,7 +5,9 @@ import {Personnage} from './Personnage';
 import {DUREE_SALLE_ZERO, SalleZero} from './SalleZero';
 import {DUREE_SOIREE, Soiree} from './Soiree';
 import {DUREE_LIVREUR, Livreur} from './Livreur';
+import {DUREE_ROULETTE, Roulette} from './Roulette';
 import {DUREE_GABARIT, Gabarit} from './Gabarit';
+import {DUREE_ROULETTE_1000, Roulette1000} from './Roulette1000';
 
 export const Root = () => (
   <>
@@ -45,6 +47,22 @@ export const Root = () => (
       id="Gabarit"
       component={Gabarit}
       durationInFrames={DUREE_GABARIT}
+      fps={30}
+      width={1080}
+      height={1920}
+    />
+    <Composition
+      id="Roulette"
+      component={Roulette}
+      durationInFrames={DUREE_ROULETTE}
+      fps={30}
+      width={1080}
+      height={1920}
+    />
+    <Composition
+      id="Roulette1000"
+      component={Roulette1000}
+      durationInFrames={DUREE_ROULETTE_1000}
       fps={30}
       width={1080}
       height={1920}

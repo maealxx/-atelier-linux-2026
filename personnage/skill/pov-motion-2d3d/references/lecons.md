@@ -10,7 +10,11 @@
 - `interpolate` exige des bornes d'entrée **croissantes**.
 - Pour lire les `console.log` du navigateur, utilise `renderStill(..., onBrowserLog)` dans un petit script.
 
+- **Reconnaissance vocale** : les modèles Whisper hors des sources officielles sont refusés par la sécurité. Quand l'alignement automatique se trompe (il a décalé « rouge, noir, rouge »), écris le rattachement **à la main** : `voix/roulette1000/caler.py` (GROUPES = bout de phrase → morceau de parole, PAUSES = blancs à garder longs, ex. 0,95 s avant le résultat).
+
 ## Géométrie et tri
+- **Un billboard collé à la caméra** devient une énorme tache (jambe géante) : dans `Vue`, on ne dessine pas un perso si sa profondeur est < 0,2. On ne dessine pas non plus les persos quand la caméra plonge à plus de 60° (ils feraient plats).
+- **Objets posés sur un meuble** : mets-les dans l'item du meuble, triés entre eux, après le dessus du meuble.
 - **Les sols passaient devant les jambes** (« on voit que le haut ») : terrasses, perrons et bassins vont dans un item avec `z: 30` pour être dessinés en premier.
 - **Trie selon la vraie distance à la caméra** : passe `cam` à `<Plan>`. C'est indispensable en contrechamp.
 - **Grands aplats beiges ou noirs** : un mur latéral ou un auvent passe juste à côté de la caméra. Recule la caméra, mets le volume en retrait, ou supprime la face inutile.

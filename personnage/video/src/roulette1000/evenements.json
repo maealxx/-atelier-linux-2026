@@ -1,0 +1,9 @@
+{
+ "tours": [
+  {"debut": [null, -150], "saut": ["bille", "saute"], "fin": ["bille", "tombe"], "num": 17, "tours": 14},
+  {"debut": ["tapis", "lance"], "saut": ["tension", "ralentit"], "fin": ["silence", "tombe"], "num": 3, "tours": 7},
+  {"debut": ["dilemme", "rejoues"], "saut": null, "fin": null, "num": 32, "tours": 14}
+ ],
+ "historique": [21, 26, 8, 31, 4],
+ "coeur": [["mise", 0, 100], ["coeur", 0, 128], ["bille", 0, 140], ["perte", 0, 152], ["relance", 0, 128], ["erreur", 0, 110], ["chiffre", 0, 100], ["tapis", 0, 122], ["tension", 0, 148], ["silence", 0, 172], ["twist", 0, 182], ["twist", 60, 176], ["piege", 0, 132], ["dilemme", 0, 118]]
+}
