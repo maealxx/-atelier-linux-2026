@@ -157,6 +157,118 @@ te = rep("hublot", "terre")
 d = 4.0
 pose(sum(np.sin(2 * np.pi * f_ * ts(d)) * (0.6 + 0.4 * np.sin(2 * np.pi * 0.3 * ts(d) + f_)) for f_ in (440, 554, 659, 880)) * env(int(d * SR), 1.0, 1.5) / 4, te - 0.3, 0.025)
 
+def scene_ok(nom):
+    return start[nom] / FPS < DUREE
+
+
+def impact(t0, vol):
+    """coup de screamer : choc grave + bruit blanc + cri métallique strident"""
+    d = 1.2
+    tt = ts(d)
+    pose(np.sin(2 * np.pi * (70 - 40 * tt) * tt) * np.exp(-tt * 3) + filtre(bruit(d), "lowpass", 300) * np.exp(-tt * 5), t0, vol)
+    pose(filtre(bruit(0.5), "highpass", 1500) * np.exp(-ts(0.5) * 6), t0, vol * 0.6)
+    d = 0.9
+    tt = ts(d)
+    cri = sum(np.sin(2 * np.pi * (f0 + 300 * np.sin(2 * np.pi * 7 * tt)) * tt) for f0 in (1800, 2350, 3100)) / 3
+    pose(cri * np.exp(-tt * 3) * env(len(tt), 0.01, 0.2), t0 + 0.02, vol * 0.45)
+
+
+def souffle_alien(t0, vol, d=1.4):
+    tt = ts(d)
+    pose(filtre(bruit(d), "bandpass", [120, 900]) * np.sin(np.pi * tt / d) ** 2 * (1 + 0.4 * np.sin(2 * np.pi * 23 * tt)), t0, vol)
+
+
+# ---------- 5. conduit : quelque chose rampe au plafond (coups sourds qui avancent), puis s'arrête ----------
+if scene_ok("conduit"):
+    t0, t1 = (start["conduit"] + 20) / FPS, rep("conduit", "sarrête")
+    t = t0
+    while t < t1:
+        k = (t - t0) / max(0.1, t1 - t0)
+        metal(t, 0.05 + 0.08 * k, rng.uniform(90, 140))
+        t += rng.uniform(0.18, 0.32)
+    pose(filtre(bruit(0.5), "bandpass", [2000, 6000]) * np.exp(-ts(0.5) * 8), t1, 0.03)
+    d = (start["grille"] - start["conduit"]) / FPS
+    pose(np.sin(2 * np.pi * 55 * ts(d)) * np.linspace(0, 1, int(d * SR)), start["conduit"] / FPS, 0.06)
+
+# ---------- 6. grille : silence, petit grincement, les yeux… SCREAMER ----------
+if scene_ok("grille"):
+    tg = (start["grille"] + round(plans["grille"][0] / sum(plans["grille"]) * next(s["frames"] for s in tl["scenes"] if s["nom"] == "grille"))) / FPS
+    d = 0.6
+    pose(np.sin(2 * np.pi * (300 + 80 * ts(d)) * ts(d)) * np.sin(np.pi * ts(d) / d) * 0.3, rep("grille", "deux") - 0.2, 0.03)
+    impact(tg, 0.6)
+    metal(tg + 0.05, 0.25, 600)
+    metal(tg + 0.4, 0.2, 500)
+
+# ---------- 7. fuite : course, portes qui claquent, griffes qui approchent, cœur qui s'emballe ----------
+if scene_ok("fuite"):
+    D = next(s["frames"] for s in tl["scenes"] if s["nom"] == "fuite")
+    t0, t1 = start["fuite"] / FPS, (start["fuite"] + D) / FPS
+    t = t0
+    while t < t1:
+        metal(t, 0.09)
+        t += 0.2
+    for z in [8, 16, 24]:
+        # pz = 2 + 28 f / D, la porte se ferme quand pz − z ≈ 1,2
+        fz = (z + 1.2 - 2) / 28 * D
+        tc = t0 + fz / FPS
+        if tc < t1:
+            pose(filtre(bruit(0.4), "bandpass", [500, 4000]) * np.exp(-ts(0.4) * 6), tc - 0.15, 0.08)
+            metal(tc + 0.2, 0.3, 120)
+    t = rep("fuite", "griffes") - 0.4
+    while t < t1:
+        k = (t - t0) / (t1 - t0)
+        d = 0.12
+        pose(np.sin(2 * np.pi * (3000 - 1200 * ts(d) / d) * ts(d)) * np.exp(-ts(d) * 12), t, 0.02 + 0.05 * k)
+        t += rng.uniform(0.1, 0.18)
+    t = t0
+    while t < t1:
+        poum(t, 0.14)
+        poum(t + 0.12, 0.08)
+        t += 0.38
+
+# ---------- 8-10. salle des écrans : porte, bips d'ordinateurs, grésillement de l'écran, drone ----------
+if scene_ok("ecrans"):
+    te = start["ecrans"] / FPS
+    pose(filtre(bruit(0.6), "bandpass", [300, 3000]) * np.exp(-ts(0.6) * 4), te, 0.08)
+    fin = min(DUREE, start["alien"] / FPS)
+    t = te + 0.5
+    while t < fin:
+        bip(t, rng.choice([1200, 1600, 2000]), 0.05, 0.008)
+        t += rng.uniform(0.3, 0.9)
+    d = fin - te
+    pose(filtre(bruit(d), "bandpass", [2000, 7000]) * 0.3 * env(int(d * SR), 0.5, 0.5), te, 0.03)
+    td = rep("double", "visage")
+    pose(sum(np.sin(2 * np.pi * f_ * ts(3.0)) for f_ in (98, 103.8)) * env(int(3.0 * SR), 0.05, 1.5) / 2, td - 0.1, 0.12)
+    if scene_ok("question"):
+        t = start["question"] / FPS
+        while t < start["alien"] / FPS:
+            poum(t, 0.1)
+            t += 0.75
+
+# ---------- 11. alien : souffle, SCREAMER, grondement, respiration lente ----------
+if scene_ok("alien"):
+    souffle_alien(rep("alien", "souffle") - 0.3, 0.12)
+    impact(rep("alien", "retournes") + 0.1, 0.65)
+    d = 3.0
+    pose(filtre(bruit(d), "lowpass", 120) * env(int(d * SR), 0.1, 1.5), rep("alien", "trois"), 0.15)
+    t = rep("alien", "et")
+    while t < min(DUREE, (start["alarme"] + 10) / FPS):
+        souffle_alien(t, 0.08, 1.6)
+        t += 2.2
+
+# ---------- 12-13. alarme (deux tons), sas qui s'ouvre, respiration jusqu'à la fin ----------
+if scene_ok("alarme"):
+    t = start["alarme"] / FPS
+    while t < DUREE:
+        bip(t, 880, 0.35, 0.05)
+        bip(t + 0.4, 660, 0.35, 0.045)
+        t += 0.9
+    pose(filtre(bruit(1.5), "highpass", 2500) * np.exp(-ts(1.5) * 2), rep("alarme", "capsule") - 0.2, 0.1)
+    t = start["dilemme"] / FPS
+    while t < DUREE:
+        souffle_alien(t, 0.07, 1.8)
+        t += 2.4
+
 # ---------- voix (si elle existe) ----------
 mix = sfx[: int(DUREE * SR)]
 if "--voix" in sys.argv and os.path.exists(f"{ici}/voix_finale.wav"):

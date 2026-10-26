@@ -13,7 +13,7 @@ export const POD_Z = [2.5, 5, 7.5, 10, 12.5, 15, 17.5, 20, 22.5];
 export const POD = {x0: 560, x1: 1360, yVerre: 70, r: 240, dz: 0.3};
 export const MA_CAPSULE = {cote: -1, z: 5}; // celle où il se réveille (mur gauche)
 export const GRIFFEE = {cote: 1, z: 12.5}; // la capsule vide, griffée (mur droit)
-export const GRILLES = [9, 15.5]; // grilles d'aération au plafond (Z)
+export const GRILLES = [9, 15.5, 22.9]; // grilles d'aération au plafond (Z) ; la dernière est pile au-dessus du hublot
 
 const ligne = (cam, A, B, w, col, key, op = 1) => {
   const r = cam.seg(A, B);
@@ -337,4 +337,181 @@ export const capsule = (cam, f, cote, z, k, {ouvre = 0, vide = false, griffee = 
     }
   }
   return {z, x: s * 960, y: YV, el: <g key={`pod${s}${z}`}>{els}</g>};
+};
+
+// ===================== Le couloir de fuite =====================
+// Couloir étroit de Z 0 à 48 (X ±650), plafond à −650, néons tous les 3 Z, portes coulissantes tous les 8 Z.
+// neon(z) → 0..1 (allumé), porte(z) → 0 (ouverte) .. 1 (fermée).
+export const COULOIR_V = {x: 650, plaf: -650, z0: 0, z1: 48};
+export const PORTES_V = [8, 16, 24, 32, 40];
+export const couloirV = (cam, f, {neon = () => 1, porte = () => 0, alarme = 1} = {}) => {
+  const {x: X, plaf: PL, z0: Z0, z1: Z1} = COULOIR_V;
+  const fond = [];
+  fond.push(<DefsVaisseau key="defs" cam={cam} />);
+  fond.push(<rect key="noir" width="1080" height="1920" fill="#020407" />);
+  fond.push(quad(cam, [[-X, PL, Z0], [X, PL, Z0], [X, PL, Z1], [-X, PL, Z1]], '#0b141c', 'plaf'));
+  fond.push(quad(cam, [[-X, SOL, Z0], [X, SOL, Z0], [X, SOL, Z1], [-X, SOL, Z1]], '#0a1118', 'sol'));
+  [-1, 1].forEach((s) => {
+    fond.push(quad(cam, [[s * X, PL, Z0], [s * X, SOL, Z0], [s * X, SOL, Z1], [s * X, PL, Z1]], '#0e1922', `mur${s}`));
+    // bas de mur coupé en biais + bandeau lumineux
+    fond.push(quad(cam, [[s * X, 250, Z0], [s * X, 270, Z0], [s * X, 270, Z1], [s * X, 250, Z1]], '#2ad8ff', `ban${s}`, 0.35));
+    for (let z = Z0 + 1; z < Z1; z += 2) {
+      fond.push(quad(cam, [[s * X, -560, z - 0.8], [s * X, 200, z - 0.8], [s * X, 200, z + 0.8], [s * X, -560, z + 0.8]], '#13212c', `pa${s}${z}`));
+      fond.push(quad(cam, [[s * X, -400, z - 0.05], [s * X, 120, z - 0.05], [s * X, 120, z + 0.05], [s * X, -400, z + 0.05]], '#1e2e3a', `pr${s}${z}`));
+    }
+  });
+  for (let z = Z0; z <= Z1; z += 0.3) {
+    if (Math.abs(z - cam.z) > 14) continue;
+    fond.push(ligne(cam, [-X, SOL - 1, z], [X, SOL - 1, z], lw(cam, 6, [0, SOL, z]), '#05090d', `gz${z}`, 0.8));
+  }
+  fond.push(quad(cam, [[-X, PL, Z1], [X, PL, Z1], [X, SOL, Z1], [-X, SOL, Z1]], '#05080b', 'fondc'));
+  fond.push(<rect key="brume" width="1080" height="1920" fill="url(#va-brume)" opacity="0.8" />);
+  const items = [];
+  // néons au plafond, avec leur tache de lumière
+  for (let z = Z0 + 1.5; z < Z1; z += 3) {
+    const on = neon(z) * gresille(f, `cn${z}`, 0.06, 0.25);
+    if (Math.abs(z - cam.z) < 1.1 && cam.y < 0) continue; // un néon collé à la caméra ferait une grande tache blanche
+    items.push({z, x: 0, y: PL, el: <g key={`cn${z}`}>
+      {quad(cam, [[-60, PL + 2, z - 0.7], [60, PL + 2, z - 0.7], [60, PL + 2, z + 0.7], [-60, PL + 2, z + 0.7]], on > 0.5 ? '#d8f6ff' : '#1a2630', 't')}
+      {halo(cam, 0, PL + 60, z, 900, 'va-bleu', 0.5 * on, 'h')}
+      {halo(cam, 0, SOL - 5, z, 700, 'va-bleu', 0.25 * on, 's')}
+    </g>});
+  }
+  // gyrophares
+  for (let z = Z0 + 4; z < Z1; z += 8) {
+    const g = alarme * gyro(f, z);
+    items.push({z, x: X - 40, y: PL + 80, el: halo(cam, X - 40, PL + 80, z, 1400, 'va-rouge', 0.8 * g, `cg${z}`)});
+  }
+  // portes coulissantes (deux battants qui se referment au centre), cadre épais
+  PORTES_V.forEach((z) => {
+    const fe = Math.max(0, Math.min(1, porte(z)));
+    const ouvert = (1 - fe) * (X - 20);
+    const els = [];
+    els.push(boiteV(cam, -X, -X + 120, PL, SOL, z - 0.12, z + 0.12, ['#1c2a36', '#24323e', '#1c2a36'], 'cg'));
+    els.push(boiteV(cam, X - 120, X, PL, SOL, z - 0.12, z + 0.12, ['#1c2a36', '#24323e', '#1c2a36'], 'cd'));
+    els.push(boiteV(cam, -X, X, PL, PL + 110, z - 0.12, z + 0.12, ['#1c2a36', '#24323e', '#1c2a36', '#1c2a36'], 'ch'));
+    if (fe > 0.01) {
+      els.push(boiteV(cam, -X + 120, -X + 120 + (X - 120) * fe, PL + 110, SOL, z - 0.04, z + 0.04, ['#2a3a46', '#33424e', '#2a3a46'], 'bg'));
+      els.push(boiteV(cam, X - 120 - (X - 120) * fe, X - 120, PL + 110, SOL, z - 0.04, z + 0.04, ['#2a3a46', '#33424e', '#2a3a46'], 'bd'));
+      for (let k = -4; k < 4; k++) els.push(quad(cam, [[k * 80 * fe, -80, z - 0.045], [k * 80 * fe + 40 * fe, -80, z - 0.045], [k * 80 * fe + 60 * fe, -20, z - 0.045], [k * 80 * fe + 20 * fe, -20, z - 0.045]], '#e8b020', `hz${k}`, 0.8));
+    }
+    els.push(halo(cam, 0, PL + 160, z - 0.15, 300, fe > 0.5 ? 'va-rouge' : 'va-vert', 0.9, 'voyant'));
+    items.push({z, x: 0, y: 0, el: <g key={`po${z}`}>{els}{ouvert < 0 && null}</g>});
+  });
+  return {fond: <g>{fond}</g>, items, brume: null};
+};
+
+// ===================== La salle des écrans =====================
+// Salle X ±1400, Z 0 → 8, plafond bas à −700 (l'alien y touche le plafond). Écrans sur tous les murs,
+// grand écran central sur le mur du fond (Z 8) qui montre la salle des capsules en direct (vue CCTV).
+// Porte d'entrée au fond gauche (mur X −1400, Z 1 → 2.6), sas de la capsule de secours sur le mur droit (X 1400, Z 3.6 → 5.4).
+export const SALLE_E = {x: 1400, plaf: -700, z0: 0, z1: 8};
+export const ECRAN = {x0: -560, x1: 560, y0: -640, y1: -20, z: 8};
+export const SAS = {x: 1400, z0: 3.6, z1: 5.4};
+export const salleEcrans = (cam, f, {flux = null, sas = 0, alarme = 0, porte = 0, lumiere = 1} = {}) => {
+  const {x: X, plaf: PL, z0: Z0, z1: Z1} = SALLE_E;
+  const fond = [];
+  fond.push(<DefsVaisseau key="defs" cam={cam} />);
+  fond.push(<rect key="noir" width="1080" height="1920" fill="#020604" />);
+  fond.push(quad(cam, [[-X, PL, Z0], [X, PL, Z0], [X, PL, Z1], [-X, PL, Z1]], '#08120e', 'plaf'));
+  for (let x = -X; x <= X; x += 350) fond.push(ligne(cam, [x, PL + 2, Z0], [x, PL + 2, Z1], lw(cam, 14, [x, PL, 4]), '#14241c', `px${x}`));
+  fond.push(quad(cam, [[-X, SOL, Z0], [X, SOL, Z0], [X, SOL, Z1], [-X, SOL, Z1]], '#08100c', 'sol'));
+  for (let z = Z0; z <= Z1; z += 0.35) fond.push(ligne(cam, [-X, SOL - 1, z], [X, SOL - 1, z], lw(cam, 5, [0, SOL, z]), '#030604', `gz${z}`, 0.8));
+  const murs = [
+    {k: 'f', pts: (a, b, y0, y1) => [[a, y0, Z1], [b, y0, Z1], [b, y1, Z1], [a, y1, Z1]], long: X, ax: [1, 0, 0], P: (u, yy) => [u, yy, Z1 - 0.01]},
+    {k: 'a', pts: (a, b, y0, y1) => [[a, y0, Z0], [b, y0, Z0], [b, y1, Z0], [a, y1, Z0]], long: X, ax: [-1, 0, 0], P: (u, yy) => [-u, yy, Z0 + 0.01]},
+  ];
+  murs.forEach((m) => fond.push(quad(cam, m.pts(-X, X, PL, SOL), '#0b1611', `m${m.k}`)));
+  [-1, 1].forEach((s) => fond.push(quad(cam, [[s * X, PL, Z0], [s * X, SOL, Z0], [s * X, SOL, Z1], [s * X, PL, Z1]], '#0a1510', `ml${s}`)));
+  // mosaïque de petits écrans (verts / bleus), qui clignotent et défilent
+  const petit = (P0, ax, w, h, k) => {
+    const c = ['#0a3a22', '#0a2a3a', '#2a3a0a'][k % 3];
+    const on = gresille(f, `pe${k}`, 0.05, 0.4);
+    return plaque(cam, P0, ax, [0, 1, 0], w, h,
+      <g opacity={on}>
+        <rect width={w} height={h} fill="#020604" stroke="#1a2a22" strokeWidth="14" />
+        <rect x="12" y="12" width={w - 24} height={h - 24} fill={c} />
+        {[...Array(5)].map((_, j) => <rect key={j} x="30" y={30 + j * (h - 60) / 5} width={(w - 60) * (0.3 + 0.7 * random(`pl${k}${j}${Math.floor(f / 8)}`))} height={(h - 60) / 10} fill={k % 2 ? '#2affb0' : '#5ac8ff'} opacity="0.7" />)}
+        <polyline points={[...Array(12)].map((_, j) => `${30 + j * (w - 60) / 11},${h - 40 - 40 * Math.abs(Math.sin(f / 6 + j + k))}`).join(' ')} fill="none" stroke="#b8ff6a" strokeWidth="6" />
+      </g>, `pe${k}`);
+  };
+  let k = 0;
+  for (let u = -X + 120; u < X - 300; u += 330) {
+    for (let yy = -620; yy < 100; yy += 260) {
+      if (u > ECRAN.x0 - 330 && u < ECRAN.x1 && yy < ECRAN.y1 + 40) { k++; continue; }
+      fond.push(petit([u, yy, Z1 - 0.01], [1, 0, 0], 300, 230, k++));
+      fond.push(petit([-u, yy, Z0 + 0.01], [-1, 0, 0], 300, 230, k++));
+    }
+  }
+  [-1, 1].forEach((s) => {
+    for (let z = Z0 + 0.4; z < Z1 - 0.3; z += 0.4) {
+      if (s < 0 && z > 0.8 && z < 2.8) continue; // la porte
+      if (s > 0 && z > SAS.z0 - 0.2 && z < SAS.z1 + 0.2) continue; // le sas
+      for (let yy = -620; yy < 100; yy += 260) fond.push(petit([s * (X - 2), yy, s > 0 ? z + 0.3 : z], [0, 0, s > 0 ? -1 : 1], 300, 230, k++));
+    }
+  });
+  // la porte d'entrée (mur gauche), qui coulisse vers le haut
+  fond.push(quad(cam, [[-X + 2, -500, 1], [-X + 2, SOL, 1], [-X + 2, SOL, 2.6], [-X + 2, -500, 2.6]], '#020304', 'trou'));
+  fond.push(quad(cam, [[-X + 4, -500, 1], [-X + 4, -500 + (SOL + 500) * (1 - porte), 1], [-X + 4, -500 + (SOL + 500) * (1 - porte), 2.6], [-X + 4, -500, 2.6]], '#24323e', 'battant'));
+  // le sas de la capsule de secours (mur droit) : sa porte s'ouvre, lumière chaude derrière
+  fond.push(quad(cam, [[X - 2, -520, SAS.z0], [X - 2, SOL, SAS.z0], [X - 2, SOL, SAS.z1], [X - 2, -520, SAS.z1]], sas > 0 ? '#ffd8a0' : '#1a2630', 'sas'));
+  if (sas > 0) {
+    // l'intérieur de la capsule de secours : coque blanche éclairée, hublot, un seul siège avec harnais
+    fond.push(plaque(cam, [X - 3, -520, SAS.z1], [0, 0, -1], [0, 1, 0], (SAS.z1 - SAS.z0) * 1000, SOL + 520,
+      <g opacity={sas}>
+        <defs>
+          <radialGradient id="sas-in" cx="50%" cy="40%" r="70%">
+            <stop offset="0" stopColor="#fff4e0" />
+            <stop offset="0.6" stopColor="#e8c89a" />
+            <stop offset="1" stopColor="#8a6a4a" />
+          </radialGradient>
+        </defs>
+        <rect width="1800" height="952" fill="url(#sas-in)" />
+        <circle cx="900" cy="230" r="120" fill="#05080f" stroke="#9aa8b4" strokeWidth="26" />
+        <circle cx="940" cy="200" r="16" fill="#fff" />
+        <path d="M640,952 L660,520 Q900,430 1140,520 L1160,952 Z" fill="#c8501a" />
+        <path d="M700,560 Q900,500 1100,560 L1080,760 Q900,720 720,760 Z" fill="#e8642a" />
+        <path d="M760,520 L860,900 M1040,520 L940,900" stroke="#2a2a30" strokeWidth="30" />
+        <rect x="610" y="420" width="580" height="30" rx="15" fill="#ffd27a" />
+        {[0, 1, 2, 3].map((j) => <circle key={j} cx={300 + j * 400} cy="80" r="22" fill="#ffd27a" opacity={0.6 + 0.4 * Math.sin(f / 5 + j)} />)}
+      </g>, 'interieur'));
+    fond.push(halo(cam, X - 10, -50, (SAS.z0 + SAS.z1) / 2, 2400, 'va-vapeur', 0.6 * sas, 'sash'));
+  }
+  const hs = (SAS.z1 - SAS.z0) / 2;
+  fond.push(quad(cam, [[X - 4, -520, SAS.z0], [X - 4, SOL, SAS.z0], [X - 4, SOL, SAS.z0 + hs * (1 - sas)], [X - 4, -520, SAS.z0 + hs * (1 - sas)]], '#2a3a46', 'sasg'));
+  fond.push(quad(cam, [[X - 4, -520, SAS.z1 - hs * (1 - sas)], [X - 4, SOL, SAS.z1 - hs * (1 - sas)], [X - 4, SOL, SAS.z1], [X - 4, -520, SAS.z1]], '#2a3a46', 'sasd'));
+  fond.push(halo(cam, X - 20, -600, SAS.z0 - 0.3, 500, sas > 0 ? 'va-vapeur' : 'va-rouge', 0.9, 'sasv'));
+  // le grand écran central : la salle des capsules en direct (vue de la caméra de surveillance)
+  const E = ECRAN;
+  const w = E.x1 - E.x0;
+  const h = E.y1 - E.y0;
+  fond.push(quad(cam, [[E.x0 - 50, E.y0 - 50, Z1 - 0.005], [E.x1 + 50, E.y0 - 50, Z1 - 0.005], [E.x1 + 50, E.y1 + 50, Z1 - 0.005], [E.x0 - 50, E.y1 + 50, Z1 - 0.005]], '#1a2a22', 'cadre'));
+  fond.push(
+    plaque(cam, [E.x0, E.y0, Z1 - 0.012], [1, 0, 0], [0, 1, 0], w, h,
+      <g>
+        <rect width={w} height={h} fill="#000" />
+        {flux && (
+          <svg x="0" y="0" width={w} height={h} viewBox={`0 ${820 - (1080 * h) / w / 2} 1080 ${(1080 * h) / w}`} preserveAspectRatio="xMidYMid slice">
+            {flux}
+          </svg>
+        )}
+        <rect width={w} height={h} fill="#3aff8a" opacity="0.14" style={{mixBlendMode: 'screen'}} />
+        {[...Array(40)].map((_, j) => <rect key={j} x="0" y={(j * h) / 40 + ((f * 3) % (h / 40))} width={w} height="4" fill="#000" opacity="0.35" />)}
+        <circle cx={w - 50} cy="46" r="16" fill="#ff2a2a" opacity={Math.floor(f / 15) % 2 ? 1 : 0.2} />
+      </g>, 'grand'),
+  );
+  fond.push(halo(cam, 0, (E.y0 + E.y1) / 2, Z1 - 0.05, 2600, 'va-vert', 0.35 * lumiere, 'eclat'));
+  fond.push(<rect key="brume" width="1080" height="1920" fill="url(#va-brume)" opacity="0.5" />);
+  // gyrophares de l'alarme
+  [[-X + 60, 1], [X - 60, 6.5], [0, 0.2]].forEach(([x, z], j) => fond.push(halo(cam, x, PL + 60, z, 1800, 'va-rouge', 0.9 * alarme * gyro(f, j * 2), `ga${j}`)));
+  const items = [];
+  // console centrale (pupitre en biais), avec claviers lumineux
+  const P = {x0: -700, x1: 700, z0: 5.6, z1: 6.4};
+  items.push({z: 6, x: 0, y: 200, el: <g key="console">
+    {boiteV(cam, P.x0, P.x1, 120, SOL, P.z0 + 0.15, P.z1, ['#16241c', '#1a2a22', '#14201a'], 'b')}
+    {quad(cam, [[P.x0, 120, P.z0 + 0.15], [P.x1, 120, P.z0 + 0.15], [P.x1, 40, P.z1], [P.x0, 40, P.z1]], '#22342a', 'pupitre')}
+    {[...Array(14)].map((_, j) => quad(cam, [[P.x0 + 60 + j * 95, 100, P.z0 + 0.3], [P.x0 + 120 + j * 95, 100, P.z0 + 0.3], [P.x0 + 120 + j * 95, 70, P.z0 + 0.55], [P.x0 + 60 + j * 95, 70, P.z0 + 0.55]], ['#2affb0', '#ffb02a', '#5ac8ff', '#ff4a4a'][j % 4], `cl${j}`, 0.4 + 0.6 * (random(`cl${j}${Math.floor(f / 7)}`) > 0.3)))}
+    {halo(cam, 0, 60, P.z0 + 0.4, 1300, 'va-vert', 0.3 * lumiere, 'h')}
+  </g>});
+  return {fond: <g>{fond}</g>, items, brume: null};
 };
