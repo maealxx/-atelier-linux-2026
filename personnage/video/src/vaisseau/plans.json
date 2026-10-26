@@ -1,0 +1,47 @@
+{
+ "reveil": [
+  1,
+  1,
+  1.1
+ ],
+ "sortie": [
+  1,
+  1.1
+ ],
+ "capsules": [
+  1.2,
+  1.1,
+  1.3
+ ],
+ "hublot": [
+  1.1,
+  1
+ ],
+ "conduit": [
+  1
+ ],
+ "grille": [
+  1
+ ],
+ "fuite": [
+  1
+ ],
+ "ecrans": [
+  1
+ ],
+ "double": [
+  1
+ ],
+ "question": [
+  1
+ ],
+ "alien": [
+  1
+ ],
+ "alarme": [
+  1
+ ],
+ "dilemme": [
+  1
+ ]
+}
