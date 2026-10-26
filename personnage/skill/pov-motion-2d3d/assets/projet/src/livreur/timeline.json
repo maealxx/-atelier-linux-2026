@@ -1,0 +1,285 @@
+{
+ "fps": 30,
+ "voix": "livreur/voix_finale.wav",
+ "scenes": [
+  {
+   "nom": "coups",
+   "frames": 113,
+   "texte": "Imagine, ton livreur Uber Eats toque à ta porte. Trois coups.",
+   "reperes": {
+    "imagine": 2,
+    "ton": 28,
+    "livreur": 33,
+    "uber": 43,
+    "eats": 52,
+    "toque": 58,
+    "à": 67,
+    "ta": 73,
+    "porte": 79,
+    "trois": 95,
+    "coups": 101
+   }
+  },
+  {
+   "nom": "message",
+   "frames": 139,
+   "texte": "Mais au même moment, ton téléphone vibre. C'est ton livreur. J'arrive dans 5 minutes.",
+   "reperes": {
+    "mais": 2,
+    "au": 7,
+    "même": 12,
+    "moment": 20,
+    "ton": 35,
+    "téléphone": 40,
+    "vibre": 56,
+    "cest": 71,
+    "livreur": 84,
+    "jarrive": 101,
+    "dans": 113,
+    "5": 118,
+    "minutes": 123
+   }
+  },
+  {
+   "nom": "question",
+   "frames": 62,
+   "texte": "Alors… qui est devant ta porte ?",
+   "reperes": {
+    "alors": 2,
+    "qui": 22,
+    "est": 27,
+    "devant": 32,
+    "ta": 40,
+    "porte": 45,
+    "": 53
+   }
+  },
+  {
+   "nom": "judas",
+   "frames": 255,
+   "texte": "Tu regardes par le judas. Un livreur. Casque sur la tête, sac sur le dos. Il bouge pas. Il fixe le judas, comme s'il savait que t'étais derrière.",
+   "reperes": {
+    "tu": 3,
+    "regardes": 8,
+    "par": 20,
+    "le": 25,
+    "judas": 30,
+    "un": 45,
+    "livreur": 52,
+    "casque": 70,
+    "sur": 80,
+    "la": 87,
+    "tête": 93,
+    "sac": 103,
+    "dos": 122,
+    "il": 135,
+    "bouge": 141,
+    "pas": 150,
+    "fixe": 168,
+    "comme": 200,
+    "sil": 209,
+    "savait": 215,
+    "que": 224,
+    "tétais": 230,
+    "derrière": 238
+   }
+  },
+  {
+   "nom": "prenom",
+   "frames": 190,
+   "texte": "On retoque. Plus fort. Et une voix derrière la porte dit ton prénom. Votre commande… T'as jamais donné ton prénom.",
+   "reperes": {
+    "on": 2,
+    "retoque": 8,
+    "plus": 28,
+    "fort": 35,
+    "et": 49,
+    "une": 54,
+    "voix": 63,
+    "derrière": 68,
+    "la": 79,
+    "porte": 84,
+    "dit": 92,
+    "ton": 97,
+    "prénom": 102,
+    "votre": 116,
+    "commande": 126,
+    "tas": 145,
+    "jamais": 151,
+    "donné": 161
+   }
+  },
+  {
+   "nom": "message2",
+   "frames": 90,
+   "texte": "Ton téléphone vibre encore. Je suis en bas de ton immeuble.",
+   "reperes": {
+    "ton": 3,
+    "téléphone": 8,
+    "vibre": 23,
+    "encore": 31,
+    "je": 49,
+    "suis": 54,
+    "en": 58,
+    "bas": 63,
+    "de": 67,
+    "immeuble": 77
+   }
+  },
+  {
+   "nom": "fenetre",
+   "frames": 205,
+   "texte": "Tu vas à la fenêtre. En bas, sous le lampadaire, y'a ton livreur. Le vrai. Il lève la tête et il te fait signe.",
+   "reperes": {
+    "tu": 3,
+    "vas": 7,
+    "à": 11,
+    "la": 16,
+    "fenêtre": 20,
+    "en": 36,
+    "bas": 43,
+    "sous": 54,
+    "le": 60,
+    "lampadaire": 66,
+    "ya": 89,
+    "ton": 99,
+    "livreur": 105,
+    "vrai": 130,
+    "il": 144,
+    "lève": 150,
+    "tête": 163,
+    "et": 172,
+    "te": 182,
+    "fait": 188,
+    "signe": 193
+   }
+  },
+  {
+   "nom": "arrete",
+   "frames": 171,
+   "texte": "Puis d'un coup, il arrête. Son bras retombe. Il regarde un peu plus haut… au-dessus de ta fenêtre.",
+   "reperes": {
+    "puis": 3,
+    "dun": 9,
+    "coup": 14,
+    "il": 26,
+    "arrête": 31,
+    "son": 49,
+    "bras": 56,
+    "retombe": 62,
+    "regarde": 89,
+    "un": 100,
+    "peu": 105,
+    "plus": 110,
+    "haut": 115,
+    "au-dessus": 127,
+    "de": 141,
+    "ta": 147,
+    "fenêtre": 154
+   }
+  },
+  {
+   "nom": "alerte",
+   "frames": 135,
+   "texte": "Et ton téléphone bipe. Un seul message. Ne sortez… surtout pas.",
+   "reperes": {
+    "et": 3,
+    "ton": 8,
+    "téléphone": 14,
+    "bipe": 28,
+    "un": 44,
+    "seul": 51,
+    "message": 58,
+    "ne": 80,
+    "sortez": 89,
+    "surtout": 109,
+    "pas": 123
+   }
+  },
+  {
+   "nom": "vide",
+   "frames": 150,
+   "texte": "Tu retournes au judas. Il y a plus personne. Le couloir est vide. Le silence est total.",
+   "reperes": {
+    "tu": 4,
+    "retournes": 9,
+    "au": 20,
+    "judas": 25,
+    "il": 39,
+    "y": 43,
+    "a": 48,
+    "plus": 52,
+    "personne": 56,
+    "le": 72,
+    "couloir": 78,
+    "est": 88,
+    "vide": 94,
+    "silence": 117,
+    "total": 137
+   }
+  },
+  {
+   "nom": "bruit",
+   "frames": 134,
+   "texte": "Et d'un coup, un énorme bruit dans ta chambre. Une ombre passe sous la porte.",
+   "reperes": {
+    "et": 3,
+    "dun": 9,
+    "coup": 15,
+    "un": 27,
+    "énorme": 34,
+    "bruit": 49,
+    "dans": 55,
+    "ta": 62,
+    "chambre": 68,
+    "une": 85,
+    "ombre": 94,
+    "passe": 102,
+    "sous": 111,
+    "la": 116,
+    "porte": 122
+   }
+  },
+  {
+   "nom": "chambre",
+   "frames": 90,
+   "texte": "Tu t'approches… tu pousses la porte… et il est là.",
+   "reperes": {
+    "tu": 3,
+    "tapproches": 10,
+    "pousses": 37,
+    "la": 46,
+    "porte": 52,
+    "et": 68,
+    "il": 73,
+    "est": 77,
+    "là": 82
+   }
+  },
+  {
+   "nom": "dilemme",
+   "frames": 191,
+   "texte": "Alors, tu cours rejoindre le livreur en bas… ou tu t'enfermes dans la salle de bain ? Dis-le en commentaire.",
+   "reperes": {
+    "alors": 3,
+    "tu": 22,
+    "cours": 28,
+    "rejoindre": 34,
+    "le": 48,
+    "livreur": 54,
+    "en": 64,
+    "bas": 70,
+    "ou": 82,
+    "tenfermes": 91,
+    "dans": 101,
+    "la": 105,
+    "salle": 110,
+    "de": 117,
+    "bain": 121,
+    "": 126,
+    "dis-le": 136,
+    "commentaire": 152
+   }
+  }
+ ]
+}

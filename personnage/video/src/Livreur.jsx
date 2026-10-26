@@ -40,7 +40,7 @@ const ecran = (f, props, voile = 0.55) => (
 );
 
 // La vue à travers le judas : grand angle, image ronde, bord noir, reflet du verre
-const Judas = ({f, cam, decor, items = [], zoom = 1, roll = 0, noir = 0}) => {
+export const Judas = ({f, cam, decor, items = [], zoom = 1, roll = 0, noir = 0}) => {
   const tous = [...decor.items, ...items].filter((o) => o && o.el).sort((a, b) => cam.profondeur(b.z, b.x ?? cam.x, b.y ?? cam.y) - cam.profondeur(a.z, a.x ?? cam.x, a.y ?? cam.y));
   const R = 470;
   return (
@@ -406,7 +406,7 @@ const Chambre = () => {
 };
 
 // ---------- 13. Le dilemme ----------
-const Choix = ({f, debut, x, y, texte, emoji, couleur}) => {
+export const Choix = ({f, debut, x, y, texte, emoji, couleur}) => {
   const p = spring({frame: f - debut, fps: 30, config: {damping: 9}});
   if (f < debut) return null;
   const w = 210 + texte.length * 29;

@@ -1,0 +1,271 @@
+{
+ "fps": 30,
+ "voix": "salle-zero/voix_finale.wav",
+ "scenes": [
+  {
+   "nom": "reveil",
+   "frames": 165,
+   "texte": "Dix-neuf heures douze. Tu te réveilles la tête sur ta table. Le cours de dix-huit heures est fini depuis longtemps.",
+   "reperes": {
+    "dix-neuf": 3,
+    "heures": 14,
+    "douze": 24,
+    "tu": 41,
+    "te": 46,
+    "réveilles": 50,
+    "la": 60,
+    "tête": 65,
+    "sur": 72,
+    "ta": 77,
+    "table": 81,
+    "le": 95,
+    "cours": 100,
+    "de": 106,
+    "dix-huit": 111,
+    "est": 129,
+    "fini": 134,
+    "depuis": 143,
+    "longtemps": 151
+   }
+  },
+  {
+   "nom": "classeVide",
+   "frames": 141,
+   "texte": "La salle est vide. Chaises sur les tables. Lumières éteintes. Et personne ne t'a réveillé.",
+   "reperes": {
+    "la": 1,
+    "salle": 6,
+    "est": 13,
+    "vide": 17,
+    "chaises": 30,
+    "sur": 39,
+    "les": 45,
+    "tables": 51,
+    "lumières": 66,
+    "éteintes": 82,
+    "et": 101,
+    "personne": 106,
+    "ne": 116,
+    "ta": 121,
+    "réveillé": 126
+   }
+  },
+  {
+   "nom": "tableau",
+   "frames": 137,
+   "texte": "Au tableau, une phrase à la craie que t'as jamais vue : ne cours pas dans les couloirs.",
+   "reperes": {
+    "au": 1,
+    "tableau": 6,
+    "une": 15,
+    "phrase": 24,
+    "à": 32,
+    "la": 37,
+    "craie": 43,
+    "que": 48,
+    "tas": 53,
+    "jamais": 59,
+    "vue": 67,
+    "": 72,
+    "ne": 83,
+    "cours": 91,
+    "pas": 98,
+    "dans": 106,
+    "les": 113,
+    "couloirs": 121
+   }
+  },
+  {
+   "nom": "couloir",
+   "frames": 167,
+   "texte": "Tu sors. Le couloir est noir. Seuls les panneaux sortie brillent en vert… et ils pointent tous vers toi.",
+   "reperes": {
+    "tu": 2,
+    "sors": 9,
+    "le": 23,
+    "couloir": 29,
+    "est": 39,
+    "noir": 45,
+    "seuls": 57,
+    "les": 63,
+    "panneaux": 70,
+    "sortie": 81,
+    "brillent": 92,
+    "en": 103,
+    "vert": 110,
+    "et": 122,
+    "ils": 128,
+    "pointent": 134,
+    "tous": 144,
+    "vers": 150,
+    "toi": 157
+   }
+  },
+  {
+   "nom": "casiers",
+   "frames": 160,
+   "texte": "Derrière toi, les casiers s'ouvrent. Un par un. Clac. Clac. Clac. Tu marches plus vite.",
+   "reperes": {
+    "derrière": 2,
+    "toi": 18,
+    "les": 29,
+    "casiers": 35,
+    "souvrent": 45,
+    "un": 62,
+    "par": 67,
+    "clac": 83,
+    "tu": 116,
+    "marches": 123,
+    "plus": 136,
+    "vite": 143
+   }
+  },
+  {
+   "nom": "hautParleur",
+   "frames": 158,
+   "texte": "Les haut-parleurs grésillent. Une voix : les élèves en retard sont priés de rejoindre la salle zéro.",
+   "reperes": {
+    "les": 2,
+    "haut-parleurs": 8,
+    "grésillent": 22,
+    "une": 42,
+    "voix": 49,
+    "": 53,
+    "élèves": 68,
+    "en": 82,
+    "retard": 88,
+    "sont": 97,
+    "priés": 103,
+    "de": 109,
+    "rejoindre": 115,
+    "la": 129,
+    "salle": 134,
+    "zéro": 144
+   }
+  },
+  {
+   "nom": "salleZero",
+   "frames": 176,
+   "texte": "La salle zéro, ça n'existe pas. Pourtant, au bout du couloir, une porte rouge. Entrouverte.",
+   "reperes": {
+    "la": 1,
+    "salle": 7,
+    "zéro": 17,
+    "ça": 33,
+    "nexiste": 39,
+    "pas": 53,
+    "pourtant": 65,
+    "au": 84,
+    "bout": 90,
+    "du": 95,
+    "couloir": 101,
+    "une": 117,
+    "porte": 125,
+    "rouge": 134,
+    "entrouverte": 148
+   }
+  },
+  {
+   "nom": "escalier",
+   "frames": 142,
+   "texte": "Tu prends l'escalier. Tu descends… et tu reviens au même étage. Encore. Et encore.",
+   "reperes": {
+    "tu": 1,
+    "prends": 7,
+    "lescalier": 12,
+    "descends": 37,
+    "et": 54,
+    "reviens": 63,
+    "au": 70,
+    "même": 74,
+    "étage": 82,
+    "encore": 97
+   }
+  },
+  {
+   "nom": "surveillant",
+   "frames": 155,
+   "texte": "Au fond du couloir, le surveillant. De dos. Immobile. Enfin quelqu'un. Tu l'appelles.",
+   "reperes": {
+    "au": 2,
+    "fond": 8,
+    "du": 14,
+    "couloir": 21,
+    "le": 37,
+    "surveillant": 43,
+    "de": 63,
+    "dos": 69,
+    "immobile": 82,
+    "enfin": 103,
+    "quelquun": 114,
+    "tu": 135,
+    "lappelles": 139
+   }
+  },
+  {
+   "nom": "retourne",
+   "frames": 163,
+   "texte": "Il se retourne. Lentement. Sa tête craque… et s'ouvre en deux. Des dents. Partout.",
+   "reperes": {
+    "il": 2,
+    "se": 8,
+    "retourne": 14,
+    "lentement": 34,
+    "sa": 56,
+    "tête": 63,
+    "craque": 75,
+    "et": 92,
+    "souvre": 97,
+    "en": 107,
+    "deux": 112,
+    "des": 124,
+    "dents": 131,
+    "partout": 145
+   }
+  },
+  {
+   "nom": "charge",
+   "frames": 115,
+   "texte": "Il tombe à quatre pattes. Le sifflet hurle. Et il fonce droit sur toi.",
+   "reperes": {
+    "il": 2,
+    "tombe": 7,
+    "à": 14,
+    "quatre": 19,
+    "pattes": 26,
+    "le": 40,
+    "sifflet": 46,
+    "hurle": 56,
+    "et": 73,
+    "fonce": 84,
+    "droit": 94,
+    "sur": 99,
+    "toi": 105
+   }
+  },
+  {
+   "nom": "dilemme",
+   "frames": 163,
+   "texte": "T'as deux secondes. Tu cours vers la sortie ? Ou t'entres dans la salle zéro ? Dis-le en commentaire !",
+   "reperes": {
+    "tas": 2,
+    "deux": 7,
+    "secondes": 12,
+    "tu": 30,
+    "cours": 34,
+    "vers": 39,
+    "la": 43,
+    "sortie": 48,
+    "": 55,
+    "ou": 66,
+    "tentres": 70,
+    "dans": 77,
+    "salle": 85,
+    "zéro": 92,
+    "dis-le": 109,
+    "en": 117,
+    "commentaire": 121
+   }
+  }
+ ]
+}

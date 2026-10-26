@@ -1,0 +1,1 @@
+{"fps": 30, "voix": "gabarit/voix_finale.wav", "scenes": [{"nom": "salon", "frames": 120, "reperes": {}}, {"nom": "message", "frames": 120, "reperes": {"coucou": 70}}, {"nom": "rue", "frames": 150, "reperes": {}}]}

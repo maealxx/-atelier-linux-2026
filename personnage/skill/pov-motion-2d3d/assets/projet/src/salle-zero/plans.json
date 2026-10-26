@@ -1,0 +1,15 @@
+{
+ "_doc": "Salle zéro : poids relatifs des plans courts de chaque scène.",
+ "reveil": [1, 0.7, 0.9, 1.1],
+ "classeVide": [1.1, 0.9, 0.9],
+ "tableau": [1.3, 0.6, 0.8, 0.8],
+ "couloir": [1, 0.8, 1, 0.8],
+ "casiers": [1.1, 0.5, 0.5, 0.5, 1],
+ "hautParleur": [0.8, 1, 0.7, 1],
+ "salleZero": [1.4, 0.7, 0.8, 1],
+ "escalier": [1.1, 0.7, 0.6, 0.6, 0.7],
+ "surveillant": [1.2, 0.8, 0.9, 0.9],
+ "retourne": [1.2, 1, 0.6, 0.8, 0.8],
+ "charge": [0.9, 1.1, 0.7, 0.8],
+ "dilemme": [1.3, 0.6, 0.6, 0.7, 1.2]
+}
