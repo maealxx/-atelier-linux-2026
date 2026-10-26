@@ -1,0 +1,270 @@
+{
+ "fps": 30,
+ "voix": "hypergamie/voix_finale.wav",
+ "scenes": [
+  {
+   "nom": "schema",
+   "frames": 81,
+   "texte": "Imagine que l'hypergamie disparaisse du jour au lendemain.",
+   "reperes": {
+    "imagine": 3,
+    "que": 17,
+    "lhypergamie": 21,
+    "disparaisse": 35,
+    "du": 49,
+    "jour": 54,
+    "au": 59,
+    "lendemain": 64
+   }
+  },
+  {
+   "nom": "matchs",
+   "frames": 131,
+   "texte": "Tu te réveilles, tu ouvres l'appli de rencontre. Quarante-sept matchs. Pendant la nuit.",
+   "reperes": {
+    "tu": 1,
+    "te": 6,
+    "réveilles": 11,
+    "ouvres": 34,
+    "lappli": 41,
+    "de": 49,
+    "rencontre": 54,
+    "quarante-sept": 72,
+    "matchs": 91,
+    "pendant": 106,
+    "la": 115,
+    "nuit": 120
+   }
+  },
+  {
+   "nom": "messages",
+   "frames": 103,
+   "texte": "Tu fais défiler. Elles t'écrivent toutes en premier. « T'es libre ce soir ? »",
+   "reperes": {
+    "tu": 2,
+    "fais": 7,
+    "défiler": 11,
+    "elles": 30,
+    "técrivent": 37,
+    "toutes": 46,
+    "en": 52,
+    "premier": 56,
+    "": 70,
+    "tes": 74,
+    "libre": 77,
+    "ce": 83,
+    "soir": 86
+   }
+  },
+  {
+   "nom": "rue",
+   "frames": 158,
+   "texte": "Tu sors acheter du pain. Dans la rue, une fille se retourne sur toi. Puis une deuxième. Elle te sourit.",
+   "reperes": {
+    "tu": 2,
+    "sors": 6,
+    "acheter": 10,
+    "du": 19,
+    "pain": 23,
+    "dans": 35,
+    "la": 41,
+    "rue": 46,
+    "une": 59,
+    "fille": 66,
+    "se": 73,
+    "retourne": 77,
+    "sur": 87,
+    "toi": 91,
+    "puis": 103,
+    "deuxième": 116,
+    "elle": 134,
+    "te": 141,
+    "sourit": 146
+   }
+  },
+  {
+   "nom": "boulangerie",
+   "frames": 146,
+   "texte": "À la boulangerie, la boulangère te glisse son numéro avec ta baguette. Gratuite, la baguette.",
+   "reperes": {
+    "à": 3,
+    "la": 7,
+    "boulangerie": 11,
+    "boulangère": 35,
+    "te": 46,
+    "glisse": 51,
+    "son": 57,
+    "numéro": 61,
+    "avec": 70,
+    "ta": 77,
+    "baguette": 81,
+    "gratuite": 98
+   }
+  },
+  {
+   "nom": "salle",
+   "frames": 138,
+   "texte": "Tu passes devant la salle de sport. Le gars en débardeur pose devant le miroir. Personne le regarde.",
+   "reperes": {
+    "tu": 3,
+    "passes": 7,
+    "devant": 14,
+    "la": 21,
+    "salle": 25,
+    "de": 32,
+    "sport": 36,
+    "le": 48,
+    "gars": 53,
+    "en": 57,
+    "débardeur": 62,
+    "pose": 73,
+    "miroir": 92,
+    "personne": 108,
+    "regarde": 123
+   }
+  },
+  {
+   "nom": "bus",
+   "frames": 155,
+   "texte": "Dans le bus, une fille s'assoit à côté de toi. Elle te demande ce que tu écoutes. Vous rigolez tout le trajet.",
+   "reperes": {
+    "dans": 3,
+    "le": 10,
+    "bus": 16,
+    "une": 30,
+    "fille": 36,
+    "sassoit": 43,
+    "à": 49,
+    "côté": 53,
+    "de": 60,
+    "toi": 64,
+    "elle": 76,
+    "te": 82,
+    "demande": 85,
+    "ce": 93,
+    "que": 96,
+    "tu": 100,
+    "écoutes": 103,
+    "vous": 119,
+    "rigolez": 124,
+    "tout": 134,
+    "trajet": 143
+   }
+  },
+  {
+   "nom": "soiree",
+   "frames": 167,
+   "texte": "Le soir, à une soirée, tu racontes une blague nulle. Tout le monde rigole. Même toi, t'y crois pas.",
+   "reperes": {
+    "le": 4,
+    "soir": 12,
+    "à": 27,
+    "une": 31,
+    "soirée": 38,
+    "tu": 52,
+    "racontes": 56,
+    "blague": 71,
+    "nulle": 78,
+    "tout": 92,
+    "monde": 99,
+    "rigole": 105,
+    "même": 122,
+    "toi": 131,
+    "ty": 144,
+    "crois": 150,
+    "pas": 156
+   }
+  },
+  {
+   "nom": "pote",
+   "frames": 141,
+   "texte": "Ton pote t'appelle. « Frère, il se passe quoi ? Moi aussi, j'ai trois rencards demain. »",
+   "reperes": {
+    "ton": 3,
+    "pote": 8,
+    "tappelle": 15,
+    "": 33,
+    "frère": 38,
+    "il": 53,
+    "se": 57,
+    "passe": 62,
+    "quoi": 68,
+    "moi": 84,
+    "aussi": 90,
+    "jai": 107,
+    "trois": 112,
+    "rencards": 116,
+    "demain": 124
+   }
+  },
+  {
+   "nom": "revers",
+   "frames": 151,
+   "texte": "Sauf que maintenant, tout le monde a le choix. Et la boulangère aussi, elle reçoit quarante-sept messages par nuit.",
+   "reperes": {
+    "sauf": 3,
+    "que": 8,
+    "maintenant": 14,
+    "tout": 33,
+    "le": 36,
+    "monde": 39,
+    "a": 45,
+    "choix": 51,
+    "et": 62,
+    "la": 66,
+    "boulangère": 71,
+    "aussi": 82,
+    "elle": 96,
+    "reçoit": 104,
+    "quarante-sept": 112,
+    "messages": 126,
+    "par": 137,
+    "nuit": 142
+   }
+  },
+  {
+   "nom": "toi",
+   "frames": 108,
+   "texte": "Plus de schéma derrière lequel te cacher. Juste toi, et tes blagues nulles.",
+   "reperes": {
+    "plus": 3,
+    "de": 8,
+    "schéma": 13,
+    "derrière": 20,
+    "lequel": 31,
+    "te": 38,
+    "cacher": 43,
+    "juste": 58,
+    "toi": 68,
+    "et": 82,
+    "tes": 86,
+    "blagues": 90,
+    "nulles": 97
+   }
+  },
+  {
+   "nom": "dilemme",
+   "frames": 154,
+   "texte": "Alors, tu dis oui à tout le monde ? Ou tu retournes voir la boulangère ? Dis-le en commentaire !",
+   "reperes": {
+    "alors": 3,
+    "tu": 22,
+    "dis": 26,
+    "oui": 29,
+    "à": 33,
+    "tout": 36,
+    "le": 39,
+    "monde": 43,
+    "": 48,
+    "ou": 59,
+    "retournes": 67,
+    "voir": 76,
+    "la": 80,
+    "boulangère": 84,
+    "dis-le": 107,
+    "en": 113,
+    "commentaire": 118
+   }
+  }
+ ]
+}

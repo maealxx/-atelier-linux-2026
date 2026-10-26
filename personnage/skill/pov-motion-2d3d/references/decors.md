@@ -39,6 +39,14 @@ Remplis les murs (couleurs, cadres, lambris, fenêtres) pour éviter les zones v
 | `wagon()` | **Intérieur d'une voiture** (X 80 → 1040, plafond −700) : tube lumineux, sol, banquettes bleues, barres jaunes, fenêtres sur le tunnel, pubs, portes d'intercirculation, passagers (`passagers: [{x, z, id, ...props du Perso}]`). Sert de décor quand la caméra est dedans, ou de `rendu` pour `rame({dedans})`. | `cz` (centre), `lumiere`, `fantome`, `passagers` |
 | `escalators()` | **Galerie d'escalators** en pente à 30° (`solEsc(z)` : SOL au palier du bas Z < 1,5, `HAUT` au palier du haut Z > 9,5) : deux escalators avec marches qui défilent, balustrades et mains courantes, séparation centrale à **lampadaires** chauds, affiches inclinées, néons, paliers dallés avec plaques peignes, **grille de sortie** en treillis (`GRILLE_Z`) qui descend, hall orange et panneau « SORTIE » derrière. | `grille` (0 ouverte → 1 fermée), `marche` (vitesse des marches), `lumiere` |
 
+## La ville de jour (Ville.jsx) — thèmes légers, pas d'horreur
+| Décor | Contenu | Options utiles |
+|---|---|---|
+| `chambreJour()` | Chambre au soleil (X ±1400, Z 0 → 5, plafond −900) : murs pêche / menthe / lavande, parquet, fenêtre sur la ville (nuages qui passent), rideaux jaunes, **rayon de soleil** et poussières, lit (`LIT`), table de nuit avec lampe, plante, étagère de livres, affiches, guirlande, tapis rond. | `soleil` |
+| `rueJour()` | **Rue commerçante de jour** (Z −5 → 60) : façades colorées à gauche (X −1600) avec fenêtres, volets, corniches ; boutiques `BOUTIQUES` (café, boulangerie avec pains en vitrine, **salle de sport** avec intérieur visible par la vitrine et miroir, fleuriste, pizza, librairie), stores rayés en pente, trottoir dallé, arbres tous les 12 Z, lampadaires, vélos, bancs, voitures garées, chaussée et passage piéton, immeubles d'en face, ciel et soleil. | `passants: [{x, z, id, ...props}]`, `salle: {gars: {x, z, ...props}}` (le gars dans la salle et son reflet), `boulangere` (props : elle derrière sa vitrine) |
+| `boulangerieInt()` | Intérieur de boulangerie (X ±1300, Z 0 → 5,5) : étagères de pains et baguettes, ardoise, comptoir en bois avec vitrine de pâtisseries et caisse (`BO.comptoir` = 3), suspensions chaudes, sol en damier, mur carrelé bleu et blanc, baie sur la rue. | — |
+| `busInt()` | Intérieur de bus (X ±1150, Z 0 → 10) : sièges orange par rangées (`RANGS`, face à +Z), barres jaunes, grandes vitres, **la ville qui défile dehors**, reflets du soleil qui glissent au sol. Pour un perso **assis** : `y = SOL − 20` et une caméra derrière la rangée de devant (le dossier cache les jambes). | `vitesse` |
+
 ## Le casino (Casino.jsx)
 | Décor | Contenu | Options utiles |
 |---|---|---|
@@ -73,4 +81,5 @@ Vue « allongé dans la capsule » : `Couche` (LeVaisseau.jsx) dessine le bonhom
 - `Roulette1000.jsx` : casino, **roue 3D sous tous les angles** (dessus, ras, macro qui suit la bille, orbite), chrono du tour avec centièmes, BPM + vignette rouge qui bat, flashback sépia, croupier 2D. Les tours de roue et le cœur sont décrits dans `src/roulette1000/evenements.json` (lu aussi par le mixage).
 - `LeVaisseau.jsx` : vaisseau, capsules, couloir, salle des écrans avec caméra de surveillance, alien 3D, deux screamers, voix guide puis vraie voix.
 - `DernierTrain.jsx` : station de métro, escalators, grille qui se ferme (gros plan des mains en 2D : `MainsGrille`), néons qui s'éteignent un par un, chose 3D en ombre floue à contre-jour rouge (`chose`, marche avec `pasChose`), train fantôme qui arrive phares allumés, intérieur vu par les portes, **clones du bonhomme** qui tournent la tête (`passagers`).
+- `Hypergamie.jsx` : thème léger en 2,5D de jour : schéma animé en 2D avec couches (`Schema`), écrans de téléphone personnalisés (appli de rencontre, liste de messages, appel et visio, notifications), rue, boulangerie, salle de sport vue par la vitrine, bus, soirée (`appart` + lumières de fête), écran partagé en deux.
 - `Gabarit.jsx` : petit modèle neutre (salon → message → rue) pour démarrer n'importe quel thème.

@@ -25,28 +25,28 @@ export const PASSAGE = {z0: 13.4, z1: 15.6, y: -330};
 export const HP = {x: -660, y: -640, z: 10}; // haut-parleur, sur la face du pilier côté voies
 export const TRAIN = {x0: 60, x1: 1060, toit: -760, bas: 560, jupe: 780, plancher: 412, long: 3.7};
 
-const ligne = (cam, A, B, w, col, key, op = 1) => {
+export const ligne = (cam, A, B, w, col, key, op = 1) => {
   const r = cam.seg(A, B);
   return r ? <line key={key} x1={r[0][0]} y1={r[0][1]} x2={r[1][0]} y2={r[1][1]} stroke={col} strokeWidth={w} opacity={op} strokeLinecap="round" /> : null;
 };
-const quad = (cam, pts, fill, key, op = 1, extra = {}) => {
+export const quad = (cam, pts, fill, key, op = 1, extra = {}) => {
   const p = cam.poly(pts);
   return p ? <polygon key={key} points={p} fill={fill} opacity={op} {...extra} /> : null;
 };
 // polygone percé (ex. mur du bout avec la bouche du tunnel)
-const troue = (cam, ext, trous, fill, key) => {
+export const troue = (cam, ext, trous, fill, key) => {
   const p = cam.poly(ext);
   if (!p) return null;
   const d = [p, ...trous.map((t) => cam.poly(t)).filter(Boolean)].map((s) => `M${s.replace(/ /g, ' L')} Z`).join(' ');
   return <path key={key} d={d} fill={fill} fillRule="evenodd" />;
 };
-const halo = (cam, x, y, z, r, grad, op, key) => {
+export const halo = (cam, x, y, z, r, grad, op, key) => {
   if (!cam.visible(z, x, y) || op <= 0.01) return null;
   const [px, py] = cam.proj(x, y, z);
   return <circle key={key} cx={px} cy={py} r={r * cam.scale(z, x, y)} fill={`url(#${grad})`} opacity={Math.min(1, op)} />;
 };
 // tache de lumière posée sur un plan horizontal (sol, ballast)
-const tache = (cam, x, y, z, rx, rz, grad, op, key) => {
+export const tache = (cam, x, y, z, rx, rz, grad, op, key) => {
   if (op <= 0.01) return null;
   const pts = [...Array(20)].map((_, k) => [x + Math.cos((k / 20) * 6.283) * rx, y, z + Math.sin((k / 20) * 6.283) * rz]);
   return quad(cam, pts, `url(#${grad})`, key, Math.min(1, op));
@@ -64,7 +64,7 @@ export const boiteG = (cam, x0, x1, y0, y1, z0, z1, [dessus, face, cote, dessous
 );
 // lumière qui grésille (paquets de 3 images)
 export const gresille = (f, graine, taux = 0.1, bas = 0.25) => (random(`${graine}${Math.floor(f / 3)}`) < taux ? bas : 1);
-const rgb = (c, k, t = [1, 1, 1]) => `rgb(${c.map((v, i) => Math.round(Math.min(255, v * k * t[i]))).join(',')})`;
+export const rgb = (c, k, t = [1, 1, 1]) => `rgb(${c.map((v, i) => Math.round(Math.min(255, v * k * t[i]))).join(',')})`;
 const voute = (th, z, d = 0) => [VOUTE.xc - (VOUTE.a - d) * Math.cos(th), NAISS - (VOUTE.b - d) * Math.sin(th), z];
 const TH = [...Array(11)].map((_, k) => (Math.PI * k) / 10);
 // la bouche du tunnel (en coupe), à la profondeur z

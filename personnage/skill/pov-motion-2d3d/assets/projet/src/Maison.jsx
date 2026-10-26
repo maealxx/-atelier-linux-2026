@@ -487,7 +487,7 @@ const DiscoInterieur = ({cam, f}) => {
 // Interface de messagerie en plein écran (coordonnées écran). messages : [{debut, texte} | {debut, photo: true, texte}]
 // verrouille : écran verrouillé (grande heure + notification) au lieu de la conversation
 // heure, date, initiale (avatar), barres (null : pas d'indicateur ; 0 : « Aucun service » ; 1 → 4 barres de réseau)
-export const Telephone = ({f, messages = [], notif = null, echelle = 1, x = 540, y = 980, vibre = 0, nom = 'Lucas 🎧', verrouille = false, heure = '23:47', date = 'samedi 25 octobre', initiale = 'L', barres = null}) => {
+export const Telephone = ({f, messages = [], notif = null, echelle = 1, x = 540, y = 980, vibre = 0, nom = 'Lucas 🎧', verrouille = false, heure = '23:47', date = 'samedi 25 octobre', initiale = 'L', barres = null, ecran = null}) => {
   const shake = vibre > 0 ? Math.sin(f * 2.4) * 10 * vibre : 0;
   const bulles = messages.filter((m) => f >= m.debut);
   const ecrit = messages.find((m) => f >= m.debut - 32 && f < m.debut);
@@ -528,7 +528,9 @@ export const Telephone = ({f, messages = [], notif = null, echelle = 1, x = 540,
           {barres === 0 && <text y="-130" fontSize="34" fontWeight="700" fill="#ff6a6a">Aucun service</text>}
         </g>
       )}
-      {!verrouille && <g>
+      {/* écran personnalisé (appli, appel vidéo…), dessiné dans le rectangle −255…255 × −480…535 */}
+      {ecran && <g><rect x="-255" y="-480" width="510" height="1010" rx="50" fill="#0b0f16" />{ecran}</g>}
+      {!verrouille && !ecran && <g>
       {/* en-tête de la conversation */}
       <rect x="-255" y="-475" width="510" height="110" fill="#121824" />
       <text x="-225" y="-405" fontSize="40" fill="#5aa0ff" fontFamily="'DejaVu Sans', Arial">‹</text>

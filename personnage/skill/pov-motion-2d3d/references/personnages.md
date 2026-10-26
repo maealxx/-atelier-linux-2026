@@ -15,6 +15,11 @@ C'est un billboard : il est dessiné face à la caméra (ou de dos), avec des pi
   - faire coucou : `epauleD -150`, `coudeD` qui oscille.
 - Le bonhomme n'existe que de face ou de dos. **Ne le filme pas de profil ni de très haut** (il paraît plat) : passe alors au 3D.
 
+## Les filles 2D (même style) : props du `Bonhomme` / `Perso`
+- `coiffure` : `'court'` (le bonhomme), `'long'`, `'queue'` (queue de cheval), `'carre'` ; `cils` ; `jupe` (couleur `pant`, jambes en `couleurs.jambe`).
+- Palettes prêtes dans `FILLES` (Hypergamie.jsx) : `ines`, `lea`, `sarah`, `boulangere`, `maya`. Gars : `GARS.karim`, `GARS.tom`, `GARS.muscle` (débardeur noir, `sx` 1.3).
+- Pour un petit perso dessiné en 2D pur (schéma, avatar rond) : `Fig` (Hypergamie.jsx). Avatar rond : `s = r / 85`, pieds à `y + 730 s`.
+
 ## Le livreur 2D : `<LivreurPerso … visiere casque sac />` (src/Appart.jsx)
 C'est le bonhomme avec une veste sombre, un casque (`visiere: 'ouverte' | 'noire'`) et un sac isotherme. Il accepte les mêmes props de pose. C'est la base d'un perso « avec accessoire » : copie-le pour faire un pompier, un policier, un serveur, etc.
 
@@ -47,7 +52,8 @@ Environ 3 m (1100 unités à `echelle` 1), noir brillant, tête allongée vers l
 - `Silhouette` (src/Maison.jsx, non exportée) : ombre derrière une vitre, floue, qui danse ou reste immobile, avec un `sourire` et une tête qui se `tord`.
 - `YeuxRouges` (src/moteur.jsx).
 
-## Le téléphone : `<Telephone f messages notif verrouille nom echelle x y vibre />` (src/Maison.jsx)
+## Le téléphone : `<Telephone f messages notif verrouille nom echelle x y vibre heure date initiale barres ecran />` (src/Maison.jsx)
+- `heure`, `date`, `initiale` (avatar), `barres` (null, 0 = « Aucun service », 1 → 4), `ecran` (dessin libre dans −255…255 × −480…535 : appli, appel, visio).
 - Il se dessine en coordonnées écran, à mettre dans `dessus` du `Plan`, avec un voile noir derrière (opacité 0.3 à 0.6).
 - `verrouille` : grande heure + `notif: {debut, texte}`, qui glisse sous l'heure.
 - `messages: [{debut, texte, gras?, photo?, alerte?}]` :

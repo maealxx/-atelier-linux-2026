@@ -50,3 +50,10 @@
 - **Piliers devant la caméra** : vérifie la ligne de vue (X du pilier à la profondeur du pilier) avant de placer une caméra le long du quai.
 - **Haut-parleur ou petite lumière filmée de près** : un halo de plus de 600 unités devient une grosse tache orange.
 - La voix ElevenLabs sans `[pause]` donne ~78 s pour 215 mots (vitesse 1.05, blancs à 0,24 s).
+
+## Retours de « Hypergamie » (26/10)
+- **Caméra à moins de 0,06 Z d'une vitre** : la vitre passe derrière le plan proche, l'intérieur (clipPath) disparaît. Garde ≥ 0,15 Z.
+- **Arbres et bancs devant la caméra** dans une rue : espace les arbres (12 Z) et vérifie la ligne de vue.
+- **Emojis dans le téléphone** : la police ne les a pas (carrés vides). Pas d'emoji dans les textes du téléphone, sauf en image (`public/emoji`).
+- **Écran partagé** : `clipPath: inset(420px 0 540px 0)` puis `translateY(-420px)` (haut) / `translateY(540px)` (bas) pour garder le centre de chaque image.
+- **Guillemets « » dans scenes.json** : Kokoro plante (« produced no phonemes ») ; guide.py les retire.

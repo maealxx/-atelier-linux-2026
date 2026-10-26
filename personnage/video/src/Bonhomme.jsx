@@ -33,31 +33,55 @@ export const Bonhomme = ({
   legD = 0,
   dos = false, // vu de dos
   couleurs = null, // remplace une partie de la palette (ex. une veste de livreur)
+  coiffure = 'court', // 'court' (le bonhomme) | 'long' | 'queue' (queue de cheval) | 'carre'
+  jupe = false, // jupe (couleur `pant`), jambes en `jambe` (peau ou collants)
+  cils = false,
 }) => {
   const C = couleurs ? {...C0, ...couleurs} : C0;
+  const J = jupe ? C.jambe || C.peau : C.pant;
+  // cheveux derrière la tête et les épaules (filles)
+  const cheveuxArriere =
+    coiffure === 'long' ? (
+      <path fill={C.chev} d="M214,190 Q206,92 300,88 Q394,92 386,190 Q398,300 404,372 Q352,392 300,388 Q248,392 196,372 Q202,300 214,190 Z" />
+    ) : coiffure === 'carre' ? (
+      <path fill={C.chev} d="M216,190 Q208,94 300,90 Q392,94 384,190 L392,288 Q300,306 208,288 Z" />
+    ) : coiffure === 'queue' ? (
+      <g>
+        <ellipse fill={C.chev} cx="300" cy="170" rx="86" ry="80" />
+        <path fill={C.chev} d="M366,120 Q440,130 436,230 Q430,320 392,350 Q410,260 384,170 Z" />
+      </g>
+    ) : null;
   return (
   <g>
     {/* jambe G */}
     <g transform={`translate(0 560) scale(1 ${1 - 0.2 * legG}) translate(0 -560)`}>
-    <line x1="258" y1="560" x2="252" y2="725" stroke={C.pant} strokeWidth="58" strokeLinecap="round" />
-    <line x1="252" y1="725" x2="250" y2="885" stroke={C.pant} strokeWidth="50" strokeLinecap="round" />
+    <line x1="258" y1="560" x2="252" y2="725" stroke={J} strokeWidth={jupe ? 44 : 58} strokeLinecap="round" />
+    <line x1="252" y1="725" x2="250" y2="885" stroke={J} strokeWidth={jupe ? 38 : 50} strokeLinecap="round" />
     <path fill={C.chaus} d="M228,880 Q228,868 245,868 L262,868 Q274,868 274,885 L274,900 Q274,920 255,920 L205,920 Q188,920 190,905 Q192,890 210,886 Z" />
     <rect x="188" y="912" width="88" height="10" rx="5" fill="#fff" />
     </g>
     {/* jambe D */}
     <g transform={`translate(0 560) scale(1 ${1 - 0.2 * legD}) translate(0 -560)`}>
-    <line x1="342" y1="560" x2="348" y2="725" stroke={C.pant} strokeWidth="58" strokeLinecap="round" />
-    <line x1="348" y1="725" x2="350" y2="885" stroke={C.pant} strokeWidth="50" strokeLinecap="round" />
+    <line x1="342" y1="560" x2="348" y2="725" stroke={J} strokeWidth={jupe ? 44 : 58} strokeLinecap="round" />
+    <line x1="348" y1="725" x2="350" y2="885" stroke={J} strokeWidth={jupe ? 38 : 50} strokeLinecap="round" />
     <path fill={C.chaus} d="M372,880 Q372,868 355,868 L338,868 Q326,868 326,885 L326,900 Q326,920 345,920 L395,920 Q412,920 410,905 Q408,890 390,886 Z" />
     <rect x="324" y="912" width="88" height="10" rx="5" fill="#fff" />
     </g>
 
     {/* bassin */}
-    <path fill={C.pant} d="M222,505 L378,505 L384,575 Q384,592 366,592 L234,592 Q216,592 216,575 Z" />
-    <rect x="220" y="505" width="160" height="14" rx="4" fill="#24395F" />
+    {jupe ? (
+      <path fill={C.pant} d="M222,500 L378,500 L414,668 Q300,690 186,668 Z" />
+    ) : (
+      <>
+        <path fill={C.pant} d="M222,505 L378,505 L384,575 Q384,592 366,592 L234,592 Q216,592 216,575 Z" />
+        <rect x="220" y="505" width="160" height="14" rx="4" fill="#24395F" />
+      </>
+    )}
 
     {/* haut du corps (respiration) */}
     <g transform={`translate(0 ${breath * 0.5})`}>
+      {/* cheveux longs : derrière les épaules (vue de face) */}
+      {!dos && cheveuxArriere}
       {/* bras G */}
       <g transform={rot(epauleG, 210, 318)}>
         <g transform={rot(coudeG, 182, 450)}>
@@ -105,11 +129,13 @@ export const Bonhomme = ({
             <circle fill={C.peauO} cx="369" cy="198" r="15" />
             <ellipse fill={C.peau} cx="300" cy="192" rx="70" ry="76" />
             <path fill={C.chev} d="M228,200 Q214,95 300,92 Q386,95 372,200 Q372,240 340,250 Q300,258 260,250 Q228,240 228,200 Z" />
+            {cheveuxArriere && coiffure !== 'queue' && <g transform="translate(0 4)">{cheveuxArriere}</g>}
+            {coiffure === 'queue' && <path fill={C.chev} d="M280,120 Q300,110 320,120 L326,330 Q300,350 274,330 Z" />}
             <path d="M262,150 Q300,130 338,150" fill="none" stroke="#3a2d55" strokeWidth="5" strokeLinecap="round" />
           </>
         ) : (
         <>
-        <ellipse fill={C.chev} cx="300" cy="170" rx="86" ry="80" />
+        {coiffure !== 'long' && coiffure !== 'carre' && <ellipse fill={C.chev} cx="300" cy="170" rx="86" ry="80" />}
         <circle fill={C.peauO} cx="231" cy="198" r="15" />
         <circle fill={C.peauO} cx="369" cy="198" r="15" />
         <ellipse fill={C.peau} cx="300" cy="192" rx="70" ry="76" />
@@ -123,6 +149,7 @@ export const Bonhomme = ({
               <ellipse cx={x} cy="198" rx="8" ry="10" fill="#1E1E2A" />
               <circle cx={x + 3} cy="194" r="3" fill="#fff" />
             </g>
+            {cils && <path d={x < 300 ? `M${x - 9},192 L${x - 18},184 M${x - 6},188 L${x - 12},179` : `M${x + 9},192 L${x + 18},184 M${x + 6},188 L${x + 12},179`} stroke="#1E1E2A" strokeWidth="4" strokeLinecap="round" />}
           </g>
         ))}
 
@@ -148,7 +175,16 @@ export const Bonhomme = ({
           />
         )}
 
-        <path fill={C.chev} d="M226,182 Q220,100 300,98 Q382,98 376,182 Q366,150 345,138 Q330,158 290,156 Q300,146 296,138 Q270,156 240,150 Q230,162 226,182 Z" />
+        {coiffure === 'court' ? (
+          <path fill={C.chev} d="M226,182 Q220,100 300,98 Q382,98 376,182 Q366,150 345,138 Q330,158 290,156 Q300,146 296,138 Q270,156 240,150 Q230,162 226,182 Z" />
+        ) : (
+          <g>
+            {/* frange sur le côté + mèches qui encadrent le visage */}
+            <path fill={C.chev} d="M226,190 Q216,98 300,96 Q384,98 376,190 Q370,140 330,132 Q290,160 238,158 Q230,170 226,190 Z" />
+            {coiffure !== 'queue' && <path fill={C.chev} d="M228,170 Q214,240 222,300 L240,298 Q234,240 242,176 Z" />}
+            {coiffure !== 'queue' && <path fill={C.chev} d="M372,170 Q386,240 378,300 L360,298 Q366,240 358,176 Z" />}
+          </g>
+        )}
 
         {/* goutte de sueur */}
         {sweat > 0 && (
