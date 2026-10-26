@@ -36,7 +36,8 @@ Travaille en français, ton jeune et direct. Fais valider le script avant de lan
 
 ## Étape 2 : le prompt voix (ElevenLabs)
 
-- Donne une description de voix, puis le texte à coller avec des balises v3 : `[whispers]`, `[pause]`, `[long pause]`, `[nervous]`, `[scared]`. Il faut un paragraphe par scène.
+- Donne une description de voix, puis le texte à coller avec des balises v3 d'émotion seulement : `[whispers]`, `[nervous]`, `[scared]`. Il faut un paragraphe par scène.
+- **Aucune balise `[pause]` ni `[long pause]`**, et peu de points de suspension (retour du 26/10) : les pauses font perdre du temps de parole et rallongent trop la vidéo. Les silences voulus se font au montage (bruitages coupés), pas dans la voix.
 - Précise **pas de souffle au début**, très peu ensuite, et des chuchotements légers seulement là où c'est indiqué.
 - Voix utilisée : « Paul K – Deep French Narrator », Stability 40-50 %.
 

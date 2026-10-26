@@ -49,6 +49,7 @@
 
 ## Son
 - La **voix ElevenLabs** de Maé, légèrement accélérée (environ 5 %), avec les blancs raccourcis sans les supprimer. Elle doit rester agréable.
+- **Pas de pause dans le script audio** (26/10) : pas de `[pause]` / `[long pause]`, presque pas de « … ». Sinon on perd du temps de parole et la vidéo est trop longue.
 - **Ne pas remonter le volume des chuchotements** (elle l'a demandé). Si un premier jet de voix contient trop de souffles, elle refait la voix : dis-le-lui.
 - Bruitages discrets qui ne couvrent pas la voix. Une **ambiance forte au début** quand il y a une coupure (ex. musique de fête), pour le contraste. Utilise des silences totaux aux moments clés.
 - **Pas de « TAP TAP »** ni d'onomatopées écrites à l'écran.
