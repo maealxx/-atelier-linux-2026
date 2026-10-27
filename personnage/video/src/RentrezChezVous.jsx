@@ -1,9 +1,9 @@
 import {AbsoluteFill, Easing, interpolate, random, Series, spring, staticFile, useCurrentFrame} from 'remotion';
 import {Bonhomme} from './Bonhomme';
-import {ACCROUPI, CHENE, foret, LAMPE, OEIL, Voile} from './ForetNuit';
+import {ACCROUPI, CHENE, foret, LAMPE, OEIL, SOL, Voile} from './ForetNuit';
 import {Choix} from './Livreur';
 import {montage, Plan} from './montage';
-import {clamp, makeCam} from './moteur';
+import {clamp, makeCam, marche, orbite, Perso} from './moteur';
 import {DEBOUT, doigts, ECARTE, galop, melange, QUATRE, RodeurMonde} from './Rodeur';
 import {PH_H, PH_W, TelReel} from './TelReel';
 import PLANS from './foret/plans.json';
@@ -135,6 +135,60 @@ const Vue = ({fg, cam: c, o = {}, items = [], zoom = 1, roll = 0, noir = 0, flou
       dessus={<g>{d.poussiere}<Voile L={d.L} P={d.P} k={voile} />{dessus}</g>} />
   );
 };
+// ----- le bonhomme vu de l'extérieur -----
+const CREP_T = [1.0, 0.8, 0.78];
+const NUIT_T = [0.55, 0.62, 1.0];
+const moi = (cam, {x, z, id, lum = 0.85, teinte = CREP_T, accroupi = false, ...pose}) => ({z, x, el: (
+  <g>
+    {accroupi && (
+      <defs>
+        <clipPath id={`cl${id}`}>
+          <rect x="-2000" y="-4000" width="5080" height={4000 + cam.proj(x, SOL, z)[1]} />
+        </clipPath>
+      </defs>
+    )}
+    <g clipPath={accroupi ? `url(#cl${id})` : undefined}>
+      <Perso cam={cam} id={id} x={x} z={z} y={SOL + (accroupi ? 230 : 0)} lum={lum} teinte={teinte} ombre={accroupi ? 0 : 0.35} {...pose} />
+    </g>
+    {accroupi && fougere(cam, x, z, id)}
+  </g>
+)});
+// une touffe de fougères posée au sol devant (x, z), côté caméra
+const fougere = (cam, x, z, id) => {
+  if (!cam.visible(z, x, SOL)) return null;
+  const [px, py] = cam.proj(x, SOL, z);
+  const s = cam.scale(z, x, SOL);
+  return (
+    <g transform={`translate(${px} ${py}) scale(${s})`}>
+      {[...Array(15)].map((_, k) => {
+        const a = -80 + k * 11.5 + 6 * Math.sin(k * 7);
+        const L = 230 + 70 * Math.sin(k * 3.1);
+        return <path key={k} d={`M0,10 Q${Math.sin((a * Math.PI) / 180) * L * 0.5},${-L * 0.8} ${Math.sin((a * Math.PI) / 180) * L * 1.1},${-Math.cos((a * Math.PI) / 180) * L * 0.6}`} stroke="#0d0e17" strokeWidth="38" fill="none" strokeLinecap="round" />;
+      })}
+      {[...Array(9)].map((_, k) => <ellipse key={`e${k}`} cx={-260 + k * 65} cy={-40 - 40 * Math.abs(Math.sin(k * 1.3))} rx="70" ry="40" fill="#10111b" />)}
+    </g>
+  );
+};
+// lueur de l'écran du téléphone sur son visage + le téléphone dans sa main
+const lueurTel = (cam, x, z, k = 1) => {
+  if (!cam.visible(z, x, SOL - 420)) return null;
+  const s = cam.scale(z, x, SOL - 386);
+  const [bx, by] = cam.proj(x, SOL - 386, z);
+  const [px, py] = [bx + 123 * s, by];
+  return {z: z - 0.08, x, el: (
+    <g key="lt">
+      <defs>
+        <radialGradient id="lt-g">
+          <stop offset="0" stopColor="#b8c4ff" stopOpacity="0.55" />
+          <stop offset="1" stopColor="#b8c4ff" stopOpacity="0" />
+        </radialGradient>
+      </defs>
+      <circle cx={px - 90 * s} cy={py - 150 * s} r={280 * s} fill="url(#lt-g)" opacity={k} />
+      <rect x={px - 26 * s} y={py - 46 * s} width={52 * s} height={92 * s} rx={9 * s} fill="#0c0d12" transform={`rotate(-12 ${px} ${py})`} />
+      <rect x={px - 22 * s} y={py - 42 * s} width={44 * s} height={84 * s} rx={7 * s} fill="#8a7ae0" opacity={0.9 * k} transform={`rotate(-12 ${px} ${py})`} />
+    </g>
+  )};
+};
 // marche le long du sentier (z selon l'image globale)
 const VITESSE = 0.021;
 const marcheCam = (fg, z0, f0, {yaw = 0, k = 1, v = VITESSE, x = 30, y = OEIL} = {}) => {
@@ -146,10 +200,27 @@ const marcheCam = (fg, z0, f0, {yaw = 0, k = 1, v = VITESSE, x = 30, y = OEIL} =
 // ===== 1. Imagine. Tu marches seul dans la forêt quand ton téléphone vibre. « Rentrez chez vous. » =====
 const Z0 = 0.5;
 const Vibre = scene('vibre', ({f, fg, i, t, d, R}) => {
-  const c = marcheCam(fg, Z0, 0, {k: 1 - 0.6 * ease(f, 30, 60)});
   const o = {nuit: 0, lumYaw: 6, lumY: -1.4};
+  if (i < 2) {
+    // de l'extérieur : il marche vers le soleil couchant ; ça vibre, il s'arrête et sort son téléphone
+    const zm = Z0 + 1.2 + VITESSE * (f < 30 ? f : 30 + 10 * ease(f, 30, 54));
+    const pasK = 1 - ease(f, 30, 50);
+    const mk = marche(fg, 0.21, pasK);
+    const sort = ease(f, 36, 56, Easing.out(Easing.cubic));
+    const vib = f >= 30 && f < 46 ? Math.sin(f * 3) * 4 : 0;
+    const pose = {legG: mk.legG, legD: mk.legD, lift: mk.bob, epauleG: mk.bras, epauleD: lerp(-mk.bras, -20, sort), coudeD: lerp(0, 120, sort), pupilY: 7 * sort, eyes: 1 + 0.15 * sort, brows: -4 * sort, shiver: vib};
+    if (i === 0) {
+      // travelling de dos, au ras du sol, il se découpe sur le soleil
+      const c = {x: 180 + 30 * Math.sin(fg / 40), y: 60, z: zm - 1.55 + 0.25 * lisse(t, d), yaw: -5, pitch: -6};
+      return <Vue fg={fg} cam={c} o={o} zoom={1.05} items={(cam) => [moi(cam, {x: 30, z: zm, id: 'mv0', dos: true, lum: 0.4, teinte: [0.95, 0.68, 0.72], ...pose})]} />;
+    }
+    // de face, plan rapproché : il lit, éclairé par l'écran
+    const c = {x: 60 + 20 * lisse(t, d), y: -200, z: zm + 0.95 - 0.15 * lisse(t, d), yaw: 186, pitch: 3};
+    return <Vue fg={fg} cam={c} o={{...o, lumYaw: 180, lumY: -1.2}} zoom={1.05} items={(cam) => [moi(cam, {x: 30, z: zm, id: 'mv1', lum: 0.62, ...pose, worry: 0.3}), lueurTel(cam, 30, zm, sort)].filter(Boolean)} />;
+  }
+  const c = marcheCam(fg, Z0, 0, {k: 0.2});
   // le téléphone monte depuis la poche (à la vibration), puis on le rapproche pour lire
-  const monte = ease(f, 36, 64, Easing.out(Easing.cubic));
+  const monte = ease(t, 0, 16, Easing.out(Easing.cubic));
   const lire = ease(f, R('numéro', 127) - 22, R('numéro', 127) + 2);
   const flou = 7 * lire;
   const tap = TAP;
@@ -166,7 +237,7 @@ const Vibre = scene('vibre', ({f, fg, i, t, d, R}) => {
       <Flou k={flou} lum={1 - 0.3 * lire}>
         <Vue fg={fg} cam={c} o={o} roll={c.roll} zoom={1.02} />
       </Flou>
-      {f > 30 && <Tel fg={fg} pose={pose} tap={tap} lueur={0.35} nuit={0.2} appui={ease(f, tap - START.vibre - 8, tap - START.vibre) * (1 - ease(f, tap - START.vibre + 2, tap - START.vibre + 10))} />}
+      {<Tel fg={fg} pose={pose} tap={tap} lueur={0.35} nuit={0.2} appui={ease(f, tap - START.vibre - 8, tap - START.vibre) * (1 - ease(f, tap - START.vibre + 2, tap - START.vibre + 10))} />}
     </AbsoluteFill>
   );
 });
@@ -209,16 +280,27 @@ const Doute = scene('doute', ({f, fg, R}) => {
 });
 
 // ===== 4. Tu regardes autour de toi. Rien. C'est une coïncidence, tu continues. =====
-const Coincidence = scene('coincidence', ({f, fg, R}) => {
+const Coincidence = scene('coincidence', ({f, fg, i, t, d, R}) => {
   const z = Z0 + START.doute * VITESSE;
+  if (i === 0) {
+    // de l'extérieur : il regarde à gauche, à droite ; la caméra tourne lentement autour de lui, en contre-plongée
+    const k = lisse(t, d);
+    const regard = interpolate(f, [0, 10, 30, 42, 62], [0, -1, -1, 1, 1], {...clamp, easing: EZ});
+    const c = orbite(30, z, 1.05, lerp(196, 166, k), 40, {pitch: -7});
+    return (
+      <Vue fg={fg} cam={c} o={{nuit: 0.25, lumYaw: 180, lumY: -1.2}} zoom={1.08}
+        items={(cam) => [moi(cam, {x: 30, z, id: 'mc0', lum: 0.58, pupilX: 14 * regard, tilt: 4 * regard, worry: 0.6, epauleD: -20, coudeD: 120}), lueurTel(cam, 30, z, 0.6)].filter(Boolean)} />
+    );
+  }
   // panoramique gauche, puis droite, puis on repart
-  const yaw = interpolate(f, [0, 8, 46, 58, 100, 118, 150], [0, 0, -58, -58, 42, 42, 0], {...clamp, easing: EZ});
+  const YAWS = [[62, 70, 100, 118, 150], [-20, -20, 42, 42, 0]];
+  const yaw = interpolate(f, YAWS[0], YAWS[1], {...clamp, easing: EZ});
   const repart = ease(f, R('continues', 141) - 20, R('continues', 141) + 10);
   const p = pas(fg, 0.21, repart);
   const m = main(fg);
   const c = {x: 30 + m.dx + p.sway, y: OEIL + m.dy + p.bob, z: z + Math.max(0, f - 120) * VITESSE * repart, yaw, pitch: 1.5};
   const o = {nuit: interpolate(f, [0, 160], [0.22, 0.45], clamp), lumYaw: 6, lumY: -1.1};
-  const vitesse = Math.abs(interpolate(f + 1, [0, 8, 46, 58, 100, 118, 150], [0, 0, -58, -58, 42, 42, 0], {...clamp, easing: EZ}) - yaw);
+  const vitesse = Math.abs(interpolate(f + 1, YAWS[0], YAWS[1], {...clamp, easing: EZ}) - yaw);
   return (
     <AbsoluteFill>
       <Vue fg={fg} cam={c} o={o} roll={m.r + p.roll} flou={vitesse > 0.5 ? [Math.min(14, vitesse * 4), 0] : null} zoom={1.02} />
@@ -228,8 +310,18 @@ const Coincidence = scene('coincidence', ({f, fg, R}) => {
 
 // ===== 5. Derrière toi, une branche craque. « Ne vous retournez pas. » =====
 const Z_ARRET = 10.5;
-const Branche = scene('branche', ({f, fg, R}) => {
+const Branche = scene('branche', ({f, fg, i, t, d, R}) => {
   const crac = R('craque', 59) - 6;
+  if (i === 1) {
+    // de face, gros plan : il se fige, les yeux grands ouverts, le regard qui glisse vers l'arrière
+    const zm = Z_ARRET - 0.021 * 50 + crac * VITESSE + 0.6;
+    const k = lisse(t, d);
+    const c = {x: 40 + tremble(fg, 4, 'bf'), y: -170, z: zm + 0.62 - 0.16 * k, yaw: 182, pitch: 0};
+    return (
+      <Vue fg={fg} cam={c} o={{nuit: 0.58, lumYaw: 0, lumY: -1.4, rim: 0.8}} zoom={1.0}
+        items={(cam) => [moi(cam, {x: 30, z: zm, id: 'mb1', lum: 0.45, teinte: [0.7, 0.7, 1.0], eyes: 1.5, worry: 1, sweat: 1, pupilX: lerp(0, 16, ease(t, 4, 14)), brows: -10, epauleD: -20, coudeD: 120, shiver: tremble(fg, 3, 'bs')})]} />
+    );
+  }
   const arret = ease(f, crac - 4, crac + 6, Easing.out(Easing.cubic));
   const zc = Z_ARRET - 0.021 * 50;
   const p = pas(fg, 0.21, 1 - arret);
@@ -237,7 +329,7 @@ const Branche = scene('branche', ({f, fg, R}) => {
   const choc = interpolate(f - crac, [0, 2, 10], [0, 1, 0], clamp);
   const c = {x: 30 + m.dx + p.sway + tremble(fg, 18 * choc, 'cr'), y: OEIL + p.bob + m.dy - 6 * arret, z: zc + Math.min(f, crac) * VITESSE + arret * 0.02, yaw: 0.6 * Math.sin(fg / 40), pitch: 1.5};
   const o = {nuit: 0.58, lumYaw: 180, lumY: -1.4, rim: 0.7};
-  const leve = ease(f, R('troisième', 75) - 4, R('troisième', 75) + 22, Easing.out(Easing.cubic));
+  const leve = i === 2 ? ease(t, 0, 16, Easing.out(Easing.cubic)) : 0;
   const pose = {x: 540 + m.dx, y: lerp(2400, 860, leve) + m.dy, rx: lerp(50, 5, leve), ry: -3, rz: lerp(14, -1, leve), s: 1.2};
   return (
     <AbsoluteFill>
@@ -265,12 +357,20 @@ const Retourne = scene('retourne', ({f, fg, i, t, d, R}) => {
     return <Vue fg={fg} cam={c} o={NUIT} roll={m.r} zoom={1.25 + 0.35 * k} flou={v > 1 ? [Math.min(40, v * 3), 0] : null} items={(cam) => rodeur(cam, {pose: DEBOUT, tete: 3 * Math.sin(fg / 30)})} />;
   }
   if (i === 1) {
+    // par-dessus son épaule : lui de dos au premier plan, elle au loin entre les deux arbres
+    const c = {x: 330 + 40 * k, y: -230 + m.dy, z: Z_ARRET + 0.85 + 0.1 * k, yaw: 184, pitch: 1};
+    return (
+      <Vue fg={fg} cam={c} o={NUIT} zoom={1.25 + 0.15 * k}
+        items={(cam) => [...rodeur(cam, {pose: DEBOUT, tete: 3 * Math.sin(fg / 30)}), moi(cam, {x: 60, z: Z_ARRET, id: 'mr1', dos: true, lum: 0.28, teinte: NUIT_T, epauleD: -20, coudeD: 120, shiver: tremble(fg, 2, 'rs')})]} />
+    );
+  }
+  if (i === 2) {
     // les bras s'ouvrent, beaucoup trop longs
     const ouvre = ease(f, R('bras', 132) - 6, R('longs', 155) + 8);
     const c = {x: 0 + m.dx, y: -520 + m.dy, z: ROD.z + 2.7 - 0.2 * k, yaw: 180, pitch: 2};
     return <Vue fg={fg} cam={c} o={NUIT} roll={m.r} zoom={1.05} items={(cam) => rodeur(cam, {pose: melange(DEBOUT, ECARTE, ouvre), tete: 2})} />;
   }
-  if (i === 2) {
+  if (i === 3) {
     // gros plan : le visage blanc, les orbites vides
     const c = {x: 0 + m.dx * 0.3, y: -640 + m.dy * 0.3, z: ROD.z + 0.62 - 0.12 * k, yaw: 180, pitch: 0};
     return <Vue fg={fg} cam={c} o={NUIT} roll={m.r * 0.5} zoom={1.0} voile={0.7} items={(cam) => rodeur(cam, {pose: ECARTE, tete: 0})} />;
@@ -348,6 +448,21 @@ const Course = scene('course', ({f, fg, i, t, d, R, bornes}) => {
         dessus={<g>{[tf - 12, tf - 2, tf + 6, tf + 15].map((t0, k) => <Fouet key={k} f={f} t0={t0} cote={k % 2 ? 1 : -1} h={[500, 900, 300, 1200][k]} id={k} />)}</g>} />
     );
   }
+  if (i === 1) {
+    // de face : il court vers nous, elle galope derrière lui
+    const k = lisse(t, d);
+    const zm = z - 0.2;
+    const mk = marche(fg, 0.42, 1.6);
+    const zr = zm - lerp(3.2, 2.2, k);
+    const c = {x: 120 + p.sway * 0.6, y: 0 + p.bob * 0.4, z: zm + 0.95 - 0.15 * k, yaw: 188, pitch: -6};
+    return (
+      <Vue fg={fg} cam={c} o={{...o, lumYaw: 180}} roll={-2 + p.roll} zoom={1.05} flou={[0, 2]}
+        items={(cam) => [
+          moi(cam, {x: 40, z: zm, id: 'mo1', lum: 0.42, teinte: NUIT_T, legG: mk.legG, legD: mk.legD, lift: mk.bob, epauleG: 40 * Math.sin(fg * 0.42), epauleD: -40 * Math.sin(fg * 0.42), coudeG: -60, coudeD: -60, scream: 0.7, sweat: 1, worry: 1, eyes: 1.4}),
+          {z: zr, x: 0, el: <RodeurMonde cam={cam} x={0} z={zr} id="ro5" pose={galop(QUATRE, fg * 0.6, 1)} ouvre={0.7} />},
+        ]} />
+    );
+  }
   // coup d'œil derrière : elle galope, de plus en plus près
   const tour = ease(t, 0, 10, Easing.out(Easing.cubic));
   const zr = z - lerp(2.9, 1.25, lisse(t, d));
@@ -393,8 +508,17 @@ const Cachette = scene('cachette', ({f, fg, i, t, d, R}) => {
   }
   const c = {x: CACHE.x + m.dx, y: CACHE.y + m.dy + 4 * Math.sin(fg / 9), z: CACHE.z, yaw: 178, pitch: -4};
   if (i === 1) {
-    const monte = ease(t, 0, 12, Easing.out(Easing.cubic));
-    return <Vue fg={fg} cam={c} o={NUIT_C} roll={m.r} zoom={1.03} dessus={<MainBouche monte={monte} />} />;
+    // de côté : accroupi contre le chêne, la main sur la bouche ; elle rôde au loin
+    const k = lisse(t, d);
+    const cc = {x: CHENE.x + 1350 - 120 * k, y: -60, z: CHENE.z + 0.75, yaw: -98, pitch: -2};
+    const zr = CHENE.z - 3.2 + 0.4 * k;
+    return (
+      <Vue fg={fg} cam={cc} o={{...NUIT_C, lumYaw: -110}} zoom={1.1} roll={m.r}
+        items={(cam) => [
+          moi(cam, {x: CHENE.x + 380, z: CHENE.z + 0.35, id: 'mh1', lum: 0.32, teinte: NUIT_T, accroupi: true, eyes: 1.4, worry: 1, sweat: 1, epauleD: 60, coudeD: 150, epauleG: 20, coudeG: -60, pupilX: -12, shiver: tremble(fg, 2.5, 'hs')}),
+          {z: zr, x: CHENE.x - 500, el: <RodeurMonde cam={cam} x={CHENE.x - 500} z={zr} id="ro6" pose={galop(QUATRE, fg * 0.15, 0.4)} tete={-15} />},
+        ]} />
+    );
   }
   // le téléphone, luminosité au minimum, contre la poitrine
   const leve = ease(t, 0, 16, Easing.out(Easing.cubic));
@@ -468,7 +592,20 @@ const TeteRenifle = ({cam, sort, f}) => {
 // ===== 10. Des griffes raclent l'écorce, juste au-dessus de ta tête. Il renifle. Puis plus rien. =====
 const GriffesS = scene('griffes', ({f, fg, i, t, d, R}) => {
   const m = main(fg, 0.5);
-  if (i < 2) {
+  if (i === 2) {
+    // plan large de côté : lui recroquevillé, elle collée de l'autre côté du tronc, la tête qui dépasse, elle renifle
+    const k = lisse(t, d);
+    const cc = {x: CHENE.x + 1500 - 100 * k, y: -260, z: CHENE.z + 0.55, yaw: -108, pitch: -4};
+    const sniff = Math.max(0, Math.sin(fg * 1.3)) ** 3;
+    return (
+      <Vue fg={fg} cam={cc} o={{...NUIT_C, lumYaw: -100}} zoom={1.12}
+        items={(cam) => [
+          moi(cam, {x: CHENE.x + 380, z: CHENE.z + 0.35, id: 'mh2', lum: 0.32, teinte: NUIT_T, accroupi: true, eyes: 1.5, worry: 1, sweat: 1, epauleD: 60, coudeD: 150, epauleG: 20, coudeG: -60, pupilX: -14, shiver: tremble(fg, 3, 'gs')}),
+          {z: CHENE.z - 0.55, x: CHENE.x - 120, el: <RodeurMonde cam={cam} x={CHENE.x - 120} z={CHENE.z - 0.55} id="ro7" pose={ECARTE} tete={-30 - 6 * sniff} />},
+        ]} />
+    );
+  }
+  if (i < 3) {
     const c = {x: CACHE.x + m.dx, y: CACHE.y + m.dy, z: CACHE.z + 0.05, yaw: 176, pitch: -52 + 3 * Math.sin(fg / 40)};
     const sort = i === 0 ? ease(f, R('griffes', 8) - 6, R('raclent', 18)) : 1 - ease(t, d - 14, d);
     const racle = i === 0 ? ease(f, R('raclent', 18), R('juste', 45) + 20, Easing.inOut(Easing.sin)) : 1;
