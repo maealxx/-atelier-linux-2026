@@ -51,11 +51,14 @@ Environ 3 m (1100 unités à `echelle` 1), noir brillant, tête allongée vers l
 - `Surveillant` (src/Lycee.jsx) : l'ancien surveillant en 2D.
 - `Silhouette` (src/Maison.jsx, non exportée) : ombre derrière une vitre, floue, qui danse ou reste immobile, avec un `sourire` et une tête qui se `tord`.
 - `YeuxRouges` (src/moteur.jsx).
+- `Rodeur` / `RodeurMonde` (src/Rodeur.jsx) : **la grande créature maigre** du style que Maé aime (gris pâle, **liseré blanc** en contre-jour, orbites noires vides, côtes, bras beaucoup trop longs, 4 longs doigts). Dessin articulé : une pose = des articulations (`DEBOUT`, `ECARTE` bras écartés, `QUATRE` à quatre pattes de face, coudes hauts comme une araignée) ; `melange(a, b, t)` passe d'une pose à l'autre sans saut, `galop(pose, phase, amp)` la fait courir. Props : `tete` (inclinaison en degrés), `ouvre` (bouche avec dents), `respire`, `lum`. `doigts(poignet, dir, {long, plie, cote})` sert aussi pour des doigts seuls (griffes sur un tronc, sur une photo).
 
 ## Le téléphone réaliste (à préférer) : `TelReel` / `Tel` (src/TelReel.jsx)
 - `Tel` : le dessin SVG complet (coque métal, Dynamic Island, reflet), à poser **en 3D dans la scène** dans une `plaque` (téléphone posé sur une table, il vibre : voir `TelSurTable` dans LeBabyphone.jsx) ou dans `TelReel`.
 - `TelReel` : **tenu en main en vraie perspective** (CSS 3D) : `pose = {x, y, rx, ry, rz, s}` (anime-la avec des courbes douces pour la prise en main), `vib` (images des vibrations : seul le téléphone tremble), `lueur` (lumière de l'écran sur la scène), `appui` (le pouce appuie).
 - Écrans : `ecran` 'off' | 'lock' | 'conv'. Écran verrouillé : `notifs: [{t, titre, texte}]` qui **s'empilent au ressort** (la plus récente en haut). `tap` (image) : on touche la notification → la conversation s'ouvre. Conversation : `messages: [{t, texte, alerte}]`, « écrit… » 30 images avant, les bulles poussent les autres en douceur, `alerte` = bulle rouge, mots en MAJUSCULES en gras ; `zoomConv` (0 → 0.3) pour lire la dernière bulle.
+- Contact inconnu : `avatar` ('?'), `couleurAvatar`, `nom`, `statut` (en-tête plus haut, sous la Dynamic Island). Message `fantome: true` : « écrit… » qui disparaît sans rien envoyer. Message `photo: (age) => <dessin 400×500 />` : photo reçue (`PH_W`, `PH_H`). `allume` (0 → 1) : luminosité de l'écran (au minimum quand on se cache).
+- De nuit : `nuit` (0 → 1) assombrit les mains (voile sombre par-dessus, pas de filtre CSS : Chrome ne l'applique pas dans le SVG), `manche` (couleur de la manche).
 - Fond flouté derrière l'objet tenu en main : `<Flou>` (LeBabyphone.jsx) autour d'un `Plan`.
 - `Babyphone` / `BabyReel` : l'unité parents (écran qui affiche un `flux`, 5 diodes de son `niveau`, `alerte`, `grain` de parasites). `VisionNocturne` : vue d'une caméra en vision nocturne (vert, grain, lignes, REC, heure).
 

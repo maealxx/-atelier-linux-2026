@@ -13,9 +13,13 @@ import {DernierTrain, DUREE_DERNIER_TRAIN} from './DernierTrain';
 import {DUREE_HYPERGAMIE, Hypergamie} from './Hypergamie';
 import {DUREE_TENTE, LaTente} from './LaTente';
 import {DUREE_BABYPHONE, LeBabyphone} from './LeBabyphone';
+import {TestForet} from './TestForet';
+import {DUREE_RENTREZ, RentrezChezVous} from './RentrezChezVous';
 
 export const Root = () => (
   <>
+    <Composition id="Rentrez" component={RentrezChezVous} durationInFrames={DUREE_RENTREZ} fps={30} width={1080} height={1920} />
+    <Composition id="TestForet" component={TestForet} durationInFrames={60} fps={30} width={1080} height={1920} />
     <Composition id="Babyphone" component={LeBabyphone} durationInFrames={DUREE_BABYPHONE} fps={30} width={1080} height={1920} />
     <Composition
       id="LaTente"

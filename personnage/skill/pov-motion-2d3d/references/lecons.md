@@ -72,3 +72,11 @@
 - **Perso assis vu sous tous les angles** : coupe en espace écran (rectangle au-dessus de la projection de l'assise), pas avec un plan 3D (dégénéré quand on le voit par la tranche).
 - **Vision nocturne** : passe d'abord en niveaux de gris (`saturate 0`), puis vert modéré ; sinon tout sature en vert fluo.
 - **Mixage** : `pluie * k` doit avoir la longueur de `sfx` (couper au plus court).
+
+## « Rentrez chez vous » (27/10)
+- **Le flou CSS (`style={{filter: 'blur()'}}`) ne marche pas sur un élément SVG** dans le rendu : utilise un `<filter><feGaussianBlur/></filter>` SVG (avec `colorInterpolationFilters="sRGB"`, sinon les couleurs sombres virent à l'orange). Le flou CSS marche seulement sur un `AbsoluteFill` (div).
+- **Flou de bougé** pendant un panoramique rapide : `<Plan flou={[40, 0]}>` (flou horizontal seulement).
+- **Lumière lointaine** (lampe torche à 15 Z) : garde une **taille fixe à l'écran** pour l'éblouissement, sinon elle fait 20 px. Trie-la juste devant la caméra (z ≈ 6 Z) pour qu'elle passe devant la brume, et dégage un couloir d'arbres (`degage`).
+- **Buissons tout près** de la caméra : de simples ellipses deviennent des taches bizarres. Ne les dessine pas sous 2 Z.
+- **Photo plein écran** au format 4:5 : mets la même photo agrandie, floutée et assombrie derrière, plutôt que des bandes noires ou un recadrage trop serré.
+- **Concurrence du rendu** : `--concurrency=$(nproc)` (4 ici) ; plus haut, Remotion refuse.

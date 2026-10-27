@@ -32,13 +32,21 @@ export const camFace = (x, z, dir, dist, t, d, {dx = 0, dy = 0, push = 0.1, pitc
 
 // Assemble une image : décor + éléments triés en profondeur + voile noir + éléments par-dessus + finition
 // Avec `cam`, les éléments sont triés selon leur vraie distance à la caméra (indispensable en contrechamp).
-export const Plan = ({f, decor, items = [], noir = 0, dessus = null, roll = 0, zoom = 1, cam = null, grain = 0.09, vignette = 0.9}) => {
+// flou : [horizontal, vertical] en px (flou de bougé, ex. pendant un panoramique rapide)
+export const Plan = ({f, decor, items = [], noir = 0, dessus = null, roll = 0, zoom = 1, cam = null, grain = 0.09, vignette = 0.9, flou = null}) => {
   const loin = (o) => (cam ? cam.profondeur(o.z, o.x ?? cam.x, o.y ?? cam.y) : o.z);
   const tous = [...decor.items, ...items].filter((o) => o && o.el).sort((a, b) => loin(b) - loin(a));
   return (
     <AbsoluteFill style={{background: '#000'}}>
       <svg viewBox="0 0 1080 1920" width={1080} height={1920}>
-        <g transform={`rotate(${roll} 540 960) translate(540 960) scale(${zoom * (1 + Math.abs(roll) * 0.012)}) translate(-540 -960)`}>
+        {flou && (
+          <defs>
+            <filter id="plan-bouge" x="-10%" y="-10%" width="120%" height="120%">
+              <feGaussianBlur stdDeviation={`${flou[0]} ${flou[1]}`} />
+            </filter>
+          </defs>
+        )}
+        <g filter={flou ? 'url(#plan-bouge)' : undefined} transform={`rotate(${roll} 540 960) translate(540 960) scale(${zoom * (1 + Math.abs(roll) * 0.012)}) translate(-540 -960)`}>
           {decor.fond}
           {decor.brume}
           {tous.map((o, i) => (

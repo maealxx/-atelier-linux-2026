@@ -103,19 +103,24 @@ const Verrou = ({f, heure, date, notifs, appui}) => {
 };
 
 // ----- la conversation : en-tête, bulles qui arrivent par le bas et poussent les autres, « écrit… » -----
-const Conversation = ({f, nom, messages, zoom = 0}) => {
+// une photo reçue : 400 × 500, dessinée par m.photo(âge en images)
+export const PH_W = 400;
+export const PH_H = 500;
+const Conversation = ({f, nom, messages, zoom = 0, avatar = null, couleurAvatar = '#c46aa8', statut = ''}) => {
   const L = 21;
   const LH = 40;
   const G = 18;
   const BAS = TH - 150;
-  const hauteur = (m) => lignes(m.texte, L).length * LH + 40;
+  const hauteur = (m) => (m.photo ? PH_H : lignes(m.texte, L).length * LH + 40);
   // hauteur « effective » d'un message à l'instant f : 0 → bulle « écrit… » (78) → bulle complète
   const eff = (m) => {
     const ecr = interpolate(f, [m.t - 30, m.t - 22], [0, 78 + G], {...clamp, easing: Easing.out(Easing.cubic)});
     const plein = interpolate(f, [m.t, m.t + 9], [0, 1], {...clamp, easing: Easing.out(Easing.cubic)});
+    // « écrit… » qui s'arrête sans rien envoyer
+    if (m.fantome) return ecr * (1 - interpolate(f, [m.t, m.t + 10], [0, 1], {...clamp, easing: Easing.in(Easing.cubic)}));
     return ecr + (hauteur(m) - 78) * plein;
   };
-  const actifs = messages.filter((m) => f >= m.t - 30);
+  const actifs = messages.filter((m) => f >= m.t - 30 && !(m.fantome && f > m.t + 10));
   let y = BAS;
   const blocs = [];
   [...actifs].reverse().forEach((m) => {
@@ -128,14 +133,28 @@ const Conversation = ({f, nom, messages, zoom = 0}) => {
       <rect x={SX} y={SY} width={SW} height={SH} fill="#0c0e13" />
       <g transform={`translate(${TW / 2} ${BAS}) scale(${1 + zoom}) translate(${-TW / 2} ${-BAS})`}>
         {blocs.map(({m, y: yb}, k) => {
-          const arrive = f >= m.t;
+          const arrive = f >= m.t && !m.fantome;
           if (!arrive) {
             // « écrit… » : trois points qui rebondissent
-            const e = ressort(f, m.t - 30, {damping: 14, stiffness: 180});
+            const e = ressort(f, m.t - 30, {damping: 14, stiffness: 180}) * (m.fantome ? 1 - doux(f, m.t, m.t + 10) : 1);
             return (
               <g key={k} transform={`translate(46 ${yb}) scale(${e})`}>
                 <rect width="120" height="78" rx="39" fill="#262a34" />
                 {[0, 1, 2].map((j) => <circle key={j} cx={34 + j * 26} cy={39 - 9 * Math.max(0, Math.sin(f / 3.2 - j * 0.9))} r="9" fill="#9aa2b2" />)}
+              </g>
+            );
+          }
+          if (m.photo) {
+            const e = ressort(f, m.t, {damping: 14, stiffness: 150});
+            return (
+              <g key={k} transform={`translate(46 ${yb + PH_H}) scale(${0.7 + 0.3 * e}) translate(0 ${-PH_H})`} opacity={Math.min(1, e * 1.5)}>
+                <defs>
+                  <clipPath id={`tr-ph${k}`}>
+                    <rect width={PH_W} height={PH_H} rx="30" />
+                  </clipPath>
+                </defs>
+                <rect x="-4" y="-4" width={PH_W + 8} height={PH_H + 8} rx="34" fill="#262a34" />
+                <g clipPath={`url(#tr-ph${k})`}>{m.photo(f - m.t)}</g>
               </g>
             );
           }
@@ -154,11 +173,23 @@ const Conversation = ({f, nom, messages, zoom = 0}) => {
         })}
       </g>
       {/* en-tête flouté par-dessus les bulles qui montent */}
-      <rect x={SX} y={SY} width={SW} height="150" fill="#14171e" opacity="0.96" />
-      <path d={`M${SX + 30},96 l-14,-16 l14,-16`} stroke="#3a8bff" strokeWidth="6" fill="none" strokeLinecap="round" />
-      <circle cx={TW / 2} cy="78" r="34" fill="#c46aa8" />
-      <text x={TW / 2} y="91" textAnchor="middle" fontSize="34" fontWeight="700" fill="#fff" fontFamily={POLICE}>M</text>
-      <text x={TW / 2} y="136" textAnchor="middle" fontSize="21" fill="#e8eaf0" fontFamily={POLICE}>{nom}</text>
+      <rect x={SX} y={SY} width={SW} height={avatar ? 200 : 150} fill="#14171e" opacity="0.96" />
+      {avatar ? (
+        <g>
+          <path d={`M${SX + 30},150 l-14,-16 l14,-16`} stroke="#3a8bff" strokeWidth="6" fill="none" strokeLinecap="round" />
+          <circle cx={TW / 2} cy="132" r="30" fill={couleurAvatar} />
+          <text x={TW / 2} y="144" textAnchor="middle" fontSize="32" fontWeight="700" fill="#fff" fontFamily={POLICE}>{avatar}</text>
+          <text x={TW / 2} y="190" textAnchor="middle" fontSize="22" fontWeight="600" fill="#e8eaf0" fontFamily={POLICE}>{nom}</text>
+        </g>
+      ) : (
+        <g>
+          <path d={`M${SX + 30},96 l-14,-16 l14,-16`} stroke="#3a8bff" strokeWidth="6" fill="none" strokeLinecap="round" />
+          <circle cx={TW / 2} cy="78" r="34" fill="#c46aa8" />
+          <text x={TW / 2} y="91" textAnchor="middle" fontSize="34" fontWeight="700" fill="#fff" fontFamily={POLICE}>M</text>
+          <text x={TW / 2} y="136" textAnchor="middle" fontSize="21" fill="#e8eaf0" fontFamily={POLICE}>{nom}</text>
+        </g>
+      )}
+      {statut && <text x={TW / 2} y="214" textAnchor="middle" fontSize="16" fill="#3ad86a" fontFamily={POLICE}>{statut}</text>}
       {/* barre de saisie */}
       <rect x={SX} y={TH - 130} width={SW} height="110" fill="#14171e" />
       <rect x="70" y={TH - 112} width={TW - 140} height="56" rx="28" fill="none" stroke="#3a3e48" strokeWidth="3" />
@@ -169,7 +200,7 @@ const Conversation = ({f, nom, messages, zoom = 0}) => {
 
 // ----- le téléphone (dessin SVG complet) -----
 // ecran : 'off' | 'lock' | 'conv'. tap : image où l'on touche la notification (passage à la conversation).
-export const Tel = ({f, ecran = 'lock', heure = '23:02', date = 'lundi 27 octobre', notifs = [], messages = [], tap = null, nom = 'Maman de Léna', reflet = 0, zoomConv = 0, allume = 1}) => {
+export const Tel = ({f, ecran = 'lock', heure = '23:02', date = 'lundi 27 octobre', notifs = [], messages = [], tap = null, nom = 'Maman de Léna', reflet = 0, zoomConv = 0, allume = 1, avatar, couleurAvatar, statut}) => {
   const vers = tap === null ? (ecran === 'conv' ? 1 : 0) : doux(f, tap, tap + 12);
   return (
     <g>
@@ -208,7 +239,7 @@ export const Tel = ({f, ecran = 'lock', heure = '23:02', date = 'lundi 27 octobr
             )}
             {vers > 0 && (
               <g opacity={vers} transform={`translate(0 ${40 * (1 - vers)})`}>
-                <Conversation f={f} nom={nom} messages={messages} zoom={zoomConv} />
+                <Conversation f={f} nom={nom} messages={messages} zoom={zoomConv} avatar={avatar} couleurAvatar={couleurAvatar} statut={statut} />
               </g>
             )}
             {/* doigt qui touche la notification */}
@@ -229,33 +260,33 @@ export const Tel = ({f, ecran = 'lock', heure = '23:02', date = 'lundi 27 octobr
 // ----- les mains qui tiennent un appareil (dessinées dans le repère de l'appareil, largeur w, hauteur h) -----
 const PEAU = '#F2C3A0';
 const PEAU_O = '#E3A984';
-export const MainsDerriere = ({w, h}) => (
+export const MainsDerriere = ({w, h, manche = '#FF6B5B', peau = null}) => (
   <g>
-    <path d={`M${-40},${h * 0.62} Q${w * 0.5},${h * 0.5} ${w + 40},${h * 0.62} L${w + 120},${h + 520} L${-120},${h + 520} Z`} fill={PEAU_O} />
-    <path d={`M${-20},${h * 0.66} Q${w * 0.5},${h * 0.56} ${w + 20},${h * 0.66} L${w + 90},${h + 520} L${-90},${h + 520} Z`} fill={PEAU} />
-    <rect x={-60} y={h + 120} width={w + 120} height="420" rx="60" fill="#FF6B5B" />
+    <path d={`M${-40},${h * 0.62} Q${w * 0.5},${h * 0.5} ${w + 40},${h * 0.62} L${w + 120},${h + 520} L${-120},${h + 520} Z`} fill={peau || PEAU_O} />
+    <path d={`M${-20},${h * 0.66} Q${w * 0.5},${h * 0.56} ${w + 20},${h * 0.66} L${w + 90},${h + 520} L${-90},${h + 520} Z`} fill={peau || PEAU} />
+    <rect x={-60} y={h + 120} width={w + 120} height="420" rx="60" fill={manche} />
   </g>
 );
-export const MainsDevant = ({w, h, appui = 0}) => (
+export const MainsDevant = ({w, h, appui = 0, peau = null}) => (
   <g>
     {/* doigts qui dépassent sur le bord gauche */}
     {[0.55, 0.64, 0.73].map((r, k) => (
       <g key={k}>
-        <ellipse cx={-6} cy={h * r} rx="40" ry="34" fill={PEAU} />
-        <ellipse cx={4} cy={h * r - 6} rx="18" ry="14" fill="#f8d4b8" opacity="0.7" />
+        <ellipse cx={-6} cy={h * r} rx="40" ry="34" fill={peau || PEAU} />
+        {!peau && <ellipse cx={4} cy={h * r - 6} rx="18" ry="14" fill="#f8d4b8" opacity="0.7" />}
       </g>
     ))}
     {/* pouce sur le bord droit (il appuie quand on touche l'écran) */}
     <g transform={`rotate(${-28 - 14 * appui} ${w + 10} ${h * 0.78})`}>
-      <ellipse cx={w + 10} cy={h * 0.7 - 30 * appui} rx="44" ry="96" fill={PEAU} />
-      <ellipse cx={w + 4} cy={h * 0.64 - 30 * appui} rx="24" ry="30" fill="#f8d4b8" opacity="0.7" />
+      <ellipse cx={w + 10} cy={h * 0.7 - 30 * appui} rx="44" ry="96" fill={peau || PEAU} />
+      {!peau && <ellipse cx={w + 4} cy={h * 0.64 - 30 * appui} rx="24" ry="30" fill="#f8d4b8" opacity="0.7" />}
     </g>
   </g>
 );
 
 // ----- le téléphone tenu en main, en vraie perspective (CSS 3D), avec la lueur de l'écran sur la scène -----
 // pose : {x, y, rx, ry, rz, s} (centre écran en px, angles en degrés). vib : liste des images de vibration.
-export const TelReel = ({f, pose, vib = [], mains = true, lueur = 0.5, appui = 0, ...tel}) => {
+export const TelReel = ({f, pose, vib = [], mains = true, lueur = 0.5, appui = 0, nuit = 0, manche, ...tel}) => {
   const {x = 540, y = 960, rx = 0, ry = 0, rz = 0, s = 1} = pose;
   const h = haptique(f, vib);
   return (
@@ -274,9 +305,12 @@ export const TelReel = ({f, pose, vib = [], mains = true, lueur = 0.5, appui = 0
         }}
       >
         <svg width={TW} height={TH} viewBox={`0 0 ${TW} ${TH}`} style={{overflow: 'visible'}}>
-          {mains && <MainsDerriere w={TW} h={TH} />}
+          {/* de nuit, les mains ne sont éclairées que par l'écran : voile sombre et froid par-dessus */}
+          {mains && <MainsDerriere w={TW} h={TH} manche={manche} />}
+          {mains && nuit > 0 && <g opacity={0.82 * nuit}><MainsDerriere w={TW} h={TH} manche="#0a0c16" peau="#0a0c16" /></g>}
           <Tel f={f} reflet={ry / 30 + rx / 60} {...tel} />
           {mains && <MainsDevant w={TW} h={TH} appui={appui} />}
+          {mains && nuit > 0 && <g opacity={0.78 * nuit}><MainsDevant w={TW} h={TH} appui={appui} peau="#0a0c16" /></g>}
         </svg>
       </div>
     </AbsoluteFill>

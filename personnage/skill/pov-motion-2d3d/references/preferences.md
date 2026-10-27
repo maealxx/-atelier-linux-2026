@@ -60,6 +60,11 @@
 - Dans l'accroche : le téléphone **vibre dès la 1re-2e seconde**. Voix au début **pressée, comme une urgence** (balises `[urgent]`, `[panicked]`, Stability 35-40 %).
 - Elle demande souvent de **prendre plus de temps** : fais plusieurs passes de planches (au moins 3) et corrige chaque plan avant le rendu.
 
+## Style de référence (27/10, « Rentrez chez vous »)
+- Maé a envoyé des captures qu'elle aime : **palette sombre gris-violet**, **halo de lumière doux derrière le sujet** (contre-jour), brume, **créature grise très maigre au liseré blanc**, orbites noires vides, très longs doigts ; téléphone en **mode sombre** (bulles grises, avatar rond, « Message… »).
+- Elle veut **un monstre** dans les histoires d'horreur, avec de l'action (**course poursuite, se cacher derrière un arbre ou un buisson**), pas seulement des messages.
+- « Pas obligé de faire trop de 3D » : du 2,5D propre (troncs en billboards, plans de brume) suffit si la lumière est belle.
+
 ## Son
 - **Pas de crépitement de feu** (demande du 27/10).
 - La **voix ElevenLabs** de Maé, légèrement accélérée (environ 5 %), avec les blancs raccourcis sans les supprimer. Elle doit rester agréable.
