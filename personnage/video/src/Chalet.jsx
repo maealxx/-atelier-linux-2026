@@ -29,7 +29,7 @@ const lumiere = (p, L) => {
   const lampe = (L.lampe * 0.55) / (1 + (d([-200, -60, 1.05]) / 520) ** 2);
   const rouge = (L.rouge * 0.9) / (1 + (d(TEL_T) / 900) ** 2);
   const porte = (L.porte * 0.7) / (1 + (d([-630, -100, 2.6]) / 800) ** 2);
-  const app = ((L.applique ?? 1) * 0.5) / (1 + (d([-250, -420, 2.5]) / 520) ** 2);
+  const app = ((L.applique ?? 1) * 0.5) / (1 + (d([-250, -420, 2.5]) / 520) ** 2) + ((L.lanterne ?? 1) * 0.45) / (1 + (d([0, -490, 1.3]) / 700) ** 2);
   return [
     0.035 + feu * 1.0 + fen * 0.35 + lampe * 1.0 + rouge * 1.0 + porte * 0.4 + app * 1.0,
     0.035 + feu * 0.52 + fen * 0.42 + lampe * 0.7 + rouge * 0.12 + porte * 0.5 + app * 0.72,
@@ -144,25 +144,41 @@ export const chalet = (cam, f, o = {}) => {
         if (!p) continue;
         const c = m.a((u0 + u1) / 2, y + H / 2);
         const v = 0.9 + 0.14 * R(`lg${m.nom}${y}`);
-        fond.push(<polygon key={`${m.nom}${y}${k}`} points={p} fill={teinte(BOIS.map((a) => a * v), c, L)} stroke={teinte(BOIS.map((a) => a * v), c, L)} strokeWidth="1" />);
+        const col = BOIS.map((a) => a * v);
+        fond.push(<polygon key={`${m.nom}${y}${k}`} points={p} fill={teinte(col, c, L)} stroke={teinte(col, c, L)} strokeWidth="1" />);
+        // volume du rondin : reflet en haut, ombre en bas
+        const ph = cam.poly([m.a(u0, y + 8), m.a(u1, y + 8), m.a(u1, y + 34), m.a(u0, y + 34)]);
+        if (ph) fond.push(<polygon key={`${m.nom}${y}${k}h`} points={ph} fill={teinte(col.map((a) => a * 1.16), c, L)} />);
+        const po = cam.poly([m.a(u0, y + 66), m.a(u1, y + 66), m.a(u1, y + H), m.a(u0, y + H)]);
+        if (po) fond.push(<polygon key={`${m.nom}${y}${k}o`} points={po} fill={teinte(col.map((a) => a * 0.74), c, L)} />);
       }
-      // reflet sur le haut du rondin, joint sombre dessous
-      const hl = cam.seg(m.a(0, y + 18), m.a(1, y + 18));
-      if (hl) fond.push(<line key={`h${m.nom}${y}`} x1={hl[0][0]} y1={hl[0][1]} x2={hl[1][0]} y2={hl[1][1]} stroke="#ffcf9a" strokeOpacity="0.07" strokeWidth={Math.max(1, 14 * cam.scale(m.a(0.5, y)[2], m.a(0.5, y)[0], y))} />);
       const s = cam.seg(m.a(0, y), m.a(1, y));
       if (s) fond.push(<line key={`j${m.nom}${y}`} x1={s[0][0]} y1={s[0][1]} x2={s[1][0]} y2={s[1][1]} stroke="#1a0e08" strokeOpacity="0.55" strokeWidth={Math.max(1, 5 * cam.scale(m.a(0.5, y)[2], m.a(0.5, y)[0], y))} />);
     }
   });
-  // sol : lattes de parquet selon X
-  for (let k = 0; k < 16; k++) {
-    const xa = CH.x0 + (k * (CH.x1 - CH.x0)) / 16;
-    const xb = CH.x0 + ((k + 1) * (CH.x1 - CH.x0)) / 16;
-    for (let j = 0; j < 7; j++) {
-      const za = -0.4 + (j * (CH.z1 + 0.4)) / 7;
-      const zb = -0.4 + ((j + 1) * (CH.z1 + 0.4)) / 7;
+  // sol : longues lattes de parquet selon Z (éclairées par tronçons, joints seulement le long des lattes)
+  const NL = 20;
+  for (let k = 0; k < NL; k++) {
+    const xa = CH.x0 + (k * (CH.x1 - CH.x0)) / NL;
+    const xb = CH.x0 + ((k + 1) * (CH.x1 - CH.x0)) / NL;
+    const v = 0.85 + 0.25 * R(`pq${k}`);
+    for (let j = 0; j < 9; j++) {
+      const za = -0.4 + (j * (CH.z1 + 0.4)) / 9;
+      const zb = -0.4 + ((j + 1) * (CH.z1 + 0.4)) / 9;
       const p = cam.poly([[xa, SOL, za], [xb, SOL, za], [xb, SOL, zb], [xa, SOL, zb]]);
-      if (p) fond.push(<polygon key={`pa${k}${j}`} points={p} fill={teinte(BOIS_F.map((a) => a * (0.9 + 0.15 * R(`pq${k}${j}`))), [(xa + xb) / 2, SOL, (za + zb) / 2], L)} stroke="#140a06" strokeOpacity="0.5" strokeWidth="1.5" />);
+      const col = teinte(BOIS_F.map((a) => a * v), [(xa + xb) / 2, SOL, (za + zb) / 2], L);
+      if (p) fond.push(<polygon key={`pa${k}${j}`} points={p} fill={col} stroke={col} strokeWidth="1.2" />);
     }
+    const sj = cam.seg([xa, SOL, -0.4], [xa, SOL, CH.z1]);
+    if (sj) fond.push(<line key={`pj${k}`} x1={sj[0][0]} y1={sj[0][1]} x2={sj[1][0]} y2={sj[1][1]} stroke="#100804" strokeOpacity="0.6" strokeWidth="2" />);
+  }
+  // lueur du feu sur le parquet, devant la cheminée
+  if (L.feu > 0) {
+    const g = cam.poly([...Array(16)].map((_, k) => {
+      const a = (k / 16) * Math.PI * 2;
+      return [CH.x0 + 160 + Math.cos(a) * 700, SOL - 1, 1.3 + Math.sin(a) * 0.7];
+    }));
+    if (g) fond.push(<polygon key="lueurSol" points={g} fill="#ff8a30" opacity={0.12 * L.feu * vacille(f)} />);
   }
   // poutres au plafond
   [0.5, 1.3, 2.1].forEach((z, k) => fond.push(boite(cam, [CH.x0, CH.x1], [CH.plaf, CH.plaf + 70], [z - 0.06, z + 0.06], BOIS_F, L, `pt${k}`)));
@@ -293,7 +309,42 @@ export const chalet = (cam, f, o = {}) => {
       {boite(cam, [CH.x0, CH.x0 + CHEM.prof], [SOL - 470, SOL], [CHEM.z0 - 0.08, CHEM.z0], PIERRE, L, 'jg')}
       {boite(cam, [CH.x0, CH.x0 + CHEM.prof], [SOL - 470, SOL], [CHEM.z1, CHEM.z1 + 0.08], PIERRE, L, 'jd')}
       {boite(cam, [CH.x0, CH.x0 + CHEM.prof + 40], [SOL - 470, SOL - 430], [CHEM.z0 - 0.1, CHEM.z1 + 0.1], BOIS_F, L, 'man')}
+      {pierres(cam, L)}
       {flammes(cam, f, L.feu)}
+      {/* bois de cerf au-dessus du manteau */}
+      {(() => {
+        const [x, y] = cam.proj(CH.x0 + CHEM.prof + 10, SOL - 760, 1.3);
+        const sc = cam.scale(1.3, CH.x0 + CHEM.prof, SOL - 760);
+        if (!cam.visible(1.3, CH.x0 + CHEM.prof, SOL - 760) || cam.x < CH.x0 + CHEM.prof) return null;
+        return (
+          <g transform={`translate(${x} ${y}) scale(${sc})`} stroke={teinte([0.75, 0.68, 0.55], [CH.x0 + 200, SOL - 760, 1.3], L)} strokeWidth="16" strokeLinecap="round" fill="none">
+            <path d="M0,0 C-60,-60 -140,-80 -200,-180 M-120,-70 L-150,-160 M-60,-30 L-60,-120" />
+            <path d="M0,0 C60,-60 140,-80 200,-180 M120,-70 L150,-160 M60,-30 L60,-120" />
+            <ellipse cx="0" cy="10" rx="40" ry="30" fill={teinte([0.4, 0.3, 0.22], [CH.x0 + 200, SOL - 760, 1.3], L)} stroke="none" />
+          </g>
+        );
+      })()}
+    </g>
+  )});
+  // tas de bûches à côté de la cheminée
+  items.push({z: CHEM.z1 + 0.25, x: CH.x0 + 120, el: (
+    <g key="buches">
+      {[...Array(9)].map((_, k) => {
+        const r = 0, row = Math.floor(k / 3), col = k % 3;
+        const z = CHEM.z1 + 0.14 + col * 0.09 + (row % 2) * 0.045;
+        const y = SOL - 40 - row * 70;
+        if (!cam.visible(z, CH.x0 + 100, y)) return null;
+        const a = cam.proj(CH.x0 + 20, y, z);
+        const b = cam.proj(CH.x0 + 240, y, z);
+        const sc = cam.scale(z, CH.x0 + 130, y);
+        return (
+          <g key={k}>
+            <line x1={a[0]} y1={a[1]} x2={b[0]} y2={b[1]} stroke={teinte([0.45, 0.3, 0.2], [CH.x0 + 130, y, z], L)} strokeWidth={70 * sc} strokeLinecap="round" />
+            <circle cx={b[0]} cy={b[1]} r={33 * sc} fill={teinte([0.85, 0.66, 0.42], [CH.x0 + 240, y, z], L)} />
+            <circle cx={b[0]} cy={b[1]} r={16 * sc} fill="none" stroke={teinte([0.55, 0.38, 0.24], [CH.x0 + 240, y, z], L)} strokeWidth={4 * sc} />
+          </g>
+        );
+      })}
     </g>
   )});
   // ----- la table, la lampe, le téléphone -----
@@ -351,11 +402,102 @@ export const chalet = (cam, f, o = {}) => {
     </g>
   )});
   items.push({z: 2.55, x: -250, el: <g key="app">{boite(cam, [-280, -220], [-460, -380], [2.53, 2.6], [0.3, 0.25, 0.2], L, 'appl')}{halo(cam, [-250, -420, 2.5], 360, '#ffc070', 0.55 * (L.applique ?? 1), 'app-h')}</g>});
+  // rideaux à carreaux de chaque côté de la fenêtre
+  [[FEN.x0 - 160, FEN.x0 + 20], [FEN.x1 - 20, FEN.x1 + 160]].forEach(([a, b], k) => {
+    const pts = [];
+    for (let j = 0; j <= 6; j++) pts.push([a + ((b - a) * j) / 6, FEN.y0 - 60, FEN.z - 0.02 - 0.015 * Math.sin(j * 1.7)]);
+    for (let j = 6; j >= 0; j--) pts.push([a + ((b - a) * j) / 6 + (k ? -30 : 30) * (j / 6), FEN.y1 + 120, FEN.z - 0.02 - 0.015 * Math.sin(j * 1.7)]);
+    const p = cam.poly(pts);
+    if (!p || cam.z > FEN.z) return;
+    items.push({z: FEN.z - 0.03, x: (a + b) / 2, el: (
+      <g key={`rid${k}`}>
+        <polygon points={p} fill={teinte([0.62, 0.12, 0.1], [(a + b) / 2, -250, FEN.z], L)} />
+        {[0.2, 0.45, 0.7].map((u) => {
+          const sg = cam.seg([a + (b - a) * u, FEN.y0 - 60, FEN.z - 0.025], [a + (b - a) * u + (k ? -20 : 20), FEN.y1 + 120, FEN.z - 0.025]);
+          return sg ? <line key={u} x1={sg[0][0]} y1={sg[0][1]} x2={sg[1][0]} y2={sg[1][1]} stroke="#1a0606" strokeOpacity="0.45" strokeWidth={6 * cam.scale(FEN.z, a, -250)} /> : null;
+        })}
+      </g>
+    )});
+  });
+  // étagère avec bocaux et un cadre, sur le mur du fond (à droite de la porte)
+  items.push({z: CH.z1 - 0.12, x: -100, el: (
+    <g key="etag">
+      {boite(cam, [-360, 60], [-330, -300], [CH.z1 - 0.2, CH.z1], BOIS, L, 'et1')}
+      {[-320, -230, -150, -60, 20].map((x, k) => boite(cam, [x, x + 55], [-330 - 70 - 30 * (k % 2), -330], [CH.z1 - 0.15, CH.z1 - 0.07], [[0.5, 0.6, 0.3], [0.7, 0.4, 0.2], [0.3, 0.4, 0.6], [0.8, 0.7, 0.4], [0.5, 0.3, 0.5]][k], L, `bo${k}`))}
+      {boite(cam, [-80, 120], [-720, -540], [CH.z1 - 0.025, CH.z1 - 0.005], [0.35, 0.25, 0.18], L, 'cadre')}
+    </g>
+  )});
+  // lanterne suspendue à la poutre du milieu
+  items.push({z: 1.3, x: 0, el: (
+    <g key="lant">
+      {(() => {
+        const s = cam.seg([0, CH.plaf + 70, 1.3], [0, -560, 1.3]);
+        return s ? <line x1={s[0][0]} y1={s[0][1]} x2={s[1][0]} y2={s[1][1]} stroke="#1a120c" strokeWidth={4 * cam.scale(1.3, 0, -700)} /> : null;
+      })()}
+      {boite(cam, [-50, 50], [-560, -420], [1.25, 1.35], [0.25, 0.22, 0.2], L, 'lan')}
+      {halo(cam, [0, -490, 1.3], 520, '#ffb860', 0.55 * (L.lanterne ?? 1) * vacille(f + 7), 'lan-h')}
+    </g>
+  )});
+  // rayon de lumière froide de la fenêtre sur le sol
+  if (cam.z < FEN.z) {
+    const r = cam.poly([[FEN.x0, FEN.y1, FEN.z], [FEN.x1, FEN.y1, FEN.z], [FEN.x1 - 250, SOL - 1, FEN.z - 1.1], [FEN.x0 - 250, SOL - 1, FEN.z - 1.1]]);
+    if (r) fond.push(<polygon key="rayonF" points={r} fill="#8aa4ff" opacity={0.07 * L.fenetre} />);
+  }
   // ----- détails : tapis, porte-manteau avec le bonnet de Léo, bois de cerf -----
-  const tapis = cam.poly([[-500, SOL - 2, 0.3], [400, SOL - 2, 0.3], [400, SOL - 2, 1.9], [-500, SOL - 2, 1.9]]);
-  if (tapis) fond.push(<polygon key="tapis" points={tapis} fill={teinte([0.36, 0.13, 0.1], [0, SOL, 1.1], L)} />);
+  [0, 1, 2, 3, 4, 5, 6, 7].forEach((j) => {
+    const za = 0.3 + j * 0.2;
+    const t = cam.poly([[-500, SOL - 2, za], [400, SOL - 2, za], [400, SOL - 2, za + 0.2], [-500, SOL - 2, za + 0.2]]);
+    if (t) fond.push(<polygon key={`tp${j}`} points={t} fill={teinte(j % 2 ? [0.36, 0.12, 0.09] : [0.42, 0.32, 0.2], [0, SOL, za + 0.1], L)} />);
+  });
   items.push({z: 2.5, x: -1100, el: <g key="pm">{boite(cam, [-1120, -1090], [-420, SOL], [2.47, 2.5], BOIS_F, L, 'pm')}{boite(cam, [-1180, -1040], [-420, -300], [2.45, 2.55], [0.15, 0.4, 0.25], L, 'man1')}</g>});
-  return {fond: <g key="fond">{fond}</g>, brume: <g key="br" />, items, L};
+  const glow = (p, r, c, op, gid) => {
+    if (!cam.visible(p[2], p[0], p[1])) return null;
+    const [x, y] = cam.proj(...p);
+    return (
+      <g key={gid}>
+        <defs>
+          <radialGradient id={gid} cx={x} cy={y} r={r} gradientUnits="userSpaceOnUse">
+            <stop offset="0" stopColor={c} stopOpacity={op} />
+            <stop offset="1" stopColor={c} stopOpacity="0" />
+          </radialGradient>
+        </defs>
+        <rect width="1080" height="1920" fill={`url(#${gid})`} style={{mixBlendMode: 'screen'}} />
+      </g>
+    );
+  };
+  const voile = (
+    <g key="voile">
+      {glow([FEU[0] + 100, SOL - 150, FEU[2]], 1100, '#ff9440', 0.2 * L.feu * vacille(f), `${id}gf`)}
+      {cam.z < FEN.z && glow([450, -250, FEN.z], 800, '#7a96ff', 0.18 * L.fenetre, `${id}gw`)}
+      {glow([0, -490, 1.3], 700, '#ffb860', 0.1 * (L.lanterne ?? 1), `${id}gl`)}
+    </g>
+  );
+  return {fond: <g key="fond">{fond}</g>, brume: <g key="br" />, items, L, voile};
+};
+
+// pierres irrégulières sur la face avant de la cheminée (x = CH.x0 + prof)
+const PIERRES = (() => {
+  const out = [];
+  for (let y = CH.plaf + 40; y < SOL - 20; y += 85) {
+    let z = CHEM.z0 - 0.08 + R(`pz${y}`) * 0.05;
+    while (z < CHEM.z1 + 0.08) {
+      const w = 0.07 + R(`pw${y}${z}`) * 0.07;
+      out.push({y, z, w: Math.min(w, CHEM.z1 + 0.08 - z), h: 70 + R(`ph${y}${z}`) * 12, v: 0.75 + R(`pv${y}${z}`) * 0.45});
+      z += w + 0.008;
+    }
+  }
+  return out;
+})();
+const pierres = (cam, L) => {
+  const X = CH.x0 + CHEM.prof + 2;
+  if (cam.x < X) return null;
+  return PIERRES.map((p, k) => {
+    // pas dans l'âtre
+    if (p.y > SOL - 470 && p.z > CHEM.z0 && p.z + p.w < CHEM.z1) return null;
+    const pts = [[X, p.y, p.z + 0.006], [X, p.y, p.z + p.w - 0.006], [X, p.y + p.h * 0.5, p.z + p.w], [X, p.y + p.h, p.z + p.w - 0.01], [X, p.y + p.h, p.z + 0.01], [X, p.y + p.h * 0.5, p.z]];
+    const q = cam.poly(pts);
+    return q ? <polygon key={k} points={q} fill={teinte(PIERRE.map((a) => a * p.v), [X, p.y + 40, p.z + p.w / 2], L)} stroke="#120c0a" strokeWidth="1.5" /> : null;
+  });
 };
 
 // petit halo lumineux (lampe, feu, écran) en 3D

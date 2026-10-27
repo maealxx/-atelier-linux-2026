@@ -162,7 +162,7 @@
   },
   {
    "nom": "choix",
-   "frames": 98,
+   "frames": 188,
    "texte": "Tu as deux secondes pour te cacher. L'armoire, ou sous le lit ?",
    "reperes": {
     "tu": 2,
@@ -225,7 +225,7 @@
   },
   {
    "nom": "rembobine",
-   "frames": 124,
+   "frames": 58,
    "texte": "On rembobine.",
    "reperes": {
     "on": 2,

@@ -400,7 +400,18 @@ claque(rep("serrure", "cède") - 0.05, 0.3)
 pose(filtre(bruit(0.15), "highpass", 2500) * np.exp(-ts(0.15) * 20), rep("serrure", "cède") - 0.05, 0.15)
 
 # ---------- 8. deux secondes : tic-tac ----------
-tictac(deb("choix") + 0.1, fin("choix"), 0.05)
+t0c = rep("choix", "lit", 84) + 0.2
+tictac(deb("choix") + 0.1, t0c, 0.05)
+# le chrono : tic toutes les 0,25 s, bip à chaque seconde, plus aigu à la fin
+t = t0c
+while t < fin("choix") - 0.05:
+    d = 0.025
+    pose(filtre(bruit(d), "highpass", 3200) * np.exp(-ts(d) * 140), t, 0.06)
+    t += 0.25
+for j in range(3):
+    d = 0.12
+    pose(np.sin(2 * np.pi * (880 if j < 2 else 1320) * ts(d)) * env(int(d * SR), 0.005, 0.03), t0c + j * 1.0, 0.05)
+pose(np.sin(2 * np.pi * 1760 * ts(0.4)) * env(int(0.4 * SR), 0.005, 0.1), fin("choix") - 0.1, 0.06)
 coeur(deb("choix"), fin("choix"), 0.4, 0.12)
 
 # ---------- 9. l'armoire ----------

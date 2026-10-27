@@ -13,7 +13,7 @@ bash voix/postfx.sh out/nl_brut.mp4 out/nl_post.mp4 0.6
 ffmpeg -loglevel error -y -i out/nl_post.mp4 -i out/nl_audio.wav -map 0:v -map 1:a -c:v copy -c:a aac -b:a 192k -shortest out/nl_avec_son.mp4
 cat > out/nl_st.json <<JSON
 {"video": "out/nl_avec_son.mp4", "words": "out/nl_mots.json", "out": "out/nl_soustitre.mp4", "mode": "burn", "work": "$WK",
- "couleurs": ["&H2A2AFF&"], "sfx": false, "bas": [[3.6, 9.23], [20.03, 23.9], [81.03, 85.3]],
+ "couleurs": ["&H2A2AFF&"], "sfx": false, "bas": [[3.6, 9.23], [20.03, 23.9], [38.5, 41.77], [81.83, 86.1]],
  "emojis": [["vibre", "1f4f3"], ["tempête", "1f328"], ["alerte", "1f6a8"], ["frappe", "1f6aa"], ["silhouette", "1f47b"], ["survis", "1f480"], ["rembobine", "23ea"], ["lit", "1f6cf"], ["visage", "1f631"]]}
 JSON
 python3 voix/soustitres.py out/nl_st.json

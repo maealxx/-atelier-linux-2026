@@ -94,7 +94,7 @@ const VueIn = ({fg, cam: c, o = {}, items = [], zoom = 1, roll = 0, noir = 0, fl
   const its = typeof items === 'function' ? items(cam, d) : items;
   return (
     <Plan {...PLAN} f={fg} cam={cam} decor={d} items={its.filter(Boolean)} zoom={zoom} roll={roll} noir={noir} flou={flou}
-      dessus={<g><rect width="1080" height="1920" fill="#ff1a1a" opacity={0.14 * r} style={{mixBlendMode: 'screen'}} /><rect width="1080" height="1920" fill="#ff1a1a" opacity={0.08 * r} />{dessus}</g>} />
+      dessus={<g>{d.voile}<rect width="1080" height="1920" fill="#ff1a1a" opacity={0.14 * r} style={{mixBlendMode: 'screen'}} /><rect width="1080" height="1920" fill="#ff1a1a" opacity={0.08 * r} />{dessus}</g>} />
   );
 };
 // dehors : forêt enneigée de nuit + le chalet + le blizzard
@@ -193,35 +193,62 @@ const Lattes = ({ferme = 1, f}) => (
   </g>
 );
 
+// ----- caméra subjective : à hauteur des yeux, portée à la main, avec le pas si on marche -----
+const OEIL = -150;
+const pov = (fg, p, c, {k = 1, pas = 0, v = 0.21} = {}) => {
+  const m = main(fg, k);
+  const bob = -Math.abs(Math.sin(fg * v)) * 16 * pas;
+  const sway = Math.sin(fg * v) * 9 * pas;
+  return vise([p[0] + m.dx + sway, p[1] + m.dy + bob, p[2]], c);
+};
+const roulis = (fg, k = 1, pas = 0, v = 0.21) => main(fg, k).r + Math.sin(fg * v) * 0.9 * pas;
+const mixC = (a, b, u) => a.map((x, i) => x + (b[i] - x) * u);
+// une main (vue subjective) qui se tend vers un point de l'écran
+const MainPov = ({x, y, s = 1, rot = -20, nuit = 0.5, ouvre = 1}) => (
+  <g>
+    <path d={`M${x + 70 * s},${y + 90 * s} L${x + 640 * s},${y + 1200 * s} L${x + 1100 * s},${y + 900 * s} L${x + 180 * s},${y + 10 * s} Z`} fill="#3a2a22" />
+    <g transform={`translate(${x} ${y}) rotate(${rot}) scale(${s})`}>
+      <ellipse cx="0" cy="40" rx="78" ry="92" fill="#F2C3A0" />
+      {[-48, -16, 16, 46].map((dx, k) => (
+        <rect key={k} x={dx - 17} y={-90 - (k === 1 || k === 2 ? 26 : 0) + (1 - ouvre) * 60} width="34" height={120 - (1 - ouvre) * 50} rx="17" fill="#F2C3A0" />
+      ))}
+      <rect x="62" y="10" width="34" height="96" rx="17" fill="#F2C3A0" transform="rotate(-40 79 58)" />
+      <g opacity={0.55 * nuit} fill="#0a0c16">
+        <ellipse cx="0" cy="40" rx="78" ry="92" />
+        {[-48, -16, 16, 46].map((dx, k) => <rect key={k} x={dx - 17} y={-90 - (k === 1 || k === 2 ? 26 : 0) + (1 - ouvre) * 60} width="34" height={120 - (1 - ouvre) * 50} rx="17" />)}
+      </g>
+    </g>
+  </g>
+);
+
 // ===== 1. Imagine. Seul dans un chalet, en pleine tempête, quand ton téléphone vibre. (5 s très dynamiques) =====
-const MOI0 = {x: -720, z: 0.62};
+const ASSIS = [-830, 20, 0.75]; // assis près du feu
+const FEU_V = [-1220, 300, 1.3];
+const TEL_V = [-300, 155, 1.0];
 const Vibre = scene('vibre', ({f, fg, i, t, d}) => {
   const k = lisse(t, d);
   if (i === 0) {
     // on fonce à travers le blizzard vers le chalet allumé
     const u = Easing.in(Easing.cubic)(Math.min(1, t / d));
     const c = {x: lerp(-300, 380, u), y: lerp(-1500, -330, u), z: lerp(17, 4.2, u), yaw: 180 + lerp(-10, 3, u), pitch: lerp(14, 2, u)};
-    return (
-      <VueExt fg={fg} cam={c} rush={1.4} roll={lerp(-5, 0, u)} flou={[0, 4 * u]}
-        chaletO={{perso: null}} items={(cam) => [moi(cam, {x: 450, z: 1.9, id: 'v0'})]} />
-    );
+    return <VueExt fg={fg} cam={c} rush={1.4} roll={lerp(-5, 0, u)} flou={[0, 4 * u]} />;
   }
   if (i === 1) {
-    // dedans : le téléphone s'allume en rouge sur la table, l'alarme hurle ; travelling rapide
-    const c = vise([700 - 300 * k, -320 + 60 * k, -0.25 + 0.45 * k], [-450, -40, 0.9]);
-    return (
-      <VueIn fg={fg} cam={c} roll={lerp(3, 0, k)} zoom={1.05 + 0.1 * k}
-        items={(cam) => [moi(cam, {x: MOI0.x, z: MOI0.z, id: 'v1', teinte: rouge(fg) > 0.5 ? ROUGE_T : FEU_T, eyes: 1.2 + 0.3 * ease(t, 6, 12), pupilX: 12 * ease(t, 6, 12), worry: 0.6})]} />
-    );
+    // assis devant le feu… l'alarme hurle : coup de tête vers la table où le téléphone clignote en rouge
+    const w = ease(t, 4, 10, Easing.inOut(Easing.cubic));
+    const vit = Math.abs(ease(t + 1, 4, 10, Easing.inOut(Easing.cubic)) - w);
+    const c = pov(fg, ASSIS, mixC(FEU_V, TEL_V, w), {k: 0.8 + 1.5 * w});
+    return <VueIn fg={fg} cam={c} roll={roulis(fg, 1)} zoom={1.04 + 0.08 * w} flou={vit > 0.05 ? [60 * vit, 0] : null} />;
   }
   if (i === 2) {
-    // gros plan : son visage dans les flashs rouges
-    const c = vise([MOI0.x + 40, -230, MOI0.z - 0.62 + 0.12 * k], [MOI0.x, -235, MOI0.z]);
-    return <VueIn fg={fg} cam={c} roll={-2} items={(cam) => [moi(cam, {x: MOI0.x, z: MOI0.z, id: 'v2', teinte: rouge(fg) > 0.5 ? ROUGE_T : FEU_T, eyes: 1.45, worry: 1, pupilX: 14, brows: -8})]} />;
+    // tu te lèves d'un bond et tu fonces vers la table
+    const u = ease(t, 0, d, Easing.out(Easing.cubic));
+    const c = pov(fg, mixC(ASSIS, [-420, OEIL, 0.55], u), TEL_V, {k: 1.4, pas: 1.2 * (1 - u), v: 0.4});
+    return <VueIn fg={fg} cam={c} roll={roulis(fg, 1.4, 1.2, 0.4)} zoom={1.05} />;
   }
   if (i === 3) {
     // la fenêtre qui tremble sous les rafales
-    const c = vise([450 + tremble(fg, 12, 'fw'), -250 + tremble(fg + 3, 10, 'fw'), 1.55 + 0.35 * k], [450, -260, 2.6]);
+    const c = pov(fg, [450 + tremble(fg, 14, 'fw'), -250 + tremble(fg + 3, 10, 'fw'), 1.55 + 0.35 * k], [450, -260, 2.6], {k: 1.2});
     return <VueIn fg={fg} cam={c} roll={tremble(fg, 1.5, 'fr')} zoom={1.05} />;
   }
   // tu attrapes le téléphone
@@ -230,7 +257,7 @@ const Vibre = scene('vibre', ({f, fg, i, t, d}) => {
   return (
     <AbsoluteFill>
       <Flou k={7} lum={0.6}>
-        <VueIn fg={fg} cam={vise([-260, -180, 0.4], [-300, 150, 1.05])} />
+        <VueIn fg={fg} cam={vise([-380, -150, 0.45], [-300, 150, 1.05])} />
       </Flou>
       <Tel fg={fg} pose={pose} lueur={0.5} nuit={0.2} />
     </AbsoluteFill>
@@ -245,7 +272,7 @@ const Alerte = scene('alerte', ({f, fg, R}) => {
   return (
     <AbsoluteFill>
       <Flou k={8} lum={0.55}>
-        <VueIn fg={fg} cam={vise([-260, -180, 0.4], [-300, 150, 1.05])} />
+        <VueIn fg={fg} cam={vise([-380, -150, 0.45], [-300, 150, 1.05])} />
       </Flou>
       <Tel fg={fg} pose={pose} lueur={0.5} nuit={0.2} />
     </AbsoluteFill>
@@ -253,23 +280,24 @@ const Alerte = scene('alerte', ({f, fg, R}) => {
 });
 
 // ===== 3. Léo est parti chercher du bois. Il y a une heure. (souvenir, puis maintenant) =====
+const PORTE_V = [-630, -80, 2.6];
 const Leo = scene('leo', ({f, fg, i, t, d}) => {
   const k = lisse(t, d);
   if (i === 0) {
-    // souvenir : Léo sort dans la tempête avec la hache ; image sépia qui papillote
-    const x = lerp(-450, -640, k);
-    const z = lerp(1.7, 2.9, k);
-    const mk = marche(fg, 0.25, 1);
+    // souvenir (sépia), en vue subjective depuis le feu : Léo se retourne, fait coucou, et sort dans la tempête
+    const sort = ease(t, d * 0.45, d);
+    const x = lerp(-560, -640, sort);
+    const z = lerp(2.25, 2.95, sort);
+    const mk = marche(fg, 0.25, sort > 0 && sort < 1 ? 1 : 0);
     return (
       <AbsoluteFill style={{filter: `sepia(0.75) saturate(0.7) brightness(${0.95 + 0.06 * Math.sin(fg * 1.7)})`}}>
-        <VueIn fg={fg} cam={vise([500, -260, 0.1 + 0.2 * k], [-630, -60, 2.6])} o={{porte: 0.85, rouge: 0, ecran: 0}} zoom={1.08}
-          items={(cam) => [leo(cam, {x, z, id: 'l0', dos: true, legG: mk.legG, legD: mk.legD, lift: mk.bob, epauleD: -20})]} />
+        <VueIn fg={fg} cam={pov(fg, ASSIS, [-620, -120, 2.6], {k: 0.5})} o={{porte: 0.85, rouge: 0, ecran: 0}} zoom={1.15}
+          items={(cam) => [leo(cam, {x, z, id: 'l0', dos: sort > 0.15, smile: 1, epauleD: sort < 0.15 ? -150 + 20 * Math.sin(fg / 3) : -20, coudeD: sort < 0.15 ? -30 : 0, legG: mk.legG, legD: mk.legD, lift: mk.bob})]} />
       </AbsoluteFill>
     );
   }
-  // maintenant : par-dessus son épaule, la porte fermée
-  const c = vise([MOI0.x - 220 + 40 * k, -230, MOI0.z - 0.75 + 0.25 * k], [-630, -80, 2.6]);
-  return <VueIn fg={fg} cam={c} zoom={1.05} items={(cam) => [moi(cam, {x: MOI0.x, z: MOI0.z, id: 'l1', dos: true, lum: 0.6})]} />;
+  // maintenant : la porte fermée, la lumière dessous ; lent travelling avant
+  return <VueIn fg={fg} cam={pov(fg, [-700, OEIL, 0.5 + 0.45 * k], PORTE_V, {k: 0.7})} roll={roulis(fg, 0.7)} zoom={1.05} />;
 });
 
 // ===== 4. On frappe à la porte. Trois coups. « C'est moi, Léo ! Ouvre, je gèle ! » =====
@@ -279,28 +307,26 @@ const Frappe = scene('frappe', ({f, fg, i, t, d, R}) => {
   const k = lisse(t, d);
   const cp = coups(f, KN);
   if (i === 0) {
-    const c = vise([MOI0.x + 60, -230, MOI0.z - 0.6 + 0.1 * k], [MOI0.x, -235, MOI0.z]);
-    return <VueIn fg={fg} cam={c} items={(cam) => [moi(cam, {x: MOI0.x, z: MOI0.z, id: 'f0', eyes: 1.2 + 0.3 * k, worry: 0.8, pupilX: -10 * k})]} />;
+    // « et là… » : tu tournes la tête vers la porte
+    const w = ease(t, 8, 22, Easing.inOut(Easing.cubic));
+    return <VueIn fg={fg} cam={pov(fg, [-620, OEIL, 0.95], mixC([-1220, 200, 1.3], PORTE_V, w), {k: 0.8})} roll={roulis(fg)} zoom={1.04} />;
   }
   const pieds = f > 60 ? [-70 + 6 * Math.sin(fg / 9), 70 + 6 * Math.sin(fg / 9 + 1)] : [];
   if (i === 1) {
-    const c = vise([-560 + tremble(fg, 20 * cp, 'fk'), -150 + tremble(fg + 1, 14 * cp, 'fk'), 1.15 + 0.45 * k], [-630, -50, 2.6]);
-    return <VueIn fg={fg} cam={c} zoom={1.04 + 0.05 * cp} o={{coups: cp, pieds}} />;
+    const c = pov(fg, [-600 + tremble(fg, 20 * cp, 'fk'), OEIL + tremble(fg + 1, 14 * cp, 'fk'), 1.0 + 0.55 * k], PORTE_V, {k: 0.8 + cp});
+    return <VueIn fg={fg} cam={c} roll={roulis(fg)} zoom={1.04 + 0.05 * cp} o={{coups: cp, pieds}} />;
   }
-  // au ras du sol : la lumière sous la porte, l'ombre de deux pieds… très fins
-  const c = vise([-600, 330, 1.75 + 0.3 * k], [-630, 420, 2.6]);
-  return <VueIn fg={fg} cam={c} zoom={1.1} o={{pieds: [-60 + 8 * Math.sin(fg / 7), 50 + 8 * Math.sin(fg / 7 + 1)]}} />;
+  // tu t'accroupis : la lumière sous la porte, l'ombre de deux pieds… très fins
+  const c = pov(fg, [-610, lerp(OEIL, 330, ease(t, 0, 14)), 1.8 + 0.25 * k], [-630, 420, 2.6], {k: 0.6});
+  return <VueIn fg={fg} cam={c} zoom={1.1} roll={roulis(fg, 0.6)} o={{pieds: [-60 + 8 * Math.sin(fg / 7), 50 + 8 * Math.sin(fg / 7 + 1)]}} />;
 });
 
 // ===== 5. Tu t'approches de la porte. Ton téléphone vibre. Numéro inconnu : « Ce n'est pas lui. » =====
 const Message = scene('message', ({f, fg, i, t, d, R}) => {
   const k = lisse(t, d);
   if (i === 0) {
-    const mk = marche(fg, 0.22, 0.8);
-    const x = lerp(MOI0.x, -620, k);
-    const z = lerp(MOI0.z + 0.3, 1.75, k);
-    const c = {x: x + 150, y: -260, z: z - 0.95, yaw: -4, pitch: 3};
-    return <VueIn fg={fg} cam={c} zoom={1.04} items={(cam) => [moi(cam, {x, z, id: 'm0', dos: true, lum: 0.6, legG: mk.legG, legD: mk.legD, lift: mk.bob})]} />;
+    // tu avances vers la porte, pas à pas
+    return <VueIn fg={fg} cam={pov(fg, [-640, OEIL, 1.1 + 0.7 * k], PORTE_V, {k: 0.8, pas: 0.8})} roll={roulis(fg, 0.8, 0.8)} zoom={1.04} o={{pieds: [-60, 60]}} />;
   }
   const m = main(fg, 0.6);
   const leve = ease(t, 0, 14, Easing.out(Easing.cubic));
@@ -322,60 +348,97 @@ const Fenetre = scene('fenetre', ({f, fg, i, t, d, R}) => {
   const k = lisse(t, d);
   const resp = 0.5 + 0.5 * Math.sin(fg / 14);
   if (i < 2) {
-    const c = i === 0 ? vise([150 + 280 * k, -170, 1.3 + 0.75 * k], [450, -250, 2.6]) : vise([450, -260, 1.75 + 0.15 * k], [500, -520, 5.4]);
+    const c = i === 0 ? pov(fg, [150 + 280 * k, OEIL - 20, 1.3 + 0.75 * k], [450, -250, 2.6], {pas: 0.6 * (1 - k)}) : pov(fg, [450, -260, 1.75 + 0.15 * k], [500, -520, 5.4], {k: 0.5});
+    // ta respiration fait de la buée sur la vitre
+    const buee = i === 1 ? 0.5 + 0.5 * Math.sin(fg / 12) : 0;
     return (
-      <VueIn fg={fg} cam={c} zoom={i === 1 ? 1.1 + 0.15 * k : 1.04}
-        o={{dehors: <RodeurMonde cam={makeCam(c)} x={DEHORS.x} z={DEHORS.z + (i === 0 ? 1.5 : 0)} pose={DEBOUT} lum={0.7} respire={resp} tete={4 * Math.sin(fg / 30)} />}} />
+      <VueIn fg={fg} cam={c} zoom={i === 1 ? 1.1 + 0.15 * k : 1.04} roll={roulis(fg, 0.6)}
+        o={{dehors: <RodeurMonde cam={makeCam(c)} x={DEHORS.x} z={DEHORS.z + (i === 0 ? 1.5 : 0)} pose={DEBOUT} lum={0.7} respire={resp} tete={4 * Math.sin(fg / 30)} />}}
+        dessus={buee > 0 && (
+          <g>
+            <defs>
+              <radialGradient id="bu-g">
+                <stop offset="0" stopColor="#dfe6ff" stopOpacity={0.35 * buee} />
+                <stop offset="1" stopColor="#dfe6ff" stopOpacity="0" />
+              </radialGradient>
+            </defs>
+            <ellipse cx="560" cy="1150" rx="420" ry="300" fill="url(#bu-g)" />
+          </g>
+        )} />
     );
   }
   if (i === 2) {
-    // dehors, plan large : elle, de dos, face au chalet ; toi, derrière la vitre
+    // dehors, plan large : elle, de dos, face au chalet
     const c = {x: 1500 - 200 * k, y: -350, z: 8.6 - 0.4 * k, yaw: 196, pitch: 1};
-    return (
-      <VueExt fg={fg} cam={c} zoom={1.05}
-        chaletO={{perso: null}}
-        items={(cam) => [rod(cam, {x: DEHORS.x, z: DEHORS.z, id: 'fe2', pose: DEBOUT, dos: true, lum: 0.75, respire: resp}), moi(cam, {x: 450, z: 2.3, id: 'fe2m', lum: 0.8})]} />
-    );
+    return <VueExt fg={fg} cam={c} zoom={1.05} items={(cam) => [rod(cam, {x: DEHORS.x, z: DEHORS.z, id: 'fe2', pose: DEBOUT, dos: true, lum: 0.75, respire: resp})]} />;
   }
   // en contre-plongée, de face, éclairée par la fenêtre : les bras qui pendent jusqu'aux genoux
   const c = {x: 380, y: 250, z: DEHORS.z - 1.9 + 0.3 * k, yaw: 0, pitch: -14};
   return (
-    <VueExt fg={fg} cam={c} o={{lumYaw: 10, lumY: -1.4}} zoom={1.0} chaletO={{}}
+    <VueExt fg={fg} cam={c} o={{lumYaw: 10, lumY: -1.4}} zoom={1.0}
       items={(cam) => [rod(cam, {x: DEHORS.x, z: DEHORS.z, id: 'fe3', pose: DEBOUT, lum: 0.95, respire: resp, tete: -10 * ease(t, 10, 50), rim: '#ffd8b0'})]} />
   );
 });
 
-// ===== 7. La poignée tourne toute seule. Le verrou cède. =====
+// ===== 7. La poignée tourne toute seule. Le verrou cède. (tu recules) =====
 const Serrure = scene('serrure', ({f, fg, i, t, d, R}) => {
   const k = lisse(t, d);
   const p = ease(f, R('poignée', 11), R('seule', 45)) * (1 - 0.15 * Math.max(0, Math.sin(f / 2.2)));
   const cede = R('cède', 77) - 2;
   const v = f < cede ? 0.06 * Math.sin(f * 2.4) * ease(f, 50, 60) : 1;
   const flash = interpolate(f - cede, [0, 2, 8], [0, 0.6, 0], clamp);
-  const c = i === 0 ? vise([-520 + 30 * k, 30, 2.25 + 0.05 * k], [-508, 20, 2.6]) : vise([-540, -50 + tremble(fg, f >= cede ? 16 : 0, 'sv'), 2.3], [-508, -60, 2.6]);
+  if (i === 0) {
+    // tu recules sans quitter la poignée des yeux
+    const c = pov(fg, [-560, OEIL + 40, 2.15 - 0.35 * k], [-508, 20, 2.6], {k: 0.9, pas: 0.4, v: 0.15});
+    return <VueIn fg={fg} cam={c} roll={roulis(fg, 0.9)} zoom={1.25 + 0.35 * k} o={{poignee: p, verrou: v}} />;
+  }
+  const c = pov(fg, [-540, -50 + tremble(fg, f >= cede ? 16 : 0, 'sv'), 2.3], [-508, -60, 2.6], {k: 0.6});
   return <VueIn fg={fg} cam={c} zoom={1.0} o={{poignee: p, verrou: v, porte: f >= cede ? 0.03 : 0}} dessus={<rect width="1080" height="1920" fill="#fff" opacity={flash} />} />;
 });
 
-// ===== 8. Deux secondes pour te cacher. L'armoire, ou sous le lit ? =====
-const MOI1 = {x: -150, z: 1.15};
-const Choix = scene('choix', ({f, fg, i, t, d, R}) => {
-  const k = lisse(t, d);
-  const sw = ease(t, 0, 8, Easing.out(Easing.cubic));
-  const c = i === 0 ? vise([-850, -230, 0.2], [lerp(-630, 1150, sw), -80, lerp(2.6, 1.8, sw)]) : vise([-700, -200, 0.1], [lerp(1150, 1000, sw), lerp(-80, 260, sw), lerp(1.8, 0.65, sw)]);
-  const v = t < 8 ? (1 - sw) * 30 : 0;
-  // compte à rebours : deux secondes
-  const reste = 1 - ease(f, R('tu', 2), d);
+// ===== 8. Te cacher : l'armoire, ou sous le lit ? 3 secondes pour choisir (chrono en millisecondes) =====
+const ARMOIRE_V = [1050, -100, 1.8];
+const LIT_V = [1000, 250, 0.65];
+const Chrono = ({reste}) => {
+  const s = Math.max(0, reste);
+  const txt = `${String(Math.floor(s)).padStart(2, '0')}.${String(Math.floor((s % 1) * 1000)).padStart(3, '0')}`;
+  const urgent = s < 1;
   return (
-    <VueIn fg={fg} cam={c} zoom={1.05} flou={v > 2 ? [v, 0] : null}
-      items={(cam) => [moi(cam, {x: MOI1.x, z: MOI1.z, id: `c${i}`, dos: true, lum: 0.6, shiver: tremble(fg, 3, 'cs')})]}
+    <g transform="translate(540 1560)">
+      <rect x="-270" y="-95" width="540" height="190" rx="36" fill="#0b0b0e" opacity="0.82" stroke={urgent ? '#ff2a2a' : '#ffffff'} strokeWidth="5" />
+      <text y="38" textAnchor="middle" fontFamily="'DejaVu Sans Mono', monospace" fontWeight="700" fontSize="118" fill={urgent && Math.floor(s * 10) % 2 ? '#ff3a3a' : '#ffffff'}>{txt}</text>
+      <rect x="-240" y="70" width={480 * Math.min(1, s / 3)} height="10" rx="5" fill="#ff3a3a" />
+    </g>
+  );
+};
+const Choix = scene('choix', ({f, fg, i, t, d, R, bornes}) => {
+  const a = R('larmoire', 53);
+  const b = R('lit', 84) - 6;
+  const t0 = R('lit', 84) + 6; // fin de la question : le chrono démarre
+  const reste = 3 - Math.max(0, f - t0) / 30;
+  let cible;
+  let vit = 0;
+  if (i === 0) {
+    const w = ease(t, 0, 8, Easing.out(Easing.cubic));
+    cible = mixC(PORTE_V, ARMOIRE_V, w);
+    vit = t < 8 ? 1 - w : 0;
+  } else if (i === 1) {
+    const w = ease(t, 0, 8, Easing.out(Easing.cubic));
+    cible = mixC(ARMOIRE_V, LIT_V, w);
+    vit = t < 8 ? 1 - w : 0;
+  } else {
+    // le regard fait des allers-retours de plus en plus rapides entre les deux cachettes
+    const u = 0.5 + 0.5 * Math.sin(t * (0.12 + t * 0.0014));
+    cible = mixC(ARMOIRE_V, LIT_V, u);
+  }
+  const c = pov(fg, [-150, OEIL, 1.0], cible, {k: 1.2 + (i === 2 ? 1 - reste / 3 : 0)});
+  return (
+    <VueIn fg={fg} cam={c} roll={roulis(fg, 1.2)} zoom={1.05} flou={vit > 0.2 ? [30 * vit, 0] : null}
       dessus={
         <g>
-          <Deux f={f} a={R('larmoire', 53)} b={R('lit', 84) - 6} />
-          <g transform="translate(540 1520)">
-            <circle r="70" fill="#0b0b0e" opacity="0.7" />
-            <circle r="60" fill="none" stroke="#ff3a3a" strokeWidth="12" strokeDasharray={`${2 * Math.PI * 60 * reste} 999`} transform="rotate(-90)" />
-            <text y="22" textAnchor="middle" fontFamily="'DejaVu Sans', Arial" fontWeight="900" fontSize="62" fill="#fff">{Math.max(1, Math.ceil(2 * reste))}</text>
-          </g>
+          <Deux f={f} a={a} b={b} />
+          {f >= t0 - 4 && <Chrono reste={reste} />}
+          <rect width="1080" height="1920" fill="#ff1a1a" opacity={f >= t0 ? 0.05 + 0.06 * Math.max(0, Math.sin(f / 2.5)) * (1 - reste / 3) : 0} />
         </g>
       } />
   );
@@ -387,14 +450,12 @@ const Armoire = scene('armoire', ({f, fg, i, t, d, R}) => {
   const k = lisse(t, d);
   const resp = 0.5 + 0.5 * Math.sin(fg / 14);
   if (i === 0) {
-    // ton choix, et tu cours vers l'armoire
-    const mk = marche(fg, 0.42, 1.4);
-    const x = lerp(MOI1.x, 950, k);
-    const z = lerp(MOI1.z, 1.8, k);
+    // ton choix, et tu cours vers l'armoire (vue subjective), la main se tend vers la porte
+    const c = pov(fg, mixC([-150, OEIL, 1.0], [780, OEIL, 1.8], ease(t, 0, d, Easing.in(Easing.quad))), ARMOIRE_V, {k: 1.4, pas: 1.4, v: 0.42});
+    const tend = ease(t, d * 0.4, d);
     return (
-      <VueIn fg={fg} cam={vise([-650, -230, 0.3], [x, -100, z])} zoom={1.05} o={{armoire: 1}}
-        items={(cam) => [moi(cam, {x, z, id: 'a0', dos: true, lum: 0.6, legG: mk.legG, legD: mk.legD, lift: mk.bob})]}
-        dessus={<Deux f={f + 200} a={0} b={0} choisi={1} />} />
+      <VueIn fg={fg} cam={c} roll={roulis(fg, 1.4, 1.4, 0.42)} zoom={1.05} o={{armoire: ease(t, d * 0.6, d)}}
+        dessus={<g>{tend > 0 && <MainPov x={lerp(1200, 700, tend)} y={lerp(2000, 1100, tend)} s={1.5} rot={-25} nuit={0.4} />}<Deux f={f + 200} a={0} b={0} choisi={1} /></g>} />
     );
   }
   const cam = {x: DANS.x + main(fg, 0.4).dx, y: DANS.y + 3 * Math.sin(fg / 9), z: DANS.z, yaw: -90 + 3 * Math.sin(fg / 50), pitch: 0};
@@ -538,12 +599,12 @@ const Lit = scene('lit', ({f, fg, i, t, d, R}) => {
   const k = lisse(t, d);
   const resp = 0.5 + 0.5 * Math.sin(fg / 14);
   if (i === 0) {
-    // ton nouveau choix, et tu plonges sous le lit
-    const u = ease(t, 6, d - 6, Easing.inOut(Easing.cubic));
-    const x = lerp(250, 1000, u);
+    // ton nouveau choix : tu plonges et tu te glisses sous le lit (vue subjective)
+    const u = ease(t, 4, d - 4, Easing.inOut(Easing.cubic));
+    const pos = [lerp(300, SOUS.x, u), lerp(OEIL, SOUS.y, Math.min(1, u * 1.6)), lerp(0.9, SOUS.z, u)];
+    const c = {...pov(fg, pos, mixC(LIT_V, [-630, 300, 2.6], u), {k: 1.3}), };
     return (
-      <VueIn fg={fg} cam={vise([150, 200, 0.05], [900, 300, 0.65])} zoom={1.05} roll={-3}
-        items={(cam) => [moi(cam, {x, z: 0.62, id: 'li0', couche: u, lum: 0.6, eyes: 1.4, worry: 1})]}
+      <VueIn fg={fg} cam={c} zoom={1.05} roll={lerp(0, -8, Math.sin(u * Math.PI))} flou={u > 0.1 && u < 0.9 ? [0, 8] : null}
         dessus={<Deux f={f + 200} a={0} b={0} choisi={2} />} />
     );
   }
@@ -692,7 +753,11 @@ const Dilemme = scene('dilemme', ({f, fg, i, t, d, R}) => {
   }
   // écran partagé : la porte (dedans) / qui est devant (dehors) — une silhouette… à l'ombre beaucoup trop longue
   const cp2 = coups(f, [R('alors', 122) - 10, R('alors', 122) - 2]);
-  const haut = <VueIn fg={fg} cam={vise([-560 + tremble(fg, 14 * cp2, 'dh'), -120, 1.75], [-630, -80, 2.6])} zoom={1.25} o={{coups: cp2, pieds: [-55, 55]}} />;
+  const tend = ease(f, R('ouvres', 149) - 10, R('ouvres', 149) + 20);
+  const haut = (
+    <VueIn fg={fg} cam={pov(fg, [-560 + tremble(fg, 14 * cp2, 'dh'), -120, 1.75], [-560, -40, 2.6], {k: 0.7})} zoom={1.25} o={{coups: cp2, pieds: [-55, 55]}}
+      dessus={<MainPov x={lerp(1100, 600, tend) + 6 * Math.sin(fg / 3)} y={lerp(1700, 860, tend)} s={1.3} rot={-30} nuit={0.45} ouvre={0.8} />} />
+  );
   const bas = (
     <VueExt fg={fg} cam={{x: -300 + 60 * k, y: -200, z: 5.6 - 0.2 * k, yaw: 188, pitch: 2}} zoom={1.35} chaletO={{}}
       items={(cam) => {
