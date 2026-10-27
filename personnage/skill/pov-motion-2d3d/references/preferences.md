@@ -15,6 +15,11 @@ Modèle à suivre : `RentrezChezVous.jsx` + `ForetNuit.jsx` + `Rodeur.jsx` + `Te
 - Fin en **dilemme** : deux étiquettes (emoji + question courte) apparaissent sur les mots, puis une bulle « DIS-LE EN COMMENTAIRE ».
 - Description : « <Titre> | Partie 1 », 2 lignes d'accroche, la question, « Le choix le plus liké décide de la partie 2. », puis des hashtags.
 
+## Format « mauvais choix → rembobinage » (27/10, « Ne lui ouvre pas »)
+- Vidéo plus longue (~1 min 35 à 1 min 50). **Un dilemme au milieu** : deux options à l'écran (`ChoixBoite`, compte à rebours). On montre d'abord **la mauvaise** jusqu'à la mort (screamer), puis la voix : « Si tu as choisi X… tu ne survis pas. » (image figée en **PAUSE** VHS), puis « On rembobine » : **rembobinage VHS rétro** (`VHS` + `imageA` qui rejoue les images à l'envers en accéléré, compteur, « ◀◀ REW » puis « ▶ PLAY ») et le son de la scène passé à l'envers. Ensuite le bon choix (coché en vert), l'histoire continue, et **un dilemme final** où la vidéo s'arrête (commentaires).
+- Pour avoir le temps du screamer, du noir et du rembobinage sans ralentir la voix : `python3 voix/inserer_blancs.py <projet> armoire=1.2 mort=1.0 rembobine=3.2 …` après `caler_voix.py`.
+- **Les 5 premières secondes doivent accrocher** : 4-5 plans très courts (plongée rapide dans le décor, alarme qui clignote, visage, détail qui bouge, téléphone), son fort dès la 1re seconde.
+
 ## Personnage et style
 - **Toujours le même bonhomme 2D** (t-shirt corail, jean bleu, cheveux violets), même style d'animation, jamais redessiné.
 - Il doit être **bien animé et visible en entier** quand on le voit en pied. « On voit que le haut » est un défaut à corriger : il ne doit jamais être coupé par un sol ou un meuble mal trié.
