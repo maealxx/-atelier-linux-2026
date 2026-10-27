@@ -7,6 +7,8 @@ description: Moteur de motion design 2,5D / 3D de Maé pour ses vidéos TikTok v
 
 Maé fait des vidéos TikTok en POV (« Imagine… ») animées en 2,5D, avec **son** bonhomme, **ses** décors et **son** montage. Ce skill contient tout le moteur graphique prêt à l'emploi dans `assets/projet/`, un projet Remotion complet. On **réutilise** au lieu de redessiner. Le moteur n'est pas réservé à l'horreur : tous les décors et persos marchent pour n'importe quel thème (on change la lumière, la teinte, l'histoire).
 
+**Style par défaut (validé le 27/10) : celui de « Rentrez chez vous »** (`RentrezChezVous.jsx`) : scènes POV caméra portée + plans extérieurs dynamiques sur le bonhomme, monstre façon `Rodeur` (silhouette maigre au liseré blanc), lumière en contre-jour avec halo, brume, palette sombre gris-violet, passe shader. Pars de ce fichier pour toute nouvelle vidéo (détails en haut de `references/preferences.md`).
+
 À lire avant d'écrire du code :
 - `references/preferences.md` contient **tout ce que Maé a demandé ou corrigé** : style, rythme, caméra, décor, son, textes. C'est la référence n° 1 ; relis-la avant chaque vidéo.
 - `references/moteur.md` décrit l'API : caméra 3D, polygones, plaques, boîtes, montage, `Plan`, finitions.

@@ -1,5 +1,13 @@
 # Les préférences de Maé (tout ce qu'elle a demandé, validé ou corrigé)
 
+## ⭐ STYLE PAR DÉFAUT DES VIDÉOS (validé le 27/10 sur « Rentrez chez vous » : « garde ce nouveau style »)
+Modèle à suivre : `RentrezChezVous.jsx` + `ForetNuit.jsx` + `Rodeur.jsx` + `TelReel.jsx`. Elle aime surtout :
+- **Les scènes POV** : caméra portée (`main(f)`), marche/course (`pas`), demi-tour avec flou de bougé, téléphone tenu en main en vraie perspective, fond flouté derrière, main qui cache la bouche, branches qui fouettent l'objectif, regard vers le haut le long d'un tronc.
+- **Mélangées avec des plans extérieurs dynamiques sur le bonhomme** : travelling de dos en contre-jour, plan de face éclairé par l'écran, orbite en contre-plongée, gros plan visage figé, par-dessus l'épaule avec le monstre au loin, travelling de face pendant la course avec le monstre derrière, plan large caché (accroupi dans les fougères). Surtout au début, pour ne pas montrer que le décor.
+- **Le design des monstres** façon `Rodeur` : grande silhouette maigre gris pâle, liseré blanc, orbites noires vides, membres trop longs, poses articulées qui se mélangent (debout → quatre pattes araignée).
+- **La lumière et la façon de filmer** : palette sombre gris-violet (ou crépuscule orange-rose qui bascule vers la nuit), **halo en contre-jour derrière le sujet**, liserés clairs, brume en couches, rayons, poussière, perspective atmosphérique, passe shader `postfx.sh`.
+- Pour un nouveau lieu : refais un décor dans cet esprit (2,5D propre, contre-jour, brume) plutôt que l'ancien style plat ; adapte `Rodeur` pour d'autres créatures.
+
 ## Format
 - TikTok vertical 1080×1920, 30 i/s, **au moins 60 s** (un peu plus long accepté).
 - Première phrase : **« Imagine… »**. L'intrigue commence **tout de suite**, sans longue mise en place.
@@ -10,7 +18,7 @@
 ## Personnage et style
 - **Toujours le même bonhomme 2D** (t-shirt corail, jean bleu, cheveux violets), même style d'animation, jamais redessiné.
 - Il doit être **bien animé et visible en entier** quand on le voit en pied. « On voit que le haut » est un défaut à corriger : il ne doit jamais être coupé par un sol ou un meuble mal trié.
-- Monstres et créatures en **vraie 3D** (`surveillant3D`), pas en dessin plat. Les humains vus en plongée ou contre-plongée aussi (tenue `'vrai'`).
+- Monstres et créatures : **depuis le 27/10, le style `Rodeur` (2D articulé, liseré blanc, contre-jour) est le préféré**. Avant, c'était la vraie 3D (`surveillant3D`) plutôt qu'un dessin plat. Les humains vus en plongée ou contre-plongée aussi (tenue `'vrai'`).
 - **Plus de 3D et de perspective** dans les décors : volumes, balcons, meubles en boîtes, bâtiments immenses, manoir « salle des fêtes » très grand.
 
 ## Accroche et texte (retour du 26/10, « Le vaisseau »)
