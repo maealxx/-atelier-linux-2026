@@ -20,6 +20,11 @@ Modèle à suivre : `RentrezChezVous.jsx` + `ForetNuit.jsx` + `Rodeur.jsx` + `Te
 - Pour avoir le temps du screamer, du noir et du rembobinage sans ralentir la voix : `python3 voix/inserer_blancs.py <projet> armoire=1.2 mort=1.0 rembobine=3.2 …` après `caler_voix.py`.
 - **Les 5 premières secondes doivent accrocher** : 4-5 plans très courts (plongée rapide dans le décor, alarme qui clignote, visage, détail qui bouge, téléphone), son fort dès la 1re seconde.
 
+## Monétisation TikTok (27/10 : « Rentrez chez vous » refusée pour « contenu de faible qualité »)
+- TikTok a jugé la vidéo comme des « prises de vue aléatoires / paysage sans rapport » : la **1re image et la miniature** montraient un sentier vide.
+- Désormais : **la 1re image montre toujours le bonhomme ou le monstre en gros** (jamais un décor vide), et on fournit une **image de couverture** (`out/<projet>_couverture.png`, rendue avec `apercu.mjs`) avec le perso + le danger.
+- Pas de longs plans de décor vide (> 1,5 s) sans perso, sans monstre ni objet de l'histoire (téléphone, porte…).
+
 ## Personnage et style
 - **Toujours le même bonhomme 2D** (t-shirt corail, jean bleu, cheveux violets), même style d'animation, jamais redessiné.
 - Il doit être **bien animé et visible en entier** quand on le voit en pied. « On voit que le haut » est un défaut à corriger : il ne doit jamais être coupé par un sol ou un meuble mal trié.
