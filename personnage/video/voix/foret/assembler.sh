@@ -13,7 +13,7 @@ bash voix/postfx.sh out/rc_brut.mp4 out/rc_post.mp4 0.6
 ffmpeg -loglevel error -y -i out/rc_post.mp4 -i out/rc_audio.wav -map 0:v -map 1:a -c:v copy -c:a aac -b:a 192k -shortest out/rc_avec_son.mp4
 cat > out/rc_st.json <<JSON
 {"video": "out/rc_avec_son.mp4", "words": "out/rc_mots.json", "out": "out/rc_soustitre.mp4", "mode": "burn", "work": "$WK",
- "couleurs": ["&H2A2AFF&"], "sfx": false, "bas": [[1.2, 15.73], [23.3, 26.7], [46.0, 49.2], [54.87, 63.0]],
+ "couleurs": ["&H2A2AFF&"], "sfx": false, "bas": [[1.1, 12.9], [19.9, 22.57], [40.97, 44.17], [50.23, 58.87]],
  "emojis": [["vibre", "1f4f3"], ["forêt", "1f332"], ["retournes", "1f440"], ["yeux", "1f480"], ["fonce", "1f631"], ["chêne", "1f333"], ["renifler", "1f443"], ["photo", "1f4f8"], ["torche", "1f526"]]}
 JSON
 python3 voix/soustitres.py out/rc_st.json

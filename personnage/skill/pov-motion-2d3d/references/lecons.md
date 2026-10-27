@@ -79,4 +79,5 @@
 - **Lumière lointaine** (lampe torche à 15 Z) : garde une **taille fixe à l'écran** pour l'éblouissement, sinon elle fait 20 px. Trie-la juste devant la caméra (z ≈ 6 Z) pour qu'elle passe devant la brume, et dégage un couloir d'arbres (`degage`).
 - **Buissons tout près** de la caméra : de simples ellipses deviennent des taches bizarres. Ne les dessine pas sous 2 Z.
 - **Photo plein écran** au format 4:5 : mets la même photo agrandie, floutée et assombrie derrière, plutôt que des bandes noires ou un recadrage trop serré.
+- **Le MP3 ElevenLabs peut contenir une prise en double** (ici le début lu deux fois, puis tout le script) : la voix « se répète » et tous les sous-titres sont décalés. Avant `caler_voix.py`, vérifie la durée attendue et cherche une répétition (auto-similarité du spectrogramme sur les 15 premières secondes) ; coupe la prise en trop avec `ffmpeg -ss`.
 - **Concurrence du rendu** : `--concurrency=$(nproc)` (4 ici) ; plus haut, Remotion refuse.

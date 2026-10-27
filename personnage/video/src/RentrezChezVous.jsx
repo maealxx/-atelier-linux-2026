@@ -293,7 +293,7 @@ const Coincidence = scene('coincidence', ({f, fg, i, t, d, R}) => {
     );
   }
   // panoramique gauche, puis droite, puis on repart
-  const YAWS = [[62, 70, 100, 118, 150], [-20, -20, 42, 42, 0]];
+  const YAWS = [[62, 70, 95, 110, 138], [-20, -20, 42, 42, 0]];
   const yaw = interpolate(f, YAWS[0], YAWS[1], {...clamp, easing: EZ});
   const repart = ease(f, R('continues', 141) - 20, R('continues', 141) + 10);
   const p = pas(fg, 0.21, repart);
@@ -382,18 +382,18 @@ const Retourne = scene('retourne', ({f, fg, i, t, d, R}) => {
 });
 
 // ===== 7. D'un coup, elle se met à quatre pattes, et elle fonce sur toi ! =====
-const Charge = scene('charge', ({f, fg, R}) => {
+const Charge = scene('charge', ({f, fg, d, R}) => {
   const tombe = ease(f, R('coup', 16) - 8, R('pattes', 67), Easing.inOut(Easing.cubic));
   const fonce = R('fonce', 98) - 22;
-  const u = ease(f, fonce, 128, Easing.in(Easing.quad));
+  const u = ease(f, fonce, d - 2, Easing.in(Easing.quad));
   const z = ROD.z + u * 4.1;
-  const choc = interpolate(f, [fonce, 128], [0, 1], clamp);
+  const choc = interpolate(f, [fonce, d - 2], [0, 1], clamp);
   const m = main(fg, 1 + 3 * choc);
   const c = {x: 30 + m.dx + tremble(fg, 26 * choc * choc, 'ch'), y: OEIL + m.dy + tremble(fg + 7, 20 * choc * choc, 'ch'), z: Z_ARRET + 0.25 * (1 - choc), yaw: 180, pitch: 1};
   const pose = galop(melange(DEBOUT, QUATRE, tombe), fg * 0.55, ease(f, fonce - 10, fonce + 6));
-  const flash = interpolate(f, [124, 126, 129], [0, 0.85, 0.3], clamp);
+  const flash = interpolate(f, [d - 6, d - 4, d - 1], [0, 0.85, 0.3], clamp);
   return (
-    <Vue fg={fg} cam={c} o={NUIT} roll={m.r * 2} zoom={lerp(1.75, 1.15, ease(f, fonce - 10, 120)) * (1 + 0.1 * choc)}
+    <Vue fg={fg} cam={c} o={NUIT} roll={m.r * 2} zoom={lerp(1.75, 1.15, ease(f, fonce - 10, d - 8)) * (1 + 0.1 * choc)}
       items={(cam) => [{z, x: ROD.x, el: <RodeurMonde cam={cam} x={ROD.x} z={z} id="ro2" pose={pose} tete={lerp(-20, 0, tombe)} ouvre={ease(f, R('fonce', 98) - 12, R('fonce', 98) + 6)} respire={respire(fg)} />}]}
       dessus={<rect width="1080" height="1920" fill="#fff" opacity={flash} />} />
   );
