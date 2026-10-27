@@ -55,6 +55,11 @@
   - la **passe de post-traitement** `voix/postfx.sh` (bloom, étalonnage ciné ombres bleues / lumières chaudes, légère aberration chromatique, vignette, grain fin) entre le rendu et le mixage, dans `assembler.sh`.
 - Pas de GPU dans l'environnement : les « shaders » sont faits par ffmpeg (CPU). Le dire si elle demande du GLSL.
 
+## Téléphone réaliste et fluide (27/10, « Le babyphone »)
+- Maé veut **un vrai téléphone, bien animé, fluide** : utilise `TelReel` (perspective CSS 3D, prise en main avec courbes douces, notifications au ressort, tap, « écrit… », bulles qui poussent les autres), jamais l'ancien `Telephone` 2D plat.
+- Dans l'accroche : le téléphone **vibre dès la 1re-2e seconde**. Voix au début **pressée, comme une urgence** (balises `[urgent]`, `[panicked]`, Stability 35-40 %).
+- Elle demande souvent de **prendre plus de temps** : fais plusieurs passes de planches (au moins 3) et corrige chaque plan avant le rendu.
+
 ## Son
 - **Pas de crépitement de feu** (demande du 27/10).
 - La **voix ElevenLabs** de Maé, légèrement accélérée (environ 5 %), avec les blancs raccourcis sans les supprimer. Elle doit rester agréable.

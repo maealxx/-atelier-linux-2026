@@ -12,9 +12,11 @@ import {DUREE_VAISSEAU, LeVaisseau} from './LeVaisseau';
 import {DernierTrain, DUREE_DERNIER_TRAIN} from './DernierTrain';
 import {DUREE_HYPERGAMIE, Hypergamie} from './Hypergamie';
 import {DUREE_TENTE, LaTente} from './LaTente';
+import {DUREE_BABYPHONE, LeBabyphone} from './LeBabyphone';
 
 export const Root = () => (
   <>
+    <Composition id="Babyphone" component={LeBabyphone} durationInFrames={DUREE_BABYPHONE} fps={30} width={1080} height={1920} />
     <Composition
       id="LaTente"
       component={LaTente}

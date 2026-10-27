@@ -64,3 +64,11 @@
 - **Arbres autour de la caméra** : avec des sapins en anneau, une caméra placée hors de la clairière se retrouve au milieu des troncs. Laisse un secteur sans arbres du côté des caméras.
 - **Voix sous 60 s** : cale à la vitesse 1.0 au lieu de 1.05.
 - **Guillemets « » seuls dans les sous-titres** : filtre-les dans `assembler.sh` (`m[2].strip('«» ')`).
+
+## Retours du « Babyphone » (27/10)
+- **Objet posé sur un meuble** (téléphone sur la table) : donne-lui un `z` d'item plus proche que le meuble, sinon le plateau le recouvre.
+- **Porte qui s'ouvre vers l'intérieur** : elle peut remplir l'image si la caméra est près d'elle. Choisis la charnière du côté qui rabat le battant contre un mur loin des caméras.
+- **Trappe au plafond** : charnière côté fond, ouverture ≤ 60°, sinon le panneau cache l'ouverture.
+- **Perso assis vu sous tous les angles** : coupe en espace écran (rectangle au-dessus de la projection de l'assise), pas avec un plan 3D (dégénéré quand on le voit par la tranche).
+- **Vision nocturne** : passe d'abord en niveaux de gris (`saturate 0`), puis vert modéré ; sinon tout sature en vert fluo.
+- **Mixage** : `pluie * k` doit avoir la longueur de `sfx` (couper au plus court).

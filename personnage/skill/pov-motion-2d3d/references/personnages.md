@@ -52,7 +52,14 @@ Environ 3 m (1100 unités à `echelle` 1), noir brillant, tête allongée vers l
 - `Silhouette` (src/Maison.jsx, non exportée) : ombre derrière une vitre, floue, qui danse ou reste immobile, avec un `sourire` et une tête qui se `tord`.
 - `YeuxRouges` (src/moteur.jsx).
 
-## Le téléphone : `<Telephone f messages notif verrouille nom echelle x y vibre heure date initiale barres ecran />` (src/Maison.jsx)
+## Le téléphone réaliste (à préférer) : `TelReel` / `Tel` (src/TelReel.jsx)
+- `Tel` : le dessin SVG complet (coque métal, Dynamic Island, reflet), à poser **en 3D dans la scène** dans une `plaque` (téléphone posé sur une table, il vibre : voir `TelSurTable` dans LeBabyphone.jsx) ou dans `TelReel`.
+- `TelReel` : **tenu en main en vraie perspective** (CSS 3D) : `pose = {x, y, rx, ry, rz, s}` (anime-la avec des courbes douces pour la prise en main), `vib` (images des vibrations : seul le téléphone tremble), `lueur` (lumière de l'écran sur la scène), `appui` (le pouce appuie).
+- Écrans : `ecran` 'off' | 'lock' | 'conv'. Écran verrouillé : `notifs: [{t, titre, texte}]` qui **s'empilent au ressort** (la plus récente en haut). `tap` (image) : on touche la notification → la conversation s'ouvre. Conversation : `messages: [{t, texte, alerte}]`, « écrit… » 30 images avant, les bulles poussent les autres en douceur, `alerte` = bulle rouge, mots en MAJUSCULES en gras ; `zoomConv` (0 → 0.3) pour lire la dernière bulle.
+- Fond flouté derrière l'objet tenu en main : `<Flou>` (LeBabyphone.jsx) autour d'un `Plan`.
+- `Babyphone` / `BabyReel` : l'unité parents (écran qui affiche un `flux`, 5 diodes de son `niveau`, `alerte`, `grain` de parasites). `VisionNocturne` : vue d'une caméra en vision nocturne (vert, grain, lignes, REC, heure).
+
+## L'ancien téléphone : `<Telephone f messages notif verrouille nom echelle x y vibre heure date initiale barres ecran />` (src/Maison.jsx)
 - `heure`, `date`, `initiale` (avatar), `barres` (null, 0 = « Aucun service », 1 → 4), `ecran` (dessin libre dans −255…255 × −480…535 : appli, appel, visio).
 - Il se dessine en coordonnées écran, à mettre dans `dessus` du `Plan`, avec un voile noir derrière (opacité 0.3 à 0.6).
 - `verrouille` : grande heure + `notif: {debut, texte}`, qui glisse sous l'heure.
