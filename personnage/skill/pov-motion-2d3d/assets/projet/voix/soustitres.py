@@ -77,7 +77,8 @@ for gi, g in enumerate(groups):
         txt = [((r"{\c" + col + "}" + " ".join(g[j][2].upper() for j in L) + r"{\c&HFFFFFF&}") if k == act
                 else " ".join(g[j][2].upper() for j in L)) for k, L in enumerate(lines)]
         pop = r"\fscx70\fscy70\t(0,90,\fscx106\fscy106)\t(90,160,\fscx100\fscy100)" if i == 0 else ""
-        ev.append(f"Dialogue: 0,{ts(s)},{ts(end)},Sub,,0,0,0,,{{\\an5\\pos({W//2},{Y0})\\blur1{pop}}}" + r"\N".join(txt))
+        yy = int(H * 0.86) if any(a <= s < b for a, b in C.get("bas", [])) else Y0
+        ev.append(f"Dialogue: 0,{ts(s)},{ts(end)},Sub,,0,0,0,,{{\\an5\\pos({W//2},{yy})\\blur1{pop}}}" + r"\N".join(txt))
 ass = f"{WK}/subs.ass"; open(ass, "w").write(hdr + "\n".join(ev) + "\n")
 
 # --- emojis : 1er groupe contenant le mot-clé
@@ -99,7 +100,8 @@ def layer(t):
         if fade < 1: im.putalpha(im.getchannel("A").point(lambda v: int(v * fade)))
         half = 55 if nl == 1 else 100; pos = k % 3
         cx = W // 2 + (150 if pos == 0 else (-150 if pos == 2 else 0))
-        cy = (Y0 - half - 75 if pos == 1 else Y0 + half + 70) + 8 * math.sin(r * 2.4 * math.pi)
+        yb = int(H * 0.86) if any(u <= a < v for u, v in C.get("bas", [])) else Y0
+        cy = (yb - half - 75 if (pos == 1 or yb != Y0) else yb + half + 70) + 8 * math.sin(r * 2.4 * math.pi)
         fr.alpha_composite(im, (int(cx - im.width / 2), int(cy - im.height / 2)))
     return fr
 

@@ -149,10 +149,10 @@ const Alerte = scene('alerte', ({f, fg, i, t, d, bornes, R}) => {
     </Flou>
   );
   const prise = ease(f, bornes[1], bornes[1] + 20);
-  const s = i === 1 ? 1.35 : 1.5 + 0.12 * k;
+  const s = i === 1 ? 1.2 : 1.24 + 0.06 * k;
   const pose = i === 1
-    ? {x: 540, y: interpolate(prise, [0, 1], [2300, 1000]), rx: interpolate(prise, [0, 1], [58, 6]), ry: -6 + 3 * Math.sin(f / 30), rz: interpolate(prise, [0, 1], [14, -2]), s}
-    : {x: 540, y: 980, rx: 4, ry: -4 + 2 * Math.sin(f / 30), rz: -1.5, s};
+    ? {x: 540, y: interpolate(prise, [0, 1], [2300, 840]), rx: interpolate(prise, [0, 1], [58, 6]), ry: -6 + 3 * Math.sin(f / 30), rz: interpolate(prise, [0, 1], [14, -2]), s}
+    : {x: 540, y: 820, rx: 4, ry: -4 + 2 * Math.sin(f / 30), rz: -1.5, s};
   const tap = R('cest', 144);
   const zoomConv = i === 2 ? 0.22 * ease(f, R('surtout', 199) - 6, R('grenier', 240)) : 0;
   return (
@@ -316,8 +316,8 @@ const Message = scene('message', ({f, fg, i, t, d, R}) => {
   const notif6 = [{t: G('message', 'vibre', 11) - 4, titre: 'Maman de Léna', texte: 'On a oublié de te dire…'}];
   const montee = ease(f, 0, 14);
   const pose = i === 0
-    ? {x: 540, y: interpolate(montee, [0, 1], [1500, 1010]), rx: interpolate(montee, [0, 1], [30, 6]), ry: -5, rz: -2, s: 1.4}
-    : {x: 540, y: 990, rx: 4, ry: -3 + 2 * Math.sin(f / 30), rz: -1, s: 1.55 + 0.1 * k};
+    ? {x: 540, y: interpolate(montee, [0, 1], [1500, 840]), rx: interpolate(montee, [0, 1], [30, 6]), ry: -5, rz: -2, s: 1.2}
+    : {x: 540, y: 820, rx: 4, ry: -3 + 2 * Math.sin(f / 30), rz: -1, s: 1.24 + 0.06 * k};
   return (
     <AbsoluteFill>
       <Flou k={8} lum={0.5}><Plan {...PLAN} f={fg} cam={camF} decor={salon(camF, fg)} items={[]} noir={0.1} /></Flou>
