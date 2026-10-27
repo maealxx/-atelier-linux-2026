@@ -8,7 +8,7 @@ python3 voix/babyphone/mixage.py out/bp_audio.wav $FIN $VOIX
 # sous-titres : seulement les mots qui tombent dans la partie rendue
 python3 -c "
 import json,sys; fin=float(sys.argv[1]) if sys.argv[1] else 1e9
-json.dump([m for m in json.load(open('voix/babyphone/mots.json')) if m[0] < fin - 0.2 and m[2].strip('«» ')], open('out/bp_mots.json','w'), ensure_ascii=False)" "$FIN"
+json.dump([m for m in json.load(open('voix/babyphone/mots.json')) if m[0] < fin - 0.2 and m[2].strip('«» :;,.!?')], open('out/bp_mots.json','w'), ensure_ascii=False)" "$FIN"
 bash voix/postfx.sh out/bp_brut.mp4 out/bp_post.mp4 0.55
 ffmpeg -loglevel error -y -i out/bp_post.mp4 -i out/bp_audio.wav -map 0:v -map 1:a -c:v copy -c:a aac -b:a 192k -shortest out/bp_avec_son.mp4
 cat > out/bp_st.json <<JSON
