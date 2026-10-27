@@ -22,8 +22,8 @@ Modèle à suivre : `RentrezChezVous.jsx` + `ForetNuit.jsx` + `Rodeur.jsx` + `Te
 
 ## Monétisation TikTok (27/10 : « Rentrez chez vous » refusée pour « contenu de faible qualité »)
 - TikTok a jugé la vidéo comme des « prises de vue aléatoires / paysage sans rapport » : la **1re image et la miniature** montraient un sentier vide.
-- Désormais : **la 1re image montre toujours le bonhomme ou le monstre en gros** (jamais un décor vide), et on fournit une **image de couverture** (`out/<projet>_couverture.png`, rendue avec `apercu.mjs`) avec le perso + le danger.
-- Pas de longs plans de décor vide (> 1,5 s) sans perso, sans monstre ni objet de l'histoire (téléphone, porte…).
+- Désormais : **la 1re image montre toujours notre bonhomme**, bien visible (le monstre n'est pas obligatoire), jamais un décor vide ; et on fournit une **image de couverture** (`personnage/<titre>_couverture.png`) avec le bonhomme (+ le danger si possible).
+- Pas de longs plans de décor vide (> 1,5 s) sans le bonhomme ni un objet de l'histoire (téléphone, porte…).
 
 ## Personnage et style
 - **Toujours le même bonhomme 2D** (t-shirt corail, jean bleu, cheveux violets), même style d'animation, jamais redessiné.

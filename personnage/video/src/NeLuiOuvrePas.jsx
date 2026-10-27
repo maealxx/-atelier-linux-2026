@@ -228,10 +228,12 @@ const TEL_V = [-300, 155, 1.0];
 const Vibre = scene('vibre', ({f, fg, i, t, d}) => {
   const k = lisse(t, d);
   if (i === 0) {
-    // on fonce à travers le blizzard vers le chalet allumé
-    const u = Easing.in(Easing.cubic)(Math.min(1, t / d));
-    const c = {x: lerp(-300, 380, u), y: lerp(-1500, -330, u), z: lerp(17, 4.2, u), yaw: 180 + lerp(-10, 3, u), pitch: lerp(14, 2, u)};
-    return <VueExt fg={fg} cam={c} rush={1.4} roll={lerp(-5, 0, u)} flou={[0, 4 * u]} />;
+    // 1re image : toi, seul devant le feu (travelling avant rapide sur ton visage)
+    const c = vise([ASSIS[0] + 330 - 120 * k, -170, ASSIS[2] - 0.75 + 0.3 * k], [ASSIS[0], -150, ASSIS[2]]);
+    return (
+      <VueIn fg={fg} cam={c} roll={lerp(-3, 0, k)} zoom={1.05 + 0.08 * k} o={{rouge: 0, ecran: 0}}
+        items={(cam) => [moi(cam, {x: ASSIS[0], z: ASSIS[2], id: 'v0', lum: 0.8, pupilX: -8, smile: 0.2})]} />
+    );
   }
   if (i === 1) {
     // assis devant le feu… l'alarme hurle : coup de tête vers la table où le téléphone clignote en rouge
@@ -247,9 +249,10 @@ const Vibre = scene('vibre', ({f, fg, i, t, d}) => {
     return <VueIn fg={fg} cam={c} roll={roulis(fg, 1.4, 1.2, 0.4)} zoom={1.05} />;
   }
   if (i === 3) {
-    // la fenêtre qui tremble sous les rafales
-    const c = pov(fg, [450 + tremble(fg, 14, 'fw'), -250 + tremble(fg + 3, 10, 'fw'), 1.55 + 0.35 * k], [450, -260, 2.6], {k: 1.2});
-    return <VueIn fg={fg} cam={c} roll={tremble(fg, 1.5, 'fr')} zoom={1.05} />;
+    // dehors : on fonce à travers le blizzard vers le chalet allumé
+    const u = Easing.in(Easing.cubic)(Math.min(1, t / d));
+    const c = {x: lerp(-300, 380, u), y: lerp(-1500, -330, u), z: lerp(17, 4.2, u), yaw: 180 + lerp(-10, 3, u), pitch: lerp(14, 2, u)};
+    return <VueExt fg={fg} cam={c} rush={1.4} roll={lerp(-5, 0, u)} flou={[0, 4 * u]} />;
   }
   // tu attrapes le téléphone
   const leve = ease(t, 0, 16, Easing.out(Easing.cubic));
