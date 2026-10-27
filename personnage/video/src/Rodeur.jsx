@@ -78,7 +78,7 @@ export const doigts = (poignet, dir, {long = 1, ecart = 1, plie = 0.25, cote = 1
 };
 
 // pose : articulations ; tete : inclinaison (degrés) ; ouvre : bouche (0 → 1) ; lum : luminosité du corps
-export const Rodeur = ({pose, tete = 0, ouvre = 0, lum = 1, rim = '#eef0ff', rimK = 1, plie = 0.25, id = 'ro', respire = 0}) => {
+export const Rodeur = ({pose, tete = 0, ouvre = 0, lum = 1, rim = '#eef0ff', rimK = 1, plie = 0.25, id = 'ro', respire = 0, dos = false}) => {
   const p = pose;
   const corps = `rgb(${Math.round(142 * lum)},${Math.round(139 * lum)},${Math.round(154 * lum)})`;
   const sombre = `rgb(${Math.round(92 * lum)},${Math.round(88 * lum)},${Math.round(106 * lum)})`;
@@ -153,14 +153,14 @@ export const Rodeur = ({pose, tete = 0, ouvre = 0, lum = 1, rim = '#eef0ff', rim
       <g transform={`translate(${p.cou[0]} ${p.cou[1]}) rotate(${ang}) translate(0 ${-L})`}>
         <path d="M0,-92 C52,-92 70,-50 66,-6 C62,44 34,84 0,86 C-34,84 -62,44 -66,-6 C-70,-50 -52,-92 0,-92 Z" fill={rim} stroke={rim} strokeWidth="7" />
         <path d="M0,-92 C52,-92 70,-50 66,-6 C62,44 34,84 0,86 C-34,84 -62,44 -66,-6 C-70,-50 -52,-92 0,-92 Z" fill={`url(#${id}-cr)`} />
-        <path d="M-30,-62 q30,-10 60,0 M-22,-48 q22,-7 44,0" stroke={sombre} strokeWidth="3" fill="none" opacity="0.7" />
-        {[-1, 1].map((s) => (
+        {!dos && <path d="M-30,-62 q30,-10 60,0 M-22,-48 q22,-7 44,0" stroke={sombre} strokeWidth="3" fill="none" opacity="0.7" />}
+        {!dos && [-1, 1].map((s) => (
           <g key={s} transform={`translate(${s * 25} 2) rotate(${s * -14})`}>
             <ellipse rx="22" ry="29" fill={sombre} opacity="0.8" />
             <ellipse rx="18.5" ry="25" fill={`url(#${id}-orb)`} />
           </g>
         ))}
-        {ouvre > 0.02 ? (
+        {dos ? null : ouvre > 0.02 ? (
           <g>
             <ellipse cx="0" cy="52" rx={14 + 10 * ouvre} ry={4 + 26 * ouvre} fill="#050307" />
             {[-12, -4, 4, 12].map((x) => (
@@ -177,13 +177,63 @@ export const Rodeur = ({pose, tete = 0, ouvre = 0, lum = 1, rim = '#eef0ff', rim
 
 // la créature posée dans le monde (billboard), pieds au sol en (x, sol, z)
 export const RodeurMonde = ({cam, x, z, y = 432, echelle = 1, ...r}) => {
-  if (!cam.visible(z, x, y)) return null;
-  const [px, py] = cam.proj(x, y, z);
-  const s = cam.scale(z, x, y) * echelle;
+  // visibilité testée au milieu du corps (les pieds peuvent être hors champ quand on lève les yeux)
+  if (!cam.visible(z, x, y - 500)) return null;
+  // ancré au milieu du corps : reste juste même si la caméra lève fort les yeux
+  const [px, py] = cam.proj(x, y - 500 * echelle, z);
+  const s = cam.scale(z, x, y - 500) * echelle;
   return (
-    <g transform={`translate(${px} ${py}) scale(${s})`}>
+    <g transform={`translate(${px} ${py}) scale(${s}) translate(0 500)`}>
       <ellipse cx="0" cy="4" rx="260" ry="34" fill="#000" opacity="0.4" />
       <Rodeur {...r} />
     </g>
   );
 };
+
+// marche lente (pieds levés à tour de rôle, bras qui se balancent)
+export const marcheRodeur = (p, ph, amp = 1) => {
+  const s = Math.sin(ph);
+  const dec = (pt, dx, dy) => [pt[0] + dx, pt[1] + dy];
+  return {
+    ...p,
+    piG: dec(p.piG, 0, -Math.max(0, s) * 70 * amp),
+    geG: dec(p.geG, 6 * s * amp, -Math.max(0, s) * 50 * amp),
+    piD: dec(p.piD, 0, -Math.max(0, -s) * 70 * amp),
+    geD: dec(p.geD, -6 * s * amp, -Math.max(0, -s) * 50 * amp),
+    maG: dec(p.maG, 30 * s * amp, 0),
+    maD: dec(p.maD, -30 * s * amp, 0),
+    tete: dec(p.tete, 6 * s * amp, -8 * Math.abs(s) * amp),
+  };
+};
+
+// la tête seule (gros plans), centrée en (0, 0), ≈ 180 de haut
+export const TeteRodeur = ({ouvre = 0, rim = '#eef0ff', corps = '#8e8b99', id = 'tr'}) => (
+  <g>
+    <defs>
+      <radialGradient id={`${id}-orb`}>
+        <stop offset="0" stopColor="#000" />
+        <stop offset="0.7" stopColor="#050408" />
+        <stop offset="1" stopColor="#1e1b26" />
+      </radialGradient>
+    </defs>
+    <path d="M0,-92 C52,-92 70,-50 66,-6 C62,44 34,84 0,86 C-34,84 -62,44 -66,-6 C-70,-50 -52,-92 0,-92 Z" fill={rim} stroke={rim} strokeWidth="7" />
+    <path d="M0,-92 C52,-92 70,-50 66,-6 C62,44 34,84 0,86 C-34,84 -62,44 -66,-6 C-70,-50 -52,-92 0,-92 Z" fill={corps} />
+    <path d="M-30,-62 q30,-10 60,0 M-22,-48 q22,-7 44,0" stroke="#5d5a6a" strokeWidth="3" fill="none" opacity="0.7" />
+    {[-1, 1].map((s) => (
+      <g key={s} transform={`translate(${s * 25} 2) rotate(${s * -14})`}>
+        <ellipse rx="22" ry="29" fill="#5d5a6a" opacity="0.8" />
+        <ellipse rx="18.5" ry="25" fill={`url(#${id}-orb)`} />
+      </g>
+    ))}
+    {ouvre > 0.02 ? (
+      <g>
+        <ellipse cx="0" cy="52" rx={14 + 10 * ouvre} ry={4 + 26 * ouvre} fill="#050307" />
+        {[-12, -4, 4, 12].map((x) => (
+          <path key={x} d={`M${x * (0.6 + ouvre * 0.5)},${52 - (4 + 26 * ouvre) + 1} l2.5,${7 * ouvre} l2.5,${-7 * ouvre}`} fill="#d8d6e0" />
+        ))}
+      </g>
+    ) : (
+      <path d="M-14,50 q14,8 28,-3" stroke="#1a1820" strokeWidth="3.5" fill="none" strokeLinecap="round" />
+    )}
+  </g>
+);

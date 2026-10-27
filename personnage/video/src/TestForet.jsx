@@ -1,20 +1,28 @@
 import {useCurrentFrame} from 'remotion';
-import {Bonhomme} from './Bonhomme';
+import {chalet, chaletExt, Neige} from './Chalet';
+import {foret, Voile} from './ForetNuit';
+import {Plan} from './montage';
+import {makeCam} from './moteur';
+import {RodeurMonde, DEBOUT} from './Rodeur';
 
-const POSES = [
-  {epauleD: 20, coudeD: 120}, {epauleD: -20, coudeD: 120}, {epauleD: 30, coudeD: -120}, {epauleD: 160, coudeD: 60},
-  {epauleD: 40, coudeD: 140}, {epauleG: -20, coudeG: -120}, {epauleG: -40, coudeG: -140}, {epauleD: 60, coudeD: 150},
+const IN = [
+  {cam: {x: 900, y: -200, z: -0.3, yaw: -20, pitch: 2}, o: {porte: 0}},
+  {cam: {x: -100, y: -150, z: 0.4, yaw: 25, pitch: 2}, o: {rouge: 0.8, ecran: 1, dehors: true}},
+  {cam: {x: 1050, y: 360, z: 0.65, yaw: -40, pitch: -2}, o: {porte: 0.8}},
+  {cam: {x: -300, y: -100, z: 1.0, yaw: 90, pitch: 3}, o: {armoire: 0}},
 ];
 export const TestForet = () => {
   const f = useCurrentFrame();
-  return (
-    <svg viewBox="0 0 1080 1920" width={1080} height={1920} style={{background: '#555'}}>
-      {POSES.map((p, k) => (
-        <g key={k} transform={`translate(${(k % 4) * 270} ${Math.floor(k / 4) * 900}) scale(0.45)`}>
-          <Bonhomme {...p} />
-          <text x="50" y="80" fontSize="60" fill="#fff">{JSON.stringify(p)}</text>
-        </g>
-      ))}
-    </svg>
-  );
+  const k = f % 6;
+  if (k < 4) {
+    const c = IN[k];
+    const cam = makeCam(c.cam);
+    const o = {...c.o};
+    if (o.dehors) o.dehors = <RodeurMonde cam={cam} x={450} z={6} pose={DEBOUT} />;
+    const d = chalet(cam, f, o);
+    return <Plan f={f} cam={cam} decor={d} items={[]} grain={0.02} vignette={0.7} />;
+  }
+  const cam = makeCam(k === 4 ? {x: 600, y: -300, z: 9, yaw: 185, pitch: 0} : {x: 2400, y: 200, z: 6, yaw: 215, pitch: -3});
+  const d = foret(cam, f, {nuit: 1, neige: 1, lumYaw: 180, degage: [[0, -1.5, 0, 4.5, 1800]]});
+  return <Plan f={f} cam={cam} decor={d} items={[chaletExt(cam, f, {})]} grain={0.02} vignette={0.7} dessus={<g><Voile L={d.L} P={d.P} /><Neige f={f} /></g>} />;
 };

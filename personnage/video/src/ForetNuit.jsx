@@ -17,15 +17,16 @@ const borne = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
 export const mix = (a, b, t) => a.map((v, i) => v + (b[i] - v) * t);
 export const rgb = (c, k = 1) => `rgb(${c.map((v) => Math.round(borne(v * k, 0, 255))).join(',')})`;
 
-export const palette = (nuit) => ({
+// neige (0 → 1) : sol et sentier enneigés, brume plus claire et plus froide
+export const palette = (nuit, neige = 0) => ({
   ciel: mix([16, 11, 22], [5, 5, 12], nuit),
-  brume: mix([122, 90, 110], [44, 46, 76], nuit),
+  brume: mix(mix([122, 90, 110], [44, 46, 76], nuit), [86, 96, 130], neige),
   halo: mix([255, 164, 112], [150, 166, 255], nuit),
   tronc: mix([30, 21, 27], [10, 10, 18], nuit),
-  sol: mix([30, 22, 26], [10, 10, 17], nuit),
-  chemin: mix([82, 62, 62], [36, 36, 52], nuit),
+  sol: mix(mix([30, 22, 26], [10, 10, 17], nuit), [92, 102, 136], neige),
+  chemin: mix(mix([82, 62, 62], [36, 36, 52], nuit), [70, 78, 108], neige),
   rim: mix([255, 196, 150], [196, 206, 255], nuit),
-  feuille: mix([96, 52, 34], [50, 46, 62], nuit),
+  feuille: mix(mix([96, 52, 34], [50, 46, 62], nuit), [120, 130, 165], neige),
 });
 
 // ----- génération déterministe de la forêt -----
@@ -215,7 +216,7 @@ const bandeBrume = (cam, d, P, k, f, op) => {
 // opts : nuit, lumYaw, lumY (hauteur de la lumière, + = plus bas), rim, portee (distance de brume), brume, rayons, f
 export const foret = (cam, f, o = {}) => {
   const opts = {nuit: 0, lumYaw: 8, lumY: -1.2, rim: 1, portee: 11, brume: 1, rayons: 1, poussiere: 1, haloK: 1, ...o};
-  const P = palette(opts.nuit);
+  const P = palette(opts.nuit, opts.neige || 0);
   const L = pointLumiere(cam, opts.lumYaw, opts.lumY);
   const hor = cam.fuite[1];
   const id = 'fn';

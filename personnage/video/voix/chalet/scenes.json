@@ -1,0 +1,18 @@
+[
+ ["vibre", "Imagine. Tu es seul dans un chalet, en pleine tempête de neige, quand ton téléphone vibre."],
+ ["alerte", "Alerte secours montagne : « Ne laissez entrer personne. Même si on frappe. »"],
+ ["leo", "Problème : ton pote Léo est parti chercher du bois. Il y a une heure."],
+ ["frappe", "Et là, on frappe à la porte. Trois coups. « C'est moi, Léo ! Ouvre, je gèle ! »"],
+ ["message", "Tu t'approches de la porte. Ton téléphone vibre encore. Numéro inconnu. « Ce n'est pas lui. »"],
+ ["fenetre", "Tu regardes par la fenêtre. Dehors, dans la neige, une silhouette immense. Beaucoup trop grande pour être Léo. Ses bras pendent jusqu'à ses genoux."],
+ ["serrure", "Et la poignée se met à tourner toute seule. Le verrou cède."],
+ ["choix", "Tu as deux secondes pour te cacher. L'armoire, ou sous le lit ?"],
+ ["armoire", "Tu choisis l'armoire. Tu fermes les portes. À travers les lattes, tu la vois entrer. Elle renifle. Elle s'approche de l'armoire. Elle penche la tête devant les lattes. Et les portes s'ouvrent."],
+ ["mort", "Si tu as choisi l'armoire… tu ne survis pas."],
+ ["rembobine", "On rembobine."],
+ ["lit", "Cette fois, tu te glisses sous le lit. Elle entre. Tu vois ses pieds maigres traverser la pièce. Ses longs doigts glissent sur le parquet."],
+ ["visage", "Elle s'arrête devant le lit. Et lentement, son visage blanc descend jusqu'au sol. Juste devant toi."],
+ ["cri", "Et dehors, quelqu'un hurle ton prénom. C'est la voix de Léo ! La créature se redresse d'un coup, et ressort dans la tempête."],
+ ["leo2", "Silence. Ton téléphone vibre. C'est Léo. « Je suis devant la porte. Ouvre vite, il revient. »"],
+ ["dilemme", "On frappe. Trois coups. Mais tout à l'heure aussi, c'était la voix de Léo. Alors, tu lui ouvres ? Ou tu laisses la porte fermée ? Dis-le en commentaire."]
+]

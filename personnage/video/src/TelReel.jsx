@@ -78,11 +78,45 @@ const Verrou = ({f, heure, date, notifs, appui}) => {
       {vues.map((n, i) => {
         // décalage vers le bas quand des notifications plus récentes arrivent (courbe douce)
         const plusRecentes = vues.slice(i + 1);
-        const dy = plusRecentes.reduce((s, m) => s + (H + G) * ressort(f, m.t, {damping: 18, stiffness: 140}), 0);
+        const haut = (m) => (m.alerte ? 120 + lignes(m.texte, 26).length * 40 : m.long ? 100 + lignes(m.texte, 28).length * 36 : H);
+        const dy = plusRecentes.reduce((s, m) => s + (haut(m) + G) * ressort(f, m.t, {damping: 18, stiffness: 140}), 0);
         const e = ressort(f, n.t, {damping: 13, stiffness: 160});
         const y = 360 + dy;
         if (y > TH - 200) return null;
         const presse = appui && i === vues.length - 1 ? 1 - 0.035 * Math.sin(Math.PI * doux(f, appui - 6, appui)) : 1;
+        if (n.long && !n.alerte) {
+          // notification longue : le texte complet sur plusieurs lignes
+          const ls = lignes(n.texte, 28);
+          const HL = 100 + ls.length * 36;
+          return (
+            <g key={i} transform={`translate(${TW / 2} ${y + HL / 2 - (1 - e) * 70}) scale(${0.88 + 0.12 * e}) translate(${-TW / 2} ${-HL / 2})`} opacity={Math.min(1, e * 1.4)}>
+              <rect x="40" y="0" width={TW - 80} height={HL} rx="32" fill="#f4f2f8" opacity="0.9" />
+              <rect x="62" y="22" width="56" height="56" rx="14" fill="#34c759" />
+              <path d="M76,40 h28 a6,6 0 0 1 6,6 v14 a6,6 0 0 1 -6,6 h-18 l-8,7 v-7 a6,6 0 0 1 -6,-6 v-14 a6,6 0 0 1 6,-6 z" fill="#fff" />
+              <text x="134" y="46" fontSize="25" fontWeight="700" fill="#111" fontFamily={POLICE}>{n.titre}</text>
+              <text x={TW - 62} y="46" textAnchor="end" fontSize="19" fill="#6a6a72" fontFamily={POLICE}>maintenant</text>
+              {ls.map((l, j) => <text key={j} x="134" y={84 + j * 36} fontSize="24" fill="#2a2a30" fontFamily={POLICE}>{l}</text>)}
+            </g>
+          );
+        }
+        if (n.alerte) {
+          // alerte d'urgence : grande carte rouge, texte complet, qui clignote doucement
+          const ls = lignes(n.texte, 26);
+          const HA = 120 + ls.length * 40;
+          const pulse = 0.85 + 0.15 * Math.sin((f - n.t) / 3);
+          return (
+            <g key={i} transform={`translate(${TW / 2} ${y + HA / 2 - (1 - e) * 70}) scale(${0.88 + 0.12 * e}) translate(${-TW / 2} ${-HA / 2})`} opacity={Math.min(1, e * 1.4)}>
+              <rect x="34" y="-6" width={TW - 68} height={HA + 12} rx="36" fill="#ff2a2a" opacity={0.35 * pulse} />
+              <rect x="40" y="0" width={TW - 80} height={HA} rx="32" fill="#d92a26" opacity={0.95} />
+              <path d="M90,30 L118,80 L62,80 Z" fill="#fff" />
+              <rect x="87" y="46" width="6" height="18" rx="3" fill="#d92a26" />
+              <circle cx="90" cy="71" r="3.5" fill="#d92a26" />
+              <text x="134" y="52" fontSize="22" fontWeight="800" fill="#fff" fontFamily={POLICE}>{n.titre}</text>
+              <text x="134" y="80" fontSize="18" fill="#ffd6d4" fontFamily={POLICE}>Alerte d’urgence · maintenant</text>
+              {ls.map((l, j) => <TexteRiche key={j} x={64} y={128 + j * 40} texte={l} taille={28} couleur="#fff" poids={600} />)}
+            </g>
+          );
+        }
         return (
           <g key={i} transform={`translate(${TW / 2} ${y + H / 2 - (1 - e) * 70}) scale(${(0.88 + 0.12 * e) * presse}) translate(${-TW / 2} ${-H / 2})`} opacity={Math.min(1, e * 1.4)}>
             <rect x="40" y="0" width={TW - 80} height={H} rx="32" fill="#f4f2f8" opacity="0.86" />
