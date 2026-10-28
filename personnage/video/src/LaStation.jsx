@@ -182,7 +182,8 @@ const Gouttes = ({f, t0, x, y, y0 = -80, n = 4, s = 1}) => (
 const Goutte = scene('goutte', ({f, fg, i, t, d, R}) => {
   const k = lisse(t, d);
   const peur = ease(f, R('noir', 113), R('noir', 113) + 8);
-  const o = {compteur: compteur(fg), neons: neonsA(fg), creature: CREAT(fg, {ouvre: 0.35})};
+  // on ne la voit pas encore : seulement les gouttes qui tombent du haut de l'image
+  const o = {compteur: compteur(fg), neons: neonsA(fg)};
   if (i === 0) {
     const c = cam2(fg, TETE_MOI.x, TETE_MOI.y + 60, 2.6 + 0.2 * k);
     return <Ecran fg={fg} roll={c.roll}><Quai cam={c} f={fg} o={{...o, moi: MOI({brows: 6, pupilX: 10, worry: 0.3})}} /></Ecran>;
@@ -190,9 +191,8 @@ const Goutte = scene('goutte', ({f, fg, i, t, d, R}) => {
   // gros plan : l'épaule, les gouttes noires qui tombent dessus
   const c = cam2(fg, TETE_MOI.x - 50, TETE_MOI.y + 120, 4.2 + 0.3 * k, 0.6);
   const ep = {x: 540 + (258 - c.x) * c.zoom, y: 960 + (-15 - c.y) * c.zoom};
-  const bouche = 960 + (-165 - c.y) * c.zoom;
   return (
-    <Ecran fg={fg} roll={c.roll} dessus={<Gouttes f={f} t0={R('goutte', 72) - 26} x={ep.x} y={ep.y} y0={bouche} s={c.zoom / 2.5} />}>
+    <Ecran fg={fg} roll={c.roll} dessus={<Gouttes f={f} t0={R('goutte', 72) - 26} x={ep.x} y={ep.y} s={c.zoom / 2.5} />}>
       <Quai cam={c} f={fg} o={{...o, moi: MOI({eyes: 1.15 + 0.35 * peur, worry: 0.4 + 0.6 * peur, pupilX: -12 * peur, pupilY: -6 * peur})}} />
     </Ecran>
   );
