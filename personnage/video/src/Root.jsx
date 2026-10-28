@@ -19,9 +19,11 @@ import {TestStation2} from './TestStation2';
 import {DUREE_RENTREZ, RentrezChezVous} from './RentrezChezVous';
 import {DUREE_CHALET, NeLuiOuvrePas} from './NeLuiOuvrePas';
 import {DUREE_STATION, LaStation} from './LaStation';
+import {DUREE_PARRAINAGE, ParrainageVideo} from './Parrainage';
 
 export const Root = () => (
   <>
+    <Composition id="Parrainage" component={ParrainageVideo} durationInFrames={DUREE_PARRAINAGE} fps={30} width={1080} height={1920} />
     <Composition id="LaStation" component={LaStation} durationInFrames={DUREE_STATION} fps={30} width={1080} height={1920} />
     <Composition id="NeLuiOuvrePas" component={NeLuiOuvrePas} durationInFrames={DUREE_CHALET} fps={30} width={1080} height={1920} />
     <Composition id="Rentrez" component={RentrezChezVous} durationInFrames={DUREE_RENTREZ} fps={30} width={1080} height={1920} />

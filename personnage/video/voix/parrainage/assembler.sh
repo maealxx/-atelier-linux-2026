@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# « Parrainages bancaires » : image (out/pa_brut.mp4) + sons (+ voix si --voix) + sous-titres incrustés, compressée.
+# Usage : bash voix/parrainage/assembler.sh <dossier_outils_sous_titres> <sortie.mp4> [fin_en_s] [--voix]
+set -euo pipefail
+cd "$(dirname "$0")/../.."
+WK="$1"; SORTIE="$2"; FIN="${3:-}"; VOIX="${4:-}"
+python3 voix/parrainage/mixage.py out/pa_audio.wav $FIN $VOIX
+# sous-titres : seulement les mots qui tombent dans la partie rendue
+python3 -c "
+import json,sys; fin=float(sys.argv[1]) if sys.argv[1] else 1e9
+json.dump([m for m in json.load(open('voix/parrainage/mots.json')) if m[0] < fin - 0.2], open('out/pa_mots.json','w'), ensure_ascii=False)" "$FIN"
+bash voix/postfx.sh out/pa_brut.mp4 out/pa_post.mp4 0.22
+ffmpeg -loglevel error -y -i out/pa_post.mp4 -i out/pa_audio.wav -map 0:v -map 1:a -c:v copy -c:a aac -b:a 192k -shortest out/pa_avec_son.mp4
+cat > out/pa_st.json <<JSON
+{"video": "out/pa_avec_son.mp4", "words": "out/pa_mots.json", "out": "out/pa_soustitre.mp4", "mode": "burn", "work": "$WK",
+ "couleurs": ["&H2A2AFF&"], "sfx": false,
+ "emojis": [["anniv", "1f382"], ["fortune", "1f4b8"], ["risque", "2705"], ["commercial", "1f454"], ["kebab", "1f959"], ["bosser", "1f477"], ["découvert", "1f6a8"], ["milliers", "1f911"], ["investissement", "1f4c8"]]}
+JSON
+python3 voix/soustitres.py out/pa_st.json
+ffmpeg -loglevel error -y -i out/pa_soustitre.mp4 -af "acompressor=threshold=-22dB:ratio=3:attack=5:release=150,loudnorm=I=-15:TP=-1:LRA=9" -c:a aac -b:a 192k -c:v libx264 -b:v 3000k -maxrate 3800k -bufsize 7M -preset slow -pix_fmt yuv420p "$SORTIE"
+ls -la "$SORTIE"
