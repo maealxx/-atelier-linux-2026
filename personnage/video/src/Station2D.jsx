@@ -207,8 +207,8 @@ export const Quai = ({cam, f, o = {}}) => {
         )}
         <Pompe2D x={640} compteur={o.compteur ?? 0} lum={nm} />
         {/* le tuyau, du pistolet à la trappe */}
-        <path d={`M${o.moi ? 455 : 300},${o.moi ? 40 : 200} Q420,320 545,120`} stroke="#0e0e10" strokeWidth="18" fill="none" strokeLinecap="round" />
-        {o.moi && <B2D x={o.moi.x ?? 430} y={SOLY} s={0.62} id="q-moi" {...o.moi.pose} />}
+        <path d={`M${o.moi ? (o.moi.x ?? 230) + 25 : 260},${o.moi ? 40 : 200} Q${o.moi ? 380 : 330},320 545,120`} stroke="#0e0e10" strokeWidth="18" fill="none" strokeLinecap="round" />
+        {o.moi && <B2D x={o.moi.x ?? 230} y={SOLY} s={0.62} id="q-moi" {...o.moi.pose} />}
         {o.premier}
       </Couche>
       {/* l'auvent : bandeau, néons, cônes de lumière */}

@@ -40,6 +40,17 @@ export const COUCHE = {
   piG: [-420, -20], piD: [420, -20],
 };
 
+// sur le toit, penchée vers la droite : les mains agrippées au bord, la tête qui pend au-dessus de quelqu'un
+export const PENCHE = {
+  tete: [450, -470], cou: [370, -500],
+  epG: [250, -530], epD: [380, -420],
+  coG: [-60, -820], coD: [330, -760],
+  maG: [-230, -24], maD: [90, -24],
+  haG: [-110, -560], haD: [-30, -500],
+  geG: [-340, -900], geD: [-210, -880],
+  piG: [-480, -24], piD: [-350, -24],
+};
+
 export const melange = (a, b, t) => Object.fromEntries(Object.keys(a).map((k) => [k, [a[k][0] + (b[k][0] - a[k][0]) * t, a[k][1] + (b[k][1] - a[k][1]) * t]]));
 // cycle de course à quatre pattes (mains et pieds alternés)
 export const galop = (p, ph, amp = 1) => {

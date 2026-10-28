@@ -1,8 +1,9 @@
 import {AbsoluteFill, Easing, interpolate, random, Series, spring, staticFile, useCurrentFrame} from 'remotion';
-import {montage} from './montage';
-import {clamp, Finition} from './moteur';
+import {montage, Plan} from './montage';
+import {clamp, Finition, makeCam, Perso} from './moteur';
 import {Chrono, ChoixBoite, Screamer, VHS, fmt} from './NeLuiOuvrePas';
-import {COUCHE, doigts, DEBOUT, galop, melange, QUATRE, ECARTE, Rodeur} from './Rodeur';
+import {COUCHE, doigts, DEBOUT, galop, melange, PENCHE, QUATRE, ECARTE, Rodeur, RodeurMonde} from './Rodeur';
+import {BOUT, gresille, station, VOIT} from './Station';
 import {Arriere, Facade, Interieur, Plafond, Quai} from './Station2D';
 import PLANS from './station/plans.json';
 import timeline from './station/timeline.json';
@@ -73,11 +74,46 @@ const imageA = (fg) => {
 // ----- ce qui ne change pas d'un plan à l'autre -----
 const compteur = (fg) => Math.min(41.8, 18.2 + fg * 0.04);
 const neonsA = (fg) => [R2(fg, 'a0', 0.12), 1, fg % 97 < 6 ? R2(fg, 'a2', 0.9) : 1];
-const CREAT = (fg, extra = {}) => ({pose: COUCHE, tete: 15 * Math.sin(fg / 40), y: 40, s: 0.5, ...extra});
+// elle est sur le toit de la voiture, penchée : sa tête pend juste au-dessus de la tienne
+const CACHEE = (fg) => ({pose: COUCHE, tete: 15 * Math.sin(fg / 40), x: -230, y: 40, s: 0.5});
+const CREAT = (fg, extra = {}) => ({pose: PENCHE, tete: 25 + 10 * Math.sin(fg / 40), x: 8, y: 40, s: 0.55, ...extra});
 const MOI = (pose = {}) => ({pose: {epauleD: -20, coudeD: 120, ...pose}});
-const TETE_MOI = {x: 430, y: -200};
-const TOIT = {x: -230, y: -65};
+const TETE_MOI = {x: 230, y: -200};
+const TOIT = {x: 235, y: -240};
 const ECRAN_P = {x: 640, y: -80};
+
+// ----- quelques plans en vraie 3D (la station entière, la contre-plongée, la course vers la boutique) -----
+const deg = (r) => (r * 180) / Math.PI;
+const vise = (p, c) => {
+  const dx = c[0] - p[0];
+  const dy = c[1] - p[1];
+  const dz = (c[2] - p[2]) * 1000;
+  return {x: p[0], y: p[1], z: p[2], yaw: deg(Math.atan2(dx, dz)), pitch: deg(Math.atan2(dy, Math.hypot(dx, dz)))};
+};
+const main3 = (f, k = 1) => ({dx: k * (5 * Math.sin(f / 23) + 3 * Math.sin(f / 9.7)), dy: k * 3 * Math.sin(f / 17 + 1), r: k * 0.35 * Math.sin(f / 31)});
+const OEIL = -150;
+const pov = (fg, p, c, {k = 1, pas = 0, v = 0.21} = {}) => {
+  const m = main3(fg, k);
+  return vise([p[0] + m.dx + Math.sin(fg * v) * 9 * pas, p[1] + m.dy - Math.abs(Math.sin(fg * v)) * 16 * pas, p[2]], c);
+};
+const roulis = (fg, k = 1, pas = 0, v = 0.21) => main3(fg, k).r + Math.sin(fg * v) * 0.9 * pas;
+const mix3 = (a, b, u) => a.map((x, i) => x + (b[i] - x) * u);
+const NEON_T = [0.84, 0.92, 1.05];
+const auvent = (fg) => [gresille(fg, 'a0', 0.15), 1, fg % 97 < 6 ? gresille(fg, 'a2', 1) : 1, 1];
+const MOI3 = {x: 60, z: 1.1};
+const caissiere3 = (cam, {x = 870, z = BOUT.z0 + 0.25, id = 'ca', ...pose}) => ({z, x, el: <Perso cam={cam} id={id} x={x} z={z} lum={0.95} teinte={[0.95, 0.97, 1.0]} ombre={0.25} coiffure="queue" cils couleurs={{haut: '#2a6a8a', hautO: '#1f5470', chev: '#3a2418'}} {...pose} />});
+const moi3 = (cam, {id, ...pose}) => ({z: MOI3.z, x: MOI3.x, el: <Perso cam={cam} id={id} x={MOI3.x} z={MOI3.z} lum={0.85} teinte={NEON_T} ombre={0.35} epauleD={-20} coudeD={120} {...pose} />});
+// sur le toit : couchée au fond (cachée), ou penchée, la tête juste au-dessus de la tienne
+const toit3 = (cam, fg, {penche = true, ouvre = 0, tete = 25} = {}) => {
+  const x = penche ? MOI3.x - 450 * 0.55 : -470;
+  return {z: MOI3.z + 0.05, x, y: VOIT.toit, el: <RodeurMonde cam={cam} x={x} z={MOI3.z + 0.05} y={VOIT.toit} pose={penche ? PENCHE : COUCHE} echelle={0.55} tete={penche ? tete : 15 * Math.sin(fg / 40)} ouvre={ouvre} respire={0.5 + 0.5 * Math.sin(fg / 14)} lum={0.9} id={`rt${fg}`} />};
+};
+const Vue3D = ({fg, cam: c, items = [], o = {}, zoom = 1, roll = 0, noir = 0, dessus = null}) => {
+  const cam = makeCam(c);
+  const its = typeof items === 'function' ? items(cam) : items;
+  const d = station(cam, fg, {auvent: auvent(fg), compteur: compteur(fg), ...o, extra: its.filter(Boolean)});
+  return <Plan grain={0.03} vignette={0.8} f={fg} cam={cam} decor={d} items={[]} zoom={zoom} roll={roll} noir={noir} dessus={dessus} />;
+};
 
 const Deux = ({f, a, b, choisi = 0}) => (
   <g>
@@ -89,12 +125,16 @@ const Deux = ({f, a, b, choisi = 0}) => (
 // ===== 1. 3 h du matin, tu fais le plein au milieu de la forêt (1re image : toi) =====
 const Pompe = scene('pompe', ({fg, i, t, d}) => {
   const k = lisse(t, d);
-  const o = {compteur: compteur(fg), neons: neonsA(fg), moi: MOI({pupilX: 6}), creature: CREAT(fg)};
-  if (i < 3) {
+  const o = {compteur: compteur(fg), neons: neonsA(fg), moi: MOI({pupilX: 6}), creature: CACHEE(fg)};
+  if (i === 2) {
+    // en 3D : la station, seule au milieu de la forêt, la grue descend vers toi
+    const c = vise([-2600 + 600 * k, -700, -5.5 + 1.5 * k], [0, -300, 2.5]);
+    return <Vue3D fg={fg} cam={c} items={(cam) => [moi3(cam, {id: 'p2', pupilX: 6}), toit3(cam, fg, {penche: false})]} />;
+  }
+  if (i < 2) {
     const c = [
       () => cam2(fg, TETE_MOI.x - 20, TETE_MOI.y + 80 - 30 * k, 2.4 + 0.25 * k),
       () => cam2(fg, ECRAN_P.x, ECRAN_P.y, 5.2 + 0.4 * k, 0.6),
-      () => cam2(fg, -50 + 80 * k, -180, 0.82 + 0.12 * k, 0.5),
     ][i]();
     return <Ecran fg={fg} roll={c.roll}><Quai cam={c} f={fg} o={o} /></Ecran>;
   }
@@ -121,13 +161,13 @@ const Feuille = scene('feuille', ({f, fg, i, t, d, R}) => {
 });
 
 // gouttes noires qui tombent (repère écran)
-const Gouttes = ({f, t0, x, y, n = 4, s = 1}) => (
+const Gouttes = ({f, t0, x, y, y0 = -80, n = 4, s = 1}) => (
   <g>
     {[...Array(n)].map((_, k) => {
       const tk = t0 + k * 14;
       const u = (f - tk) / 9;
       if (u < 0) return null;
-      const yy = u < 1 ? lerp(-80, y, u * u) : y;
+      const yy = u < 1 ? lerp(y0, y, u * u) : y;
       return (
         <g key={k}>
           {u < 1 && <ellipse cx={x + k * 14 * s} cy={yy} rx={9 * s} ry={17 * s} fill="#050307" />}
@@ -142,16 +182,17 @@ const Gouttes = ({f, t0, x, y, n = 4, s = 1}) => (
 const Goutte = scene('goutte', ({f, fg, i, t, d, R}) => {
   const k = lisse(t, d);
   const peur = ease(f, R('noir', 113), R('noir', 113) + 8);
-  const o = {compteur: compteur(fg), neons: neonsA(fg), creature: CREAT(fg)};
+  const o = {compteur: compteur(fg), neons: neonsA(fg), creature: CREAT(fg, {ouvre: 0.35})};
   if (i === 0) {
     const c = cam2(fg, TETE_MOI.x, TETE_MOI.y + 60, 2.6 + 0.2 * k);
     return <Ecran fg={fg} roll={c.roll}><Quai cam={c} f={fg} o={{...o, moi: MOI({brows: 6, pupilX: 10, worry: 0.3})}} /></Ecran>;
   }
   // gros plan : l'épaule, les gouttes noires qui tombent dessus
   const c = cam2(fg, TETE_MOI.x - 50, TETE_MOI.y + 120, 4.2 + 0.3 * k, 0.6);
-  const ep = {x: 540 + (380 - c.x) * c.zoom, y: 960 + (-15 - c.y) * c.zoom};
+  const ep = {x: 540 + (258 - c.x) * c.zoom, y: 960 + (-15 - c.y) * c.zoom};
+  const bouche = 960 + (-165 - c.y) * c.zoom;
   return (
-    <Ecran fg={fg} roll={c.roll} dessus={<Gouttes f={f} t0={R('goutte', 72) - 26} x={ep.x} y={ep.y} s={c.zoom / 2.5} />}>
+    <Ecran fg={fg} roll={c.roll} dessus={<Gouttes f={f} t0={R('goutte', 72) - 26} x={ep.x} y={ep.y} y0={bouche} s={c.zoom / 2.5} />}>
       <Quai cam={c} f={fg} o={{...o, moi: MOI({eyes: 1.15 + 0.35 * peur, worry: 0.4 + 0.6 * peur, pupilX: -12 * peur, pupilY: -6 * peur})}} />
     </Ecran>
   );
@@ -174,16 +215,14 @@ const Toit = scene('toit', ({fg, i, t, d}) => {
   const k = lisse(t, d);
   const o = {compteur: compteur(fg), neons: neonsA(fg), moi: MOI({pupilX: 8})};
   if (i === 0) {
-    // la caméra remonte de toi… jusqu'au toit de la voiture
-    const u = ease(t, 4, d - 6, Easing.inOut(Easing.cubic));
-    const c0 = camMix({x: TETE_MOI.x, y: TETE_MOI.y + 40, zoom: 2.4}, {x: 50, y: -120, zoom: 1.45}, u);
-    const c = cam2(fg, c0.x, c0.y, c0.zoom, 0.7);
-    return <Ecran fg={fg} roll={c.roll}><Quai cam={c} f={fg} o={{...o, creature: CREAT(fg, {tete: 20})}} /></Ecran>;
+    // en 3D, contre-plongée au ras du sol : toi… et, juste au-dessus de ta tête, elle
+    const c = vise([MOI3.x + 520 - 120 * k, 330, MOI3.z - 0.75 + 0.2 * k], [MOI3.x - 60, -420 - 60 * k, MOI3.z]);
+    return <Vue3D fg={fg} cam={c} noir={0.2} zoom={1.02 + 0.06 * k} roll={roulis(fg, 0.6)} items={(cam) => [moi3(cam, {id: 't0', pupilX: 8}), toit3(cam, fg, {ouvre: 0.3})]} />;
   }
   if (i === 1) {
     // gros plan : sa tête, penchée vers toi
-    const c = cam2(fg, TOIT.x + 60, TOIT.y + 30, 3.4 + 0.3 * k, 0.5);
-    return <Ecran fg={fg} roll={c.roll}><Quai cam={c} f={fg} o={{...o, creature: CREAT(fg, {tete: -35 * ease(t, 6, 36)})}} /></Ecran>;
+    const c = cam2(fg, TOIT.x - 20, TOIT.y + 90, 3.0 + 0.3 * k, 0.5);
+    return <Ecran fg={fg} roll={c.roll}><Quai cam={c} f={fg} o={{...o, creature: CREAT(fg, {tete: 25 + 25 * ease(t, 6, 36), ouvre: 0.4 * ease(t, 10, 40)})}} /></Ecran>;
   }
   // tu fixes la pompe sans lever les yeux… les doigts descendent dans l'image
   const c = cam2(fg, ECRAN_P.x - 60, ECRAN_P.y + 40, 3.6, 0.6);
@@ -195,7 +234,7 @@ const Toit = scene('toit', ({fg, i, t, d}) => {
 });
 
 // ===== 6. Trois secondes : la voiture, ou la boutique ? (chrono en millisecondes) =====
-const PORTIERE = {x: -130, y: 120, zoom: 2.1};
+const PORTIERE = {x: -80, y: -40, zoom: 1.6};
 const BOUTIQUE_P = {x: 980, y: -120, zoom: 1.8};
 const Choix = scene('choix', ({f, fg, i, t, R}) => {
   const t0 = R('boutique', 90) + 12;
@@ -223,7 +262,7 @@ const Choix = scene('choix', ({f, fg, i, t, R}) => {
           <rect width="1080" height="1920" fill="#ff1a1a" opacity={f >= t0 ? 0.05 + 0.06 * Math.max(0, Math.sin(f / 2.5)) * (1 - reste / 3) : 0} />
         </g>
       }>
-      <Quai cam={c} f={fg} o={{compteur: 41.8, neons: neonsA(fg), moi: MOI({eyes: 1.4, worry: 1, sweat: 1}), creature: CREAT(fg, {tete: -30})}} />
+      <Quai cam={c} f={fg} o={{compteur: 41.8, neons: neonsA(fg), moi: MOI({eyes: 1.4, worry: 1, sweat: 1}), creature: CREAT(fg)}} />
     </Ecran>
   );
 });
@@ -309,7 +348,7 @@ const Voiture = scene('voiture', ({f, fg, i, t, d, R}) => {
     const c = cam2(fg, c0.x, c0.y, c0.zoom, 1.5);
     return (
       <Ecran fg={fg} roll={c.roll} flou={12 * u} noir={ease(t, d - 10, d)} dessus={<Deux f={f + 300} a={0} b={0} choisi={1} />}>
-        <Quai cam={c} f={fg} o={{compteur: 41.8, neons: neonsA(fg), creature: CREAT(fg, {tete: -30})}} />
+        <Quai cam={c} f={fg} o={{compteur: 41.8, neons: neonsA(fg), creature: CREAT(fg)}} />
       </Ecran>
     );
   }
@@ -385,19 +424,16 @@ const Rembobine = scene('rembobine', ({f, fg}) => {
 });
 
 // ===== 10. Cette fois, la boutique ! La caissière t'ouvre et verrouille derrière toi. =====
-const DEHORS = (fg, extra = {}) => ({compteur: 41.8, neons: neonsA(fg), creature: CREAT(fg, {tete: -30}), ...extra});
+// vue de la boutique : elle s'est tassée sur le toit (moins haute, pour rester dans la vitrine)
+const TASSEE = melange(COUCHE, PENCHE, 0.4);
+const DEHORS = (fg, extra = {}) => ({compteur: 41.8, neons: neonsA(fg), creature: CREAT(fg, {pose: TASSEE, x: -230}), ...extra});
 const Boutique = scene('boutique', ({f, fg, i, t, d, R}) => {
   const k = lisse(t, d);
   if (i === 0) {
-    // tu cours vers la porte vitrée (la façade grossit, la caméra secoue)
+    // en 3D, vue subjective : tu cours vers la boutique
     const u = ease(t, 0, d, Easing.in(Easing.quad));
-    const c = cam2(fg, lerp(400, 1070, u), lerp(-80, -60, u), lerp(1.0, 2.6, u), 1.6);
-    const bob = Math.abs(Math.sin(fg * 0.42)) * 12;
-    return (
-      <Ecran fg={fg} roll={c.roll + Math.sin(fg * 0.42) * 1.2} dessus={<Deux f={f + 300} a={0} b={0} choisi={2} />}>
-        <g transform={`translate(0 ${bob})`}><Facade cam={c} f={fg} o={{caissiere: {x: 1070, y: 420, pose: {epauleD: -60, coudeD: -90, eyes: 1.4, worry: 1}}}} /></g>
-      </Ecran>
-    );
+    const c = pov(fg, mix3([520, OEIL, MOI3.z + 0.2], [870, OEIL, BOUT.z0 - 0.45], u), [870, -170, BOUT.z0 + 0.3], {k: 1.5, pas: 1.4, v: 0.42});
+    return <Vue3D fg={fg} cam={c} roll={roulis(fg, 1.5, 1.4, 0.42)} zoom={1.05} noir={0.2} o={{compteur: 41.8, caissiere: caissiere3(makeCam(c), {epauleD: -150, coudeD: -40 + 30 * Math.sin(fg * 0.5), eyes: 1.4, worry: 1})}} items={(cam) => [toit3(cam, fg)]} dessus={<Deux f={f + 300} a={0} b={0} choisi={2} />} />;
   }
   // dedans : elle verrouille ; dehors, la voiture… et ce qu'il y a sur le toit
   const verrou = ease(f, R('verrouille', 98), R('derrière', 109));
@@ -413,7 +449,7 @@ const Boutique = scene('boutique', ({f, fg, i, t, d, R}) => {
 const Descend = scene('descend', ({f, fg, t, d, R}) => {
   const k = lisse(t, d);
   const u = ease(f, R('vois', 36), R('pattes', 89) + 6);
-  const creature = {pose: galop(melange(COUCHE, QUATRE, ease(u, 0, 0.4)), fg * 0.2, Math.sin(u * Math.PI) * 0.8), x: lerp(-230, 380, u), y: lerp(40, 380, ease(u, 0.15, 0.7)), s: 0.5, tete: -20};
+  const creature = {pose: galop(melange(TASSEE, QUATRE, ease(u, 0, 0.4)), fg * 0.2, Math.sin(u * Math.PI) * 0.8), x: lerp(-230, 380, u), y: lerp(40, 380, ease(u, 0.15, 0.7)), s: 0.5, tete: -20};
   const c = cam2(fg, -120, -80, 1.25 + 0.3 * k, 0.6);
   return (
     <Ecran fg={fg} roll={c.roll}>
