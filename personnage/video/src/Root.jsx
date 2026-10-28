@@ -20,9 +20,11 @@ import {DUREE_RENTREZ, RentrezChezVous} from './RentrezChezVous';
 import {DUREE_CHALET, NeLuiOuvrePas} from './NeLuiOuvrePas';
 import {DUREE_STATION, LaStation} from './LaStation';
 import {DUREE_PARRAINAGE, ParrainageVideo} from './Parrainage';
+import {DUREE_BABYPHONE2, LeBabyphone2} from './LeBabyphone2';
 
 export const Root = () => (
   <>
+    <Composition id="LeBabyphone2" component={LeBabyphone2} durationInFrames={DUREE_BABYPHONE2} fps={30} width={1080} height={1920} />
     <Composition id="Parrainage" component={ParrainageVideo} durationInFrames={DUREE_PARRAINAGE} fps={30} width={1080} height={1920} />
     <Composition id="LaStation" component={LaStation} durationInFrames={DUREE_STATION} fps={30} width={1080} height={1920} />
     <Composition id="NeLuiOuvrePas" component={NeLuiOuvrePas} durationInFrames={DUREE_CHALET} fps={30} width={1080} height={1920} />

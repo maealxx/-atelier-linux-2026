@@ -130,3 +130,12 @@ Pour les vidéos **informatives** (pas d'horreur) : fond en dégradé radial + h
 - Bonhomme : `Fig` (pieds en x, y ; accessoires `tete` et `devant`), `mainD(pose)` / `mainG(pose)` + `versEcran` pour poser un objet dans sa main ; `ChapeauFete`, `Cravate`, tenues `KARIM`, `COSTUME`, `VENDEUR`, `PASSANTS`.
 - Polices : Montserrat Black (`TITRE`, chargée avec FontFace + delayRender) et Inter (`TEXTE`). Emojis Twemoji dans `public/emoji` (`Emo`).
 - Alignement voix : si `caler_voix.py` se trompe sur une liste à virgules, corrige les passages à la main avec `voix/parrainage/retouche.py` (intervalles relevés sur l'énergie).
+
+## Maison de nuit éclairée pièce par pièce (`MaisonNuit.jsx`, « Le babyphone 2 »)
+Inspiré des vidéos de référence de Maé (« Nuit 5 – Papa », sleep paralysis) : une couleur de lumière forte par pièce + l'heure qui défile en haut.
+- Moteur : faces 3D éclairées (lumières ponctuelles `{p, c, i, r, bas}`, ambiance `amb`, brume colorée `F`), murs subdivisés (sub 12) pour des dégradés lisses, `halo`, `boite`, `face`, `trier`.
+- Pièces : `chambre` (Léna, bande LED orange au plafond, veilleuse, lit, fenêtre d'orage, caméra du babyphone), `couloir` (vert, trappe du grenier qui s'ouvre `trappe: 0..1`), `salon` (télé bleue, lampe, escalier plein + `solEscalier(z)`, placard sous l'escalier, porte d'entrée ; `tv: 0, lampe: 0` → coupure, la lune prend le relais), `cuisine` (cyan), `jardin` (façade, fenêtre de Léna `fenetreLena`, clôture, portail, orage).
+- `eclair(fg)` (images `ECLAIRS`) fait claquer les fenêtres et le ciel.
+- Persos : `Moi` / `Lena` teintés par la lumière du lieu + liseré lumineux (`RimDefs`, filtres `rim-orange|vert|bleu|cyan|violet`), `TeteCouchee` (tête sur l'oreiller : l'ancrer devant le lit, `z: LIT.z0 - 0.05`), `Creature` = Rodeur noir `visage="sourire"` (yeux injectés, sourire plein de dents).
+- Habillage : `HUD` (« NUIT 1 · SALON » + heure en Anton), `horloge`, `Pluie2`. Police Anton dans `public/fonts` ; sous-titres en Anton via `"police": "Anton"` dans le JSON de `soustitres.py`.
+- ⚠️ Ne pas écraser `src/Maison.jsx` (ancien décor utilisé par Soirée/Hypergamie) : le nouveau moteur s'appelle `MaisonNuit.jsx`.

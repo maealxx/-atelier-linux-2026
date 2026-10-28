@@ -100,10 +100,12 @@ export const doigts = (poignet, dir, {long = 1, ecart = 1, plie = 0.25, cote = 1
 };
 
 // pose : articulations ; tete : inclinaison (degrés) ; ouvre : bouche (0 → 1) ; lum : luminosité du corps
-export const Rodeur = ({pose, tete = 0, ouvre = 0, lum = 1, rim = '#eef0ff', rimK = 1, plie = 0.25, id = 'ro', respire = 0, dos = false}) => {
+// couleur : [r, g, b] du corps (sinon gris pâle) ; visage : 'sourire' → tête ronde noire, yeux qui brillent, sourire plein de dents
+export const Rodeur = ({pose, tete = 0, ouvre = 0, lum = 1, rim = '#eef0ff', rimK = 1, plie = 0.25, id = 'ro', respire = 0, dos = false, couleur = null, visage = null, yeux = '#ffd8c8', sourire = 1}) => {
   const p = pose;
-  const corps = `rgb(${Math.round(142 * lum)},${Math.round(139 * lum)},${Math.round(154 * lum)})`;
-  const sombre = `rgb(${Math.round(92 * lum)},${Math.round(88 * lum)},${Math.round(106 * lum)})`;
+  const cc = couleur || [142, 139, 154];
+  const corps = `rgb(${Math.round(cc[0] * lum)},${Math.round(cc[1] * lum)},${Math.round(cc[2] * lum)})`;
+  const sombre = couleur ? `rgb(${Math.round(cc[0] * 0.55 * lum)},${Math.round(cc[1] * 0.55 * lum)},${Math.round(cc[2] * 0.55 * lum)})` : `rgb(${Math.round(92 * lum)},${Math.round(88 * lum)},${Math.round(106 * lum)})`;
   const W = {cuisse: 30, tibia: 24, bras: 24, avb: 19, doigt: 9};
   const jambes = [[p.haG, p.geG, p.piG], [p.haD, p.geD, p.piD]];
   const bras = [[p.epG, p.coG, p.maG, -1], [p.epD, p.coD, p.maD, 1]];
@@ -173,6 +175,7 @@ export const Rodeur = ({pose, tete = 0, ouvre = 0, lum = 1, rim = '#eef0ff', rim
       <path d={`M${hc[0] - 26},${hc[1] - 50} q26,16 52,0`} stroke={sombre} strokeWidth="3.5" fill="none" opacity="0.6" />
       {/* la tête : crâne allongé, orbites noires vides, sourire fin */}
       <g transform={`translate(${p.cou[0]} ${p.cou[1]}) rotate(${ang}) translate(0 ${-L})`}>
+        {visage === 'sourire' ? <VisageSourire rim={rim} corps={corps} yeux={yeux} sourire={sourire} id={id} dos={dos} /> : (<>
         <path d="M0,-92 C52,-92 70,-50 66,-6 C62,44 34,84 0,86 C-34,84 -62,44 -66,-6 C-70,-50 -52,-92 0,-92 Z" fill={rim} stroke={rim} strokeWidth="7" />
         <path d="M0,-92 C52,-92 70,-50 66,-6 C62,44 34,84 0,86 C-34,84 -62,44 -66,-6 C-70,-50 -52,-92 0,-92 Z" fill={`url(#${id}-cr)`} />
         {!dos && <path d="M-30,-62 q30,-10 60,0 M-22,-48 q22,-7 44,0" stroke={sombre} strokeWidth="3" fill="none" opacity="0.7" />}
@@ -192,10 +195,54 @@ export const Rodeur = ({pose, tete = 0, ouvre = 0, lum = 1, rim = '#eef0ff', rim
         ) : (
           <path d="M-14,50 q14,8 28,-3" stroke="#1a1820" strokeWidth="3.5" fill="none" strokeLinecap="round" />
         )}
+        </>)}
       </g>
     </g>
   );
 };
+
+// tête ronde noire, deux yeux injectés qui brillent, un sourire immense plein de dents (créature « Le babyphone 2 »)
+export const VisageSourire = ({rim = '#ffffff', corps = '#060608', yeux = '#ffd8c8', sourire = 1, id = 'vs', dos = false}) => (
+  <g>
+    <defs>
+      <radialGradient id={`${id}-oe`}>
+        <stop offset="0" stopColor="#ffffff" />
+        <stop offset="0.45" stopColor={yeux} />
+        <stop offset="0.8" stopColor="#ff4a3a" />
+        <stop offset="1" stopColor="#ff2a1a" stopOpacity="0" />
+      </radialGradient>
+    </defs>
+    <circle cx="0" cy="-6" r="104" fill={rim} />
+    <circle cx="0" cy="-6" r="98" fill={corps} />
+    {!dos && (
+      <g>
+        {[-1, 1].map((s) => (
+          <g key={s} transform={`translate(${s * 36} -24)`}>
+            <circle r="46" fill={`url(#${id}-oe)`} opacity="0.55" />
+            <circle r="24" fill="#fff4ee" />
+            {[0, 1, 2, 3, 4, 5].map((k) => <path key={k} d={`M${Math.cos(k) * 22},${Math.sin(k) * 22} L${Math.cos(k + 0.3) * 10},${Math.sin(k + 0.3) * 10}`} stroke="#d83a3a" strokeWidth="1.6" />)}
+            <circle r="5" fill="#200" />
+          </g>
+        ))}
+        <g transform={`translate(0 34) scale(${0.4 + 0.6 * sourire} ${0.5 + 0.5 * sourire})`}>
+          <path d="M-80,-6 Q0,62 80,-6 Q0,22 -80,-6 Z" fill="#1a0408" stroke="#ece6da" strokeWidth="3" />
+          {[...Array(15)].map((_, k) => {
+            const u = (k + 0.5) / 15;
+            const x = -76 + 152 * u;
+            const yh = -6 + 30 * 4 * u * (1 - u) * 0.62;
+            return <path key={k} d={`M${x - 4.5},${yh - 2} L${x + 4.5},${yh - 2} L${x},${yh + 9} Z`} fill="#f2ece0" />;
+          })}
+          {[...Array(13)].map((_, k) => {
+            const u = (k + 0.5) / 13;
+            const x = -70 + 140 * u;
+            const yb = -6 + 68 * 4 * u * (1 - u) * 0.5 + 2;
+            return <path key={`b${k}`} d={`M${x - 4.5},${yb + 2} L${x + 4.5},${yb + 2} L${x},${yb - 9} Z`} fill="#e8e0d2" />;
+          })}
+        </g>
+      </g>
+    )}
+  </g>
+);
 
 // la créature posée dans le monde (billboard), pieds au sol en (x, sol, z)
 export const RodeurMonde = ({cam, x, z, y = 432, echelle = 1, ...r}) => {

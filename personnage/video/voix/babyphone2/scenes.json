@@ -1,0 +1,17 @@
+[
+ ["alerte", "Imagine, tu fais du baby-sitting. Ton tel vibre. Encore. Et encore. Cinq messages d'un coup. C'est la mère de la petite: Surtout, n'ouvre JAMAIS la trappe du grenier."],
+ ["dodo", "Tu couches Léna, tu allumes sa veilleuse, tu prends le babyphone et tu descends."],
+ ["chuchote", "Vingt-trois heures. Dans le babyphone, Léna chuchote. Elle rigole. Puis elle dit: Chut, il va t'entendre."],
+ ["escalier", "Tu montes l'escalier en courant. Tu ouvres la porte. Léna dort. Toute seule. Mais au plafond du couloir, la trappe du grenier est entrouverte."],
+ ["voix", "Tu redescends. Le babyphone grésille. Et une voix d'homme, très basse, murmure ton prénom."],
+ ["ecran", "Sur l'écran, la caméra a tourné toute seule. Elle filme la trappe. Et une longue main grise en sort."],
+ ["message", "Ton tel vibre. La mère t'écrit: On a oublié de te dire. Léna dort chez sa mamie ce soir."],
+ ["coupure", "La lumière s'éteint. Des pas lourds à l'étage. Quelque chose descend l'escalier. À quatre pattes."],
+ ["choix", "Trois secondes. Tu te caches dans le placard sous l'escalier? Ou tu cours vers la porte d'entrée?"],
+ ["placard", "Tu te glisses dans le placard. Tu retiens ton souffle. Les pas s'arrêtent devant la porte. Le babyphone grésille dans ta main. Et la petite voix chuchote: Je te vois."],
+ ["mort", "Si tu as choisi le placard, tu ne survis pas."],
+ ["rembobine", "On rembobine."],
+ ["porte", "Tu cours vers la porte. Fermée à clé. Tu sautes par la fenêtre de la cuisine, tu tombes dans le jardin, tu cours jusqu'au portail. Derrière toi, la fenêtre de la chambre de Léna s'allume."],
+ ["fenetre", "Léna est là. Elle te fait coucou. Et derrière elle, une silhouette immense pose sa main sur son épaule."],
+ ["dilemme", "Tu t'enfuis? Ou tu retournes chercher Léna? Dis-le en commentaire."]
+]
