@@ -96,3 +96,5 @@ Modèle à suivre : `RentrezChezVous.jsx` + `ForetNuit.jsx` + `Rodeur.jsx` + `Te
 
 ## Sous-titres
 - Montserrat Black, majuscules, 1 à 3 mots, ligne active en **rouge**, pop d'apparition, quelques emojis Twemoji (7 à 9) sur les moments forts.
+
+- (station-service) Maé préfère le rendu de « Rentrez chez vous » : 3D éclairée façon forêt (lumières, brume, contre-jour), personnages 2D dedans, plans POV caméra à l'épaule + plans dynamiques sur le bonhomme. Les plaques 2D plates « illustrées » ont moins plu. Le monstre ne doit pas être montré avant la révélation prévue par le texte.

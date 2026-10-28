@@ -53,7 +53,7 @@ export const lumiere = (p, n, L) => {
     if (on < 0.05) return;
     // le néon éclaire vers le bas : rien au-dessus de l'auvent
     if (p[1] < NEONS[k][1] - 20) return;
-    add(NEON_C, ponctuelle(p, n, NEONS[k], 1.05 * on, 1150));
+    add(NEON_C, ponctuelle(p, n, NEONS[k], 0.95 * on, 1050));
   });
   const vit = L.vitrine ?? 1;
   if (vit > 0.05) {
@@ -77,8 +77,8 @@ export const ombre = (cam, albedo, p, n, L, F) => {
     const dd = Math.max(0, cam.profondeur(p[2], p[0], p[1]));
     const b = 1 - Math.exp(-dd / F.portee);
     const lb = lumiere(p, null, L);
-    const brume = F.brume.map((v, i) => v + film(lb[i] * 0.5) * 120);
-    col = mix(col, brume, b * 0.9);
+    const brume = F.brume.map((v, i) => v + film(lb[i] * 0.45) * [60, 78, 96][i]);
+    col = mix(col, brume, b * 0.78);
   }
   return rgb(col);
 };
@@ -273,7 +273,7 @@ const pompe = (cam, ctx, f, o) => {
 // ----- l'auvent : dalle, bandeau rouge, néons -----
 const auvent = (cam, ctx, f) => {
   const el = [];
-  el.push(boite(cam, ctx, [AUV.x0, AUV.x1], [AUV.y, AUV.y + AUV.ep], [AUV.z0, AUV.z1], [0.62, 0.62, 0.66], 'dalle', {sub: 6, emis: {}}));
+  el.push(boite(cam, ctx, [AUV.x0, AUV.x1], [AUV.y, AUV.y + AUV.ep], [AUV.z0, AUV.z1], [0.4, 0.4, 0.45], 'dalle', {sub: 6, emis: {}}));
   // bandeau rouge sur les tranches
   [[AUV.z0 - 0.003, [0, 0, -1]], [AUV.z1 + 0.003, [0, 0, 1]]].forEach(([zz, n], k) => {
     el.push(face(cam, ctx, [[AUV.x0, AUV.y + 15, zz], [AUV.x1, AUV.y + 15, zz], [AUV.x1, AUV.y + 75, zz], [AUV.x0, AUV.y + 75, zz]], n, [0.9, 0.08, 0.1], `band${k}`, {sub: 4}));
@@ -500,13 +500,13 @@ export const stationNuit = (cam, f, o = {}) => {
   const L = {auvent: o.auvent || NEONS.map(() => 1), vitrine: o.vitrine ?? 1, ecran: o.ecran ?? 1, extra: o.lumieres || []};
   if (o.phares) L.extra = [...L.extra, {p: [(VOIT.x0 + VOIT.x1) / 2, 200, VOIT.z0 - 0.4], c: [1, 0.95, 0.8], i: 1.2, r: 1500}];
   const P = palette(o.nuit ?? 1);
-  const F = {portee: o.portee ?? 14, brume: P.brume.map((v) => v * 0.75)};
+  const F = {portee: o.portee ?? 20, brume: [26, 24, 52]};
   const ctx = {L, F};
   // la forêt : lumière dans la direction de la station (troncs en contre-jour autour de la clairière)
   const cx = 0;
   const cz = 2.5;
   const lumYaw = (Math.atan2(cx - cam.x, (cz - cam.z) * 1000) * 180) / Math.PI;
-  const d = foret(cam, f, {nuit: o.nuit ?? 1, lumYaw, lumY: -1.0, rim: 1.1, portee: 9, rayons: 0, poussiere: 0.6, haloK: 0.3, brume: 0.45, degage: [[0, -3, 0, 12, 3300], [0, -40, 0, -2, 700]], feuillesDegage: false, ...(o.foret || {})});
+  const d = foret(cam, f, {nuit: o.nuit ?? 1, lumYaw, lumY: -1.0, rim: 1.1, portee: 9, rayons: 0, poussiere: 0.6, haloK: 0.3, brume: 0.25, degage: [[0, -3, 0, 12, 3300], [0, -40, 0, -2, 700]], feuillesDegage: false, ...(o.foret || {})});
   // objets lumineux (pour les reflets au sol)
   const em = [];
   NEONS.forEach((q, k) => L.auvent[k] > 0.5 && em.push({pts: [[q[0] - 330, q[1], q[2]], [q[0] + 330, q[1], q[2]], [q[0] + 330, q[1] + 40, q[2]], [q[0] - 330, q[1] + 40, q[2]]], c: '#e8f4ff', op: 0.9}));
@@ -562,7 +562,7 @@ export const CAISSE_P = {x: 1000, z: 7.15};
 export const PORTE_G = {x0: 720, x1: 1080};
 const lumsDedans = (o) => {
   const on = o.boutique || [1, 1, 1, 1];
-  const L = PLAFONNIERS.map(([x, z], k) => ({p: [x, BOUT.plaf + 30, z], c: [0.9, 1, 0.88], i: 0.85 * on[k], r: 1150}));
+  const L = PLAFONNIERS.map(([x, z], k) => ({p: [x, BOUT.plaf + 30, z], c: [0.92, 1, 0.94], i: 0.95 * on[k], r: 900}));
   L.push({p: [-700, -300, BOUT.z1 - 0.3], c: [0.75, 0.92, 1], i: 0.35 * (o.frigos ?? 1), r: 900});
   L.push({p: [900, -560, BOUT.z1 - 0.15], c: [1, 0.12, 0.1], i: 0.28 * (o.veilleuse ?? 1), r: 650});
   // un peu de la lumière de l'auvent entre par la vitrine
@@ -575,7 +575,7 @@ export const eclaireDedans = (o, p, k = 1) => {
 };
 export const dedans = (cam, f, o = {}) => {
   const B = BOUT;
-  const ctx = {L: {auvent: [], vitrine: 0, ecran: 0, extra: lumsDedans(o)}, F: {portee: 30, brume: [14, 14, 20]}};
+  const ctx = {L: {auvent: [], vitrine: 0, ecran: 0, extra: lumsDedans(o)}, F: {portee: 9, brume: [10, 9, 18]}};
   const on = o.boutique || [1, 1, 1, 1];
   // dehors, vu par la vitrine (dessiné d'abord, l'intérieur le recouvre partout sauf la vitre)
   const ext = stationNuit(cam, f, {...o.dehors, sansBoutique: true});

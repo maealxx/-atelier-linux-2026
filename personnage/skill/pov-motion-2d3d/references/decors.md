@@ -113,3 +113,12 @@ Vue « allongé dans la capsule » : `Couche` (LeVaisseau.jsx) dessine le bonhom
 - `Hypergamie.jsx` : thème léger en 2,5D de jour : schéma animé en 2D avec couches (`Schema`), écrans de téléphone personnalisés (appli de rencontre, liste de messages, appel et visio, notifications), rue, boulangerie, salle de sport vue par la vitrine, bus, soirée (`appart` + lumières de fête), écran partagé en deux.
 - `RentrezChezVous.jsx` : forêt au crépuscule puis de nuit (`ForetNuit.jsx`), messages d'un **numéro inconnu** (TelReel avec avatar « ? », « écrit… » qui s'arrête sans rien envoyer, **photo reçue**), demi-tour avec **flou de bougé** (`<Plan flou={[x, 0]}>`), **créature 2D articulée** (`Rodeur`) qui passe de debout à quatre pattes et charge, course avec **branches qui fouettent l'objectif**, cachette derrière un chêne (main sur la bouche), **griffes qui raclent l'écorce** vues d'en dessous, tête qui renifle, lampe torche qui clignote au loin, dilemme en écran partagé.
 - `Gabarit.jsx` : petit modèle neutre (salon → message → rue) pour démarrer n'importe quel thème.
+
+## StationNuit (station-service 3D, style « Rentrez chez vous ») — `src/StationNuit.jsx`
+- Clairière dans `foret()` (degage + `feuillesDegage: false`), route qui part dans les arbres, lumière de la forêt orientée vers la station (troncs en contre-jour autour).
+- Éclairage par face : lumières ponctuelles (6 néons d'auvent, vitrine, écran de pompe, `lumieres` en plus) × orientation (Lambert adouci) × atténuation, lune bleue en ambiance, rendu filmique `film()`, brume selon la distance éclairée par les lumières. Grandes faces subdivisées (`sub`) = taches de lumière.
+- Asphalte mouillé : reflet miroir flouté des objets lumineux (néons, vitrine, enseignes). Cônes de lumière sous les néons. Halos (bloom).
+- Voiture = profil extrudé (caisse + habitacle vitré), roues en polygones, trappe à essence ; pompe sur îlot (écran côté −X), tuyau qui passe derrière le bonhomme.
+- `stationNuit(cam, f, o)` → `{fond, brume, items, L, P, poussiere}` pour `<Plan>` ; `eclaire(o, p)` donne la teinte d'un personnage à cet endroit.
+- `dedans(cam, f, o)` : boutique en 3D (4 plafonniers qui s'éteignent un à un = vraie baisse de lumière, frigos lumineux, porte du générateur + veilleuse rouge, comptoir, écrans CCTV) ; le dehors est vu à travers la vitrine. `eclaireDedans(o, p)`.
+- Pièges : ne jamais poser une caméra dans un volume (pompe, comptoir) ; pour voir la caissière derrière le comptoir, caméra côté client (z < COMPTOIR.z0) + zoom.

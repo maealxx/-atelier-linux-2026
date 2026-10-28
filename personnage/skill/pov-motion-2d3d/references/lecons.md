@@ -83,3 +83,7 @@
 - **Billboard ancré aux pieds + caméra qui lève les yeux** : les pieds passent presque au plan proche et toute la créature part hors champ (invisible). `RodeurMonde` est maintenant ancré **au milieu du corps** ; fais pareil pour tout grand billboard vu de près en contre-plongée.
 - **Rejouer des images (rembobinage, souvenir)** : garde les fonctions de rendu des scènes (`RENDUS`) et appelle-les avec n'importe quelle image (`imageA(fg)`), au lieu de re-rendre une vidéo.
 - **Concurrence du rendu** : `--concurrency=$(nproc)` (4 ici) ; plus haut, Remotion refuse.
+
+- Décors 3D « plats / gris » : la cause était l'absence de brume et d'atténuation de la lumière. Un éclairage par face (Lambert + 1/(1+(d/r)²)) + brume colorée selon la distance + reflets miroir flous au sol donnent le rendu « réaliste » de la forêt. Trop de brume grise = image délavée : garder une brume sombre bleu-violet.
+- La gêne du spectateur vient surtout des formes simplistes posées sur fond plat ; une créature/un objet doit être éclairé par la même lumière que la scène (teinte calculée à sa position).
+- Gouttes « noir, épais » : une goutte en forme de larme + reflet, puis une tache qui coule vers le bas (sinon ça ressemble à une pastille).

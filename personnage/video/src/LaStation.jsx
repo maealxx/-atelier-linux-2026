@@ -212,10 +212,25 @@ const Gouttes = ({f, t0, x, y, y0 = -80, n = 4, s = 1}) => (
       const u = (f - tk) / 9;
       if (u < 0) return null;
       const yy = u < 1 ? lerp(y0, y, u * u) : y;
+      const cx = x + (k % 2 ? 1 : -1) * k * 9 * s;
+      const e = Math.min(1, (u - 1) * 2);
+      // une fois tombée : une tache épaisse, brillante, qui coule lentement vers le bas
+      const coule = Math.min(1, Math.max(0, (u - 1) / 5)) * (40 + 25 * k) * s;
       return (
         <g key={k}>
-          {u < 1 && <ellipse cx={x + k * 14 * s} cy={yy} rx={9 * s} ry={17 * s} fill="#050307" />}
-          {u >= 1 && <ellipse cx={x + k * 14 * s - 6} cy={y + 4} rx={(18 + 12 * Math.min(1, (u - 1) * 2)) * s} ry={(8 + 4 * Math.min(1, (u - 1) * 2)) * s} fill="#050307" opacity="0.92" />}
+          {u < 1 && (
+            <g>
+              <path d={`M${cx},${yy - 26 * s} Q${cx + 11 * s},${yy} ${cx},${yy + 12 * s} Q${cx - 11 * s},${yy} ${cx},${yy - 26 * s} Z`} fill="#040306" />
+              <ellipse cx={cx - 3 * s} cy={yy - 2 * s} rx={2.5 * s} ry={5 * s} fill="#9aa8c8" opacity="0.6" />
+            </g>
+          )}
+          {u >= 1 && (
+            <g>
+              <path d={`M${cx - 7 * s},${y} Q${cx - 8 * s},${y + coule} ${cx - 2 * s},${y + coule + 8 * s} Q${cx + 5 * s},${y + coule} ${cx + 4 * s},${y}`} fill="#040306" />
+              <ellipse cx={cx} cy={y + 2 * s} rx={(14 + 10 * e) * s} ry={(6 + 3 * e) * s} fill="#040306" />
+              <ellipse cx={cx - 4 * s} cy={y} rx={5 * s} ry={1.8 * s} fill="#b8c4e0" opacity="0.45" />
+            </g>
+          )}
         </g>
       );
     })}
@@ -251,7 +266,7 @@ const Goutte = scene('goutte', ({f, fg, i, t, d, R}) => {
   const cam = makeCam(c);
   const [ex, ey] = cam.proj(...EPAULE);
   return (
-    <Vue fg={fg} cam={c} o={o} zoom={1.0 + 0.05 * k}
+    <Vue fg={fg} cam={c} o={o} zoom={1.45 + 0.1 * k}
       items={[moi(cam, o, {id: 'g1', epauleD: -20, coudeD: 120, eyes: 1.15 + 0.35 * peur, worry: 0.4 + 0.6 * peur, pupilX: 12 * peur, pupilY: -6 * peur})]}
       dessus={<Gouttes f={f} t0={R('goutte', 72) - 26} x={ex} y={ey} s={cam.scale(MOI.z, ...EPAULE.slice(0, 2)) * 0.9} />} />
   );
@@ -580,7 +595,7 @@ const Neons = scene('neons', ({f, fg, i, t, d, R}) => {
   if (i === 0) {
     // la boutique entière : les plafonniers claquent un à un, la nuit gagne la pièce
     const o = {boutique: nb, frigos: nb[0] > 0.5 ? 1 : 0.2, dehors: DEHORS(fg, {compteur: 41.8})};
-    const c = pov(fg, [-1500, -430, 5.85], [700, 0, 8.0], {k: 0.6 + 0.4 * noirs});
+    const c = pov(fg, [-750, -430, 5.8], [700, 0, 8.4], {k: 0.6 + 0.4 * noirs});
     return (
       <VueIn fg={fg} cam={c} o={o} zoom={1.0 + 0.04 * k}
         items={(cam) => [caissiere(cam, o, {id: 'n0', x: CAISSE_P.x, z: CAISSE_P.z, eyes: 1.2, pupilY: -8}), moi(cam, o, {id: 'n0m', x: MOI_IN.x, z: MOI_IN.z, dedansL: true, dos: true, epauleD: -10, coudeD: 30})]} />
