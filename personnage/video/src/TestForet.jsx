@@ -1,28 +1,31 @@
 import {useCurrentFrame} from 'remotion';
-import {chalet, chaletExt, Neige} from './Chalet';
-import {foret, Voile} from './ForetNuit';
+import {station, boutiqueInt, VOIT} from './Station';
 import {Plan} from './montage';
-import {makeCam} from './moteur';
-import {RodeurMonde, DEBOUT} from './Rodeur';
+import {makeCam, Perso} from './moteur';
+import {RodeurMonde, QUATRE} from './Rodeur';
 
-const IN = [
-  {cam: {x: 900, y: -200, z: -0.3, yaw: -20, pitch: 2}, o: {porte: 0}},
-  {cam: {x: -100, y: -150, z: 0.4, yaw: 25, pitch: 2}, o: {rouge: 0.8, ecran: 1, dehors: true}},
-  {cam: {x: 1050, y: 360, z: 0.65, yaw: -40, pitch: -2}, o: {porte: 0.8}},
-  {cam: {x: 600, y: -150, z: 0.1, yaw: -60, pitch: 3}, o: {}},
+const vise = (p, c) => {
+  const dx = c[0] - p[0], dy = c[1] - p[1], dz = (c[2] - p[2]) * 1000;
+  return {x: p[0], y: p[1], z: p[2], yaw: (Math.atan2(dx, dz) * 180) / Math.PI, pitch: (Math.atan2(dy, Math.hypot(dx, dz)) * 180) / Math.PI};
+};
+const CONF = [
+  vise([-200, -250, -2.2], [0, -200, 3]),
+  vise([600, -100, -0.4], [-300, -50, 1.5]),
+  vise([1800, -2400, -1.0], [-400, 0, 1.4]),
+  vise([300, -150, 5.3], [-300, -100, 1.5]),
 ];
 export const TestForet = () => {
   const f = useCurrentFrame();
-  const k = f % 6;
-  if (k < 4) {
-    const c = IN[k];
-    const cam = makeCam(c.cam);
-    const o = {...c.o};
-    if (o.dehors) o.dehors = <RodeurMonde cam={cam} x={450} z={6} pose={DEBOUT} />;
-    const d = chalet(cam, f, o);
-    return <Plan f={f} cam={cam} decor={d} items={[]} grain={0.02} vignette={0.7} dessus={d.voile} />;
+  const k = f % 4;
+  const cam = makeCam(CONF[k]);
+  const creature = {z: 1.4, x: -430, y: VOIT.toit, el: <RodeurMonde cam={cam} x={-430} z={1.4} y={VOIT.toit} pose={QUATRE} echelle={0.55} />};
+  const caissiere = {z: 5.9, x: 950, el: <Perso cam={cam} id="cs" x={950} z={5.9} lum={0.9} coiffure="queue" couleurs={{haut: '#2a6a8a', hautO: '#1f5470', chev: '#3a2418'}} />};
+  const moi = {z: 1.1, x: 60, el: <Perso cam={cam} id="mo" x={60} z={1.1} lum={0.85} teinte={[0.85, 0.92, 1]} epauleD={-20} coudeD={120} />};
+  if (k < 3) {
+    const d = station(cam, f, {creature, caissiere, compteur: 23.47, extra: [moi], feuille: 1});
+    return <Plan f={f} cam={cam} decor={d} items={[]} grain={0.02} vignette={0.7} />;
   }
-  const cam = makeCam(k === 4 ? {x: 600, y: -300, z: 9, yaw: 185, pitch: 0} : {x: 2400, y: 200, z: 6, yaw: 215, pitch: -3});
-  const d = foret(cam, f, {nuit: 1, neige: 1, lumYaw: 180, degage: [[0, -1.5, 0, 4.5, 1800]]});
-  return <Plan f={f} cam={cam} decor={d} items={[chaletExt(cam, f, {})]} grain={0.02} vignette={0.7} dessus={<g><Voile L={d.L} P={d.P} /><Neige f={f} /></g>} />;
+  const d = boutiqueInt(cam, f, {creature, caissiere});
+  const deh = [...d.dehors].sort((a, b) => cam.profondeur(b.z, b.x ?? cam.x, b.y ?? cam.y) - cam.profondeur(a.z, a.x ?? cam.x, a.y ?? cam.y));
+  return <Plan f={f} cam={cam} decor={{fond: <g>{d.fond}{deh.map((o, i) => <g key={i}>{o.el}</g>)}{d.surf}{d.facade}</g>, brume: null, items: d.items}} items={[]} grain={0.02} vignette={0.7} />;
 };

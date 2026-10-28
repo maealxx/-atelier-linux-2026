@@ -110,7 +110,7 @@ const VueExt = ({fg, cam: c, o = {}, items = [], zoom = 1, roll = 0, noir = 0, f
 };
 
 // ----- les deux choix (milieu) -----
-const ChoixBoite = ({f, debut, x, y, texte, emoji, couleur, etat = 0}) => {
+export const ChoixBoite = ({f, debut, x, y, texte, emoji, couleur, etat = 0}) => {
   // etat : 0 normal, 1 choisi (pulse + coche), -1 écarté (grisé)
   const p = spring({frame: f - debut, fps: 30, config: {damping: 9}});
   if (f < debut) return null;
@@ -136,7 +136,7 @@ const Deux = ({f, a, b, choisi = 0}) => (
 );
 
 // ----- effets « VHS » : rembobinage, pause -----
-const VHS = ({f, children, force = 1, texte = '◀◀ REW', compteur = null}) => {
+export const VHS = ({f, children, force = 1, texte = '◀◀ REW', compteur = null}) => {
   const bandes = [0, 1, 2].map((k) => ({y: ((random(`vy${k}${Math.floor(f / 3)}`) * 2100) | 0) - 100, h: 40 + random(`vh${k}${Math.floor(f / 3)}`) * 160, dx: (random(`vd${k}${f}`) - 0.5) * 120 * force}));
   return (
     <AbsoluteFill style={{background: '#000'}}>
@@ -164,7 +164,7 @@ const VHS = ({f, children, force = 1, texte = '◀◀ REW', compteur = null}) =>
     </AbsoluteFill>
   );
 };
-const fmt = (s) => `0:${String(Math.floor(s / 60)).padStart(2, '0')}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+export const fmt = (s) => `0:${String(Math.floor(s / 60)).padStart(2, '0')}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
 
 // les lattes de l'armoire, vues de l'intérieur (par-dessus l'image)
 const Lattes = ({ferme = 1, f}) => (
@@ -204,7 +204,7 @@ const pov = (fg, p, c, {k = 1, pas = 0, v = 0.21} = {}) => {
 const roulis = (fg, k = 1, pas = 0, v = 0.21) => main(fg, k).r + Math.sin(fg * v) * 0.9 * pas;
 const mixC = (a, b, u) => a.map((x, i) => x + (b[i] - x) * u);
 // une main (vue subjective) qui se tend vers un point de l'écran
-const MainPov = ({x, y, s = 1, rot = -20, nuit = 0.5, ouvre = 1}) => (
+export const MainPov = ({x, y, s = 1, rot = -20, nuit = 0.5, ouvre = 1}) => (
   <g>
     <path d={`M${x + 70 * s},${y + 90 * s} L${x + 640 * s},${y + 1200 * s} L${x + 1100 * s},${y + 900 * s} L${x + 180 * s},${y + 10 * s} Z`} fill="#3a2a22" />
     <g transform={`translate(${x} ${y}) rotate(${rot}) scale(${s})`}>
@@ -402,7 +402,7 @@ const Serrure = scene('serrure', ({f, fg, i, t, d, R}) => {
 // ===== 8. Te cacher : l'armoire, ou sous le lit ? 3 secondes pour choisir (chrono en millisecondes) =====
 const ARMOIRE_V = [1050, -100, 1.8];
 const LIT_V = [1000, 250, 0.65];
-const Chrono = ({reste}) => {
+export const Chrono = ({reste}) => {
   const s = Math.max(0, reste);
   const txt = `${String(Math.floor(s)).padStart(2, '0')}.${String(Math.floor((s % 1) * 1000)).padStart(3, '0')}`;
   const urgent = s < 1;
@@ -506,7 +506,7 @@ const Armoire = scene('armoire', ({f, fg, i, t, d, R}) => {
   }
   return <Screamer f={u} fg={fg} />;
 });
-const Screamer = ({f, fg, fige = false}) => {
+export const Screamer = ({f, fg, fige = false}) => {
   const s = fige ? 4.6 : interpolate(f, [0, 4, 20], [2.2, 4.4, 4.9], clamp);
   const sh = fige ? 0 : 1;
   return (

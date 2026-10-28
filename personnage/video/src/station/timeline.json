@@ -1,0 +1,344 @@
+{
+ "fps": 30,
+ "voix": "station/voix_finale.wav",
+ "scenes": [
+  {
+   "nom": "pompe",
+   "frames": 192,
+   "texte": "Imagine. Il est trois heures du matin. Tu fais le plein dans une station-service perdue au milieu de la forêt.",
+   "reperes": {
+    "imagine": 3,
+    "il": 25,
+    "est": 32,
+    "trois": 40,
+    "heures": 48,
+    "du": 61,
+    "matin": 69,
+    "tu": 91,
+    "fais": 96,
+    "le": 101,
+    "plein": 106,
+    "dans": 112,
+    "une": 117,
+    "station-service": 125,
+    "perdue": 143,
+    "au": 152,
+    "milieu": 157,
+    "de": 165,
+    "la": 170,
+    "forêt": 176
+   }
+  },
+  {
+   "nom": "vitre",
+   "frames": 84,
+   "texte": "Et d'un coup, la caissière tape contre la vitre. Fort.",
+   "reperes": {
+    "et": 1,
+    "dun": 7,
+    "coup": 13,
+    "la": 28,
+    "caissière": 32,
+    "tape": 43,
+    "contre": 51,
+    "vitre": 63,
+    "fort": 80
+   }
+  },
+  {
+   "nom": "feuille",
+   "frames": 155,
+   "texte": "Elle colle une feuille contre le verre. Dessus, c'est écrit : « Ne lève pas les yeux. »",
+   "reperes": {
+    "elle": 2,
+    "colle": 10,
+    "une": 19,
+    "feuille": 28,
+    "contre": 37,
+    "le": 45,
+    "verre": 51,
+    "dessus": 69,
+    "cest": 88,
+    "écrit": 93,
+    "": 100,
+    "ne": 119,
+    "lève": 123,
+    "pas": 130,
+    "les": 134,
+    "yeux": 139
+   }
+  },
+  {
+   "nom": "goutte",
+   "frames": 148,
+   "texte": "Tu ne comprends pas. Et là, quelque chose goutte sur ton épaule. Noir. Épais.",
+   "reperes": {
+    "tu": 1,
+    "ne": 6,
+    "comprends": 10,
+    "pas": 17,
+    "et": 30,
+    "là": 35,
+    "quelque": 50,
+    "chose": 61,
+    "goutte": 72,
+    "sur": 83,
+    "ton": 90,
+    "épaule": 97,
+    "noir": 113,
+    "épais": 128
+   }
+  },
+  {
+   "nom": "toit",
+   "frames": 154,
+   "texte": "Ça vient du toit de ta voiture. Quelque chose est couché sur le toit. Juste au-dessus de ta tête.",
+   "reperes": {
+    "ça": 1,
+    "vient": 7,
+    "du": 12,
+    "toit": 18,
+    "de": 24,
+    "ta": 30,
+    "voiture": 36,
+    "quelque": 58,
+    "chose": 66,
+    "est": 74,
+    "couché": 79,
+    "sur": 87,
+    "le": 92,
+    "juste": 111,
+    "au-dessus": 119,
+    "tête": 138
+   }
+  },
+  {
+   "nom": "choix",
+   "frames": 201,
+   "texte": "Tu as trois secondes. Tu sautes dans la voiture, ou tu cours vers la boutique ?",
+   "reperes": {
+    "tu": 1,
+    "as": 5,
+    "trois": 10,
+    "secondes": 15,
+    "sautes": 38,
+    "dans": 45,
+    "la": 49,
+    "voiture": 54,
+    "ou": 70,
+    "cours": 78,
+    "vers": 81,
+    "boutique": 90,
+    "": 99
+   }
+  },
+  {
+   "nom": "voiture",
+   "frames": 407,
+   "texte": "Tu choisis la voiture. Tu claques la portière. Tu tournes la clé. Le moteur tousse. Et un long bras gris descend devant le pare-brise. Ses doigts tapotent la vitre. Un. Deux. Trois. Et la vitre explose.",
+   "reperes": {
+    "tu": 1,
+    "choisis": 6,
+    "la": 14,
+    "voiture": 19,
+    "claques": 43,
+    "portière": 56,
+    "tournes": 80,
+    "clé": 92,
+    "le": 106,
+    "moteur": 112,
+    "tousse": 121,
+    "et": 140,
+    "un": 145,
+    "long": 151,
+    "bras": 157,
+    "gris": 163,
+    "descend": 168,
+    "devant": 178,
+    "pare-brise": 193,
+    "ses": 218,
+    "doigts": 224,
+    "tapotent": 230,
+    "vitre": 249,
+    "deux": 287,
+    "trois": 308,
+    "explose": 350
+   }
+  },
+  {
+   "nom": "mort",
+   "frames": 112,
+   "texte": "Si tu as choisi la voiture… tu ne survis pas.",
+   "reperes": {
+    "si": 1,
+    "tu": 6,
+    "as": 11,
+    "choisi": 16,
+    "la": 24,
+    "voiture": 29,
+    "ne": 55,
+    "survis": 60,
+    "pas": 68
+   }
+  },
+  {
+   "nom": "rembobine",
+   "frames": 60,
+   "texte": "On rembobine.",
+   "reperes": {
+    "on": 1,
+    "rembobine": 6
+   }
+  },
+  {
+   "nom": "boutique",
+   "frames": 132,
+   "texte": "Cette fois, tu cours vers la boutique ! La caissière t'ouvre, et verrouille derrière toi.",
+   "reperes": {
+    "cette": 1,
+    "fois": 11,
+    "tu": 22,
+    "cours": 27,
+    "vers": 31,
+    "la": 35,
+    "boutique": 40,
+    "": 50,
+    "caissière": 68,
+    "touvre": 80,
+    "et": 94,
+    "verrouille": 98,
+    "derrière": 109,
+    "toi": 119
+   }
+  },
+  {
+   "nom": "descend",
+   "frames": 106,
+   "texte": "Par la vitre, tu la vois descendre du toit. À quatre pattes.",
+   "reperes": {
+    "par": 1,
+    "la": 6,
+    "vitre": 10,
+    "tu": 25,
+    "vois": 36,
+    "descendre": 42,
+    "du": 54,
+    "toit": 60,
+    "à": 74,
+    "quatre": 80,
+    "pattes": 89
+   }
+  },
+  {
+   "nom": "ecrans",
+   "frames": 123,
+   "texte": "Sur les écrans de surveillance, elle fait le tour de la boutique. Lentement.",
+   "reperes": {
+    "sur": 2,
+    "les": 7,
+    "écrans": 12,
+    "de": 21,
+    "surveillance": 27,
+    "elle": 49,
+    "fait": 57,
+    "le": 61,
+    "tour": 66,
+    "la": 75,
+    "boutique": 80,
+    "lentement": 99
+   }
+  },
+  {
+   "nom": "regle",
+   "frames": 124,
+   "texte": "La caissière chuchote : « Tant que la lumière est allumée, elle ne peut pas entrer. »",
+   "reperes": {
+    "la": 2,
+    "caissière": 6,
+    "chuchote": 16,
+    "": 27,
+    "tant": 44,
+    "que": 49,
+    "lumière": 57,
+    "est": 66,
+    "allumée": 70,
+    "elle": 87,
+    "ne": 93,
+    "peut": 97,
+    "pas": 101,
+    "entrer": 106
+   }
+  },
+  {
+   "nom": "neons",
+   "frames": 166,
+   "texte": "Et au même moment, les néons se mettent à grésiller. Un par un, ils s'éteignent. Il n'en reste qu'un.",
+   "reperes": {
+    "et": 2,
+    "au": 6,
+    "même": 11,
+    "moment": 18,
+    "les": 32,
+    "néons": 37,
+    "se": 42,
+    "mettent": 47,
+    "à": 55,
+    "grésiller": 60,
+    "un": 81,
+    "par": 86,
+    "ils": 104,
+    "séteignent": 110,
+    "il": 133,
+    "nen": 138,
+    "reste": 143,
+    "quun": 151
+   }
+  },
+  {
+   "nom": "sourire",
+   "frames": 113,
+   "texte": "Tu te tournes vers la caissière. Elle sourit. Beaucoup trop grand.",
+   "reperes": {
+    "tu": 2,
+    "te": 6,
+    "tournes": 11,
+    "vers": 19,
+    "la": 24,
+    "caissière": 28,
+    "elle": 48,
+    "sourit": 59,
+    "beaucoup": 78,
+    "trop": 91,
+    "grand": 98
+   }
+  },
+  {
+   "nom": "dilemme",
+   "frames": 277,
+   "texte": "Le générateur est dans l'arrière-boutique. Tu y vas pour rallumer les lumières ? Ou tu restes dans le noir… avec elle ? Dis-le en commentaire.",
+   "reperes": {
+    "le": 2,
+    "générateur": 7,
+    "est": 21,
+    "dans": 25,
+    "larrière-boutique": 30,
+    "tu": 59,
+    "y": 63,
+    "vas": 67,
+    "pour": 71,
+    "rallumer": 75,
+    "les": 84,
+    "lumières": 89,
+    "": 98,
+    "ou": 110,
+    "restes": 121,
+    "noir": 140,
+    "avec": 154,
+    "elle": 160,
+    "dis-le": 180,
+    "en": 188,
+    "commentaire": 194
+   }
+  }
+ ]
+}

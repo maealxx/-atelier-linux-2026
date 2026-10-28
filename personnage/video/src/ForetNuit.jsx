@@ -279,6 +279,7 @@ export const foret = (cam, f, o = {}) => {
     if (t) items.push(t);
   });
   BUISSONS.forEach((b) => {
+    if (bloque({...b, r: b.r * 0.5})) return;
     const t = buisson(cam, b, P, L, opts);
     if (t) items.push(t);
   });
