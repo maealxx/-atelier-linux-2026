@@ -29,6 +29,17 @@ export const QUATRE = {
   piG: [-170, -24], piD: [170, -24],
 };
 
+// couchée à plat (sur un toit), de face : tête basse, bras et jambes étalés
+export const COUCHE = {
+  tete: [0, -210], cou: [0, -150],
+  epG: [-90, -150], epD: [90, -150],
+  coG: [-300, -230], coD: [300, -230],
+  maG: [-470, -20], maD: [470, -20],
+  haG: [-40, -170], haD: [40, -170],
+  geG: [-260, -260], geD: [260, -260],
+  piG: [-420, -20], piD: [420, -20],
+};
+
 export const melange = (a, b, t) => Object.fromEntries(Object.keys(a).map((k) => [k, [a[k][0] + (b[k][0] - a[k][0]) * t, a[k][1] + (b[k][1] - a[k][1]) * t]]));
 // cycle de course à quatre pattes (mains et pieds alternés)
 export const galop = (p, ph, amp = 1) => {

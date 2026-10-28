@@ -36,6 +36,7 @@ export const Bonhomme = ({
   coiffure = 'court', // 'court' (le bonhomme) | 'long' | 'queue' (queue de cheval) | 'carre'
   jupe = false, // jupe (couleur `pant`), jambes en `jambe` (peau ou collants)
   cils = false,
+  grin = 0, // 0 → 1 : sourire beaucoup trop grand (jusqu'aux oreilles, pleines dents)
 }) => {
   const C = couleurs ? {...C0, ...couleurs} : C0;
   const J = jupe ? C.jambe || C.peau : C.pant;
@@ -146,7 +147,7 @@ export const Bonhomme = ({
         {[272, 328].map((x) => (
           <g key={x} transform={`translate(${x} 198) scale(1 ${eyes}) translate(${-x} -198)`}>
             <g transform={`translate(${pupilX} ${pupilY})`}>
-              <ellipse cx={x} cy="198" rx="8" ry="10" fill="#1E1E2A" />
+              <ellipse cx={x} cy="198" rx={8 * (1 - 0.45 * grin)} ry={10 * (1 - 0.45 * grin)} fill="#1E1E2A" />
               <circle cx={x + 3} cy="194" r="3" fill="#fff" />
             </g>
             {cils && <path d={x < 300 ? `M${x - 9},192 L${x - 18},184 M${x - 6},188 L${x - 12},179` : `M${x + 9},192 L${x + 18},184 M${x + 6},188 L${x + 12},179`} stroke="#1E1E2A" strokeWidth="4" strokeLinecap="round" />}
@@ -162,7 +163,28 @@ export const Bonhomme = ({
         <path d="M300,205 Q294,220 302,222" fill="none" stroke="#D99572" strokeWidth="5" strokeLinecap="round" />
 
         {/* bouche */}
-        {scream > 0.02 ? (
+        {grin > 0.02 ? (
+          <g>
+            <defs>
+              <clipPath id="bh-visage">
+                <ellipse cx="300" cy="192" rx="69" ry="75" />
+              </clipPath>
+            </defs>
+            <g clipPath="url(#bh-visage)">
+              {/* joues tirées vers le haut */}
+              <path d={`M${270 - 60 * grin},${226 - 6 * grin} Q300,${232 + 4 * grin} ${330 + 60 * grin},${226 - 6 * grin}`} fill="none" stroke={C.peauO} strokeWidth={4 + 3 * grin} strokeLinecap="round" opacity={0.7 * grin} />
+              {/* la bouche, d'une oreille à l'autre */}
+              <path d={`M${284 - 70 * grin},${236 - 12 * grin} Q300,${250 + 30 * grin} ${316 + 70 * grin},${236 - 12 * grin} Q300,${240 + 8 * grin} ${284 - 70 * grin},${236 - 12 * grin} Z`} fill="#3a0e18" stroke="#5a1a26" strokeWidth="4" strokeLinejoin="round" />
+              {/* dents */}
+              {[...Array(Math.round(6 + 10 * grin))].map((_, k, arr) => {
+                const u = (k + 0.5) / arr.length;
+                const x = 284 - 70 * grin + (32 + 140 * grin) * u;
+                const yh = 236 - 12 * grin + (14 + 38 * grin) * 4 * u * (1 - u) * 0.5;
+                return <rect key={k} x={x - 4} y={yh} width="8" height={6 + 6 * grin} rx="2" fill="#f4efe2" />;
+              })}
+            </g>
+          </g>
+        ) : scream > 0.02 ? (
           <ellipse cx="300" cy={240 + scream * 4} rx={9 + scream * 5} ry={4 + scream * 13} fill="#7A2E3A" />
         ) : (
           <path
