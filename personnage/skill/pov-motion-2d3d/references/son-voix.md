@@ -50,3 +50,9 @@ Les impacts des screamers fixent la crête : la voix paraît basse (moyenne −2
 - `ffmpeg -i x.mp4 -af volumedetect -f null -` : moyenne autour de −16 dB, crête sous −0,5 dB.
 - Planche d'images : `ffmpeg -i x.mp4 -vf "fps=1/4,scale=216:-1,tile=8x2" -frames:v 1 planche.png`. Les sous-titres doivent tomber sur les bons plans.
 - Tu ne peux pas écouter : dis-le et décris ce que tu as mesuré.
+
+## 2 bis. Calage précis des sous-titres avec la reconnaissance vocale (28/10)
+`caler_voix.py` devine le minutage par les pauses : sur une voix rapide (ElevenLabs v4, peu de pauses), les sous-titres peuvent être décalés de plus d'une seconde. Maé l'a remarqué. Après `caler_voix.py`, cale donc les mots sur une vraie transcription :
+1. `pip install faster-whisper`. Hugging Face est bloqué par le proxy, mais le modèle Whisper small (CTranslate2 int8) existe sur npm en 4 parties : `@skillninja/shortmovie-telop-model-p0` à `p3`. Télécharge les .tgz depuis registry.npmjs.org, puis `cat model.bin.part0..3 > model.bin` et vérifie `model.sha256`. Copie ensuite config/tokenizer/vocabulary/preprocessor depuis p0.
+2. Transcris `voix_finale.wav` à 16 kHz, en passant un tableau numpy (le chemin de fichier plante avec la version de PyAV installée) : `language='fr', word_timestamps=True, initial_prompt=<script>`. Sauve `[[début, fin, mot], …]`.
+3. `python3 voix/aligner_asr.py <projet> asr_words.json` : aligne lettre à lettre le script sur la transcription, puis réécrit `mots.json` et `timeline.json`. Recale ensuite les plans (`plans.json`) sur les nouveaux repères.

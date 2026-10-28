@@ -320,7 +320,7 @@ const Pub = scene('pub', ({f, fg, i, t, k, R}) => {
     // le prix d'un client : l'étiquette monte jusqu'à 100 € et plus
     const v = interpolate(f, [R('peut', 133) - 4, R('euros', 155)], [0, 100], {...clamp, easing: Easing.out(Easing.cubic)});
     const fin = f >= R('euros', 155);
-    const sw = Math.sin((f - 130) / 7) * 6 * Math.exp(-(f - 130) / 30);
+    const sw = Math.sin((f - 160) / 7) * 6 * Math.exp(-Math.max(0, f - 160) / 30);
     return (
       <Ecran fg={fg} theme="or" t={t} cam={derive(k, {z0: 1.0, z1: 1.08, y0: -40, y1: 0})}>
         <Couche p={0.55}>
@@ -448,7 +448,7 @@ const Parrainage = scene('parrainage', ({f, fg, i, t, k, R}) => {
   if (i === 1) {
     // tu passes la porte « compte ouvert » → l'argent part de la banque
     const tc = R('compte', 104);
-    const marcheU = ease(f, 48, tc - 6, Easing.inOut(Easing.sin));
+    const marcheU = ease(f, 46, tc - 6, Easing.inOut(Easing.sin));
     const m = Math.sin(fg / 3);
     const ouvert = ease(f, tc - 20, tc - 8);
     const fl = ease(f, tc, tc + 12);
@@ -735,7 +735,7 @@ const Kebab = scene('kebab', ({f, fg, i, t, k, R}) => {
   if (i === 1) {
     // tu payes ton kebab par carte : bip, validé
     const tb = R('carte', 69);
-    const approche = ease(f, 44, tb, Easing.inOut(Easing.cubic));
+    const approche = ease(f, 55, tb, Easing.inOut(Easing.cubic));
     const ok = f > tb + 2;
     const bras = {epauleD: lerp(-10, -140, approche), coudeD: lerp(10, 60, approche)};
     const main0 = versEcran(lerp(120, 200, approche), 1950, 1.35, mainD(bras));
@@ -776,7 +776,7 @@ const Kebab = scene('kebab', ({f, fg, i, t, k, R}) => {
     );
   }
   // le schéma : 10 € de la carte au commerçant ; une petite commission part vers ta banque
-  const f1 = ease(f, 86, 100);
+  const f1 = ease(f, 97, 110);
   const tcom = R('commission', 107);
   const f2 = ease(f, tcom - 4, tcom + 12);
   const bq = pop(f, R('banque', 130) - 6);
@@ -784,13 +784,13 @@ const Kebab = scene('kebab', ({f, fg, i, t, k, R}) => {
   const A = [260, 470];
   const B = [820, 470];
   const C = [540, 1180];
-  const u1 = ((f - 86) % 30) / 30;
+  const u1 = ((f - 97) % 30) / 30;
   return (
     <Ecran fg={fg} theme="nuit" t={t} cam={derive(k, {z0: 1.0, z1: 1.05})} horizon={1420}>
       <Couche p={1}>
         <Flux d={`M${A[0] + 120},${A[1]} L${B[0] - 140},${B[1]}`} u={f1} f={f} c={P.vert} />
         <Flux d={`M${B[0]},${B[1] + 170} C${B[0]},${900} ${C[0] + 200},${820} ${C[0] + 80},${C[1] - 420}`} u={f2} f={f} c={P.or} />
-        <Tuile x={A[0]} y={A[1]} s={pop(f, 84)} c="#ffffff" w={250} h={250}>
+        <Tuile x={A[0]} y={A[1]} s={pop(f, 95)} c="#ffffff" w={250} h={250}>
           <Carte x={0} y={0} s={0.52} id="kc2" />
         </Tuile>
         <Tuile x={B[0]} y={B[1]} s={pop(f, R('commerçant', 87) - 2)} c="#ffffff" w={250} h={250}>
@@ -860,7 +860,7 @@ const Dort = scene('dort', ({f, fg, i, t, k, R}) => {
       </Couche>
       <Couche p={1.05}>
         {[0, 1, 2, 3].map((j) => {
-          const u = Math.max(0, f - 50 - j * 5) / 40;
+          const u = Math.max(0, f - 46 - j * 5) / 36;
           const x = 300 + u * 520;
           const bob = Math.abs(Math.sin((f + j * 5) / 3)) * -18;
           return u > 0 && x < 1250 ? (
@@ -919,7 +919,7 @@ const Credits = scene('credits', ({f, fg, i, t, k, R}) => {
   }
   // le découvert : le solde passe dans le rouge, les frais tombent
   const td = R('découvert', 156);
-  const v = interpolate(f, [140, td + 4], [23, -47], {...clamp, easing: Easing.inOut(Easing.cubic)});
+  const v = interpolate(f, [115, td + 4], [23, -47], {...clamp, easing: Easing.inOut(Easing.cubic)});
   const rouge = v < 0;
   const tf = R('frais', 179);
   const sh = rouge && f < td + 20 ? Math.sin(f * 2.4) * 8 * Math.exp(-(f - td) / 8) : 0;
@@ -1103,7 +1103,7 @@ const Reste = scene('reste', ({f, fg, i, t, k, R}) => {
     );
   }
   // une graine de 100 € qui devient un arbre à billets
-  const g = ease(f, 126, R('investissement', 150) + 14, Easing.inOut(Easing.sin));
+  const g = ease(f, 132, R('investissement', 150) + 14, Easing.inOut(Easing.sin));
   return (
     <Ecran fg={fg} theme="vert" t={t} cam={derive(k, {z0: 1.08, z1: 1.0, y0: 60, y1: -40})} horizon={1300}>
       <Couche p={1}>
