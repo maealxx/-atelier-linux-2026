@@ -122,3 +122,11 @@ Vue « allongé dans la capsule » : `Couche` (LeVaisseau.jsx) dessine le bonhom
 - `stationNuit(cam, f, o)` → `{fond, brume, items, L, P, poussiere}` pour `<Plan>` ; `eclaire(o, p)` donne la teinte d'un personnage à cet endroit.
 - `dedans(cam, f, o)` : boutique en 3D (4 plafonniers qui s'éteignent un à un = vraie baisse de lumière, frigos lumineux, porte du générateur + veilleuse rouge, comptoir, écrans CCTV) ; le dehors est vu à travers la vitrine. `eclaireDedans(o, p)`.
 - Pièges : ne jamais poser une caméra dans un volume (pompe, comptoir) ; pour voir la caissière derrière le comptoir, caméra côté client (z < COMPTOIR.z0) + zoom.
+
+## Studio « explication » 2,5D (`ParrainageKit.jsx`, vidéo « Comment les banques gagnent de l'argent avec les parrainages »)
+Pour les vidéos **informatives** (pas d'horreur) : fond en dégradé radial + halos qui dérivent + sol en perspective (grille qui défile), thèmes `violet`, `rose`, `bleu`, `vert`, `rouge`, `nuit`, `or`.
+- Caméra : `<Cadre cam={{x, y, z, r}} t={t}>` (coup de zoom d'entrée) et `<Couche p={0.3…1.3}>` pour la parallaxe (fond lent, premier plan rapide). `derive(k, {...})` fait dériver la caméra pendant le plan.
+- Objets prêts : `Billet` (100 €, rotation 3D `flip`, yeux, casque), `Piece`, `Pile`, `Gerbe` (explosion de billets/pièces), `Banque` (bâtiment à colonnes en volume, fenêtres-yeux qui se plissent), `Carte` bancaire rose, `MiniTel` (écran perso), `Tele`, `IconeInsta`, `IconePlay`, `Anneau` (ring light), `Tuile`, `Etiquette` (prix), `Coche`, `Tampon`, `Chiffre` (compteur), `Eclat`, `Confettis`, `Flux` (ligne d'argent animée), `BulleCommentaire`.
+- Bonhomme : `Fig` (pieds en x, y ; accessoires `tete` et `devant`), `mainD(pose)` / `mainG(pose)` + `versEcran` pour poser un objet dans sa main ; `ChapeauFete`, `Cravate`, tenues `KARIM`, `COSTUME`, `VENDEUR`, `PASSANTS`.
+- Polices : Montserrat Black (`TITRE`, chargée avec FontFace + delayRender) et Inter (`TEXTE`). Emojis Twemoji dans `public/emoji` (`Emo`).
+- Alignement voix : si `caler_voix.py` se trompe sur une liste à virgules, corrige les passages à la main avec `voix/parrainage/retouche.py` (intervalles relevés sur l'énergie).

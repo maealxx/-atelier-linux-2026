@@ -98,3 +98,8 @@ Modèle à suivre : `RentrezChezVous.jsx` + `ForetNuit.jsx` + `Rodeur.jsx` + `Te
 - Montserrat Black, majuscules, 1 à 3 mots, ligne active en **rouge**, pop d'apparition, quelques emojis Twemoji (7 à 9) sur les moments forts.
 
 - (station-service) Maé préfère le rendu de « Rentrez chez vous » : 3D éclairée façon forêt (lumières, brume, contre-jour), personnages 2D dedans, plans POV caméra à l'épaule + plans dynamiques sur le bonhomme. Les plaques 2D plates « illustrées » ont moins plu. Le monstre ne doit pas être montré avant la révélation prévue par le texte.
+
+## Vidéos explicatives (28/10, « Comment les banques gagnent de l'argent avec les parrainages »)
+- Ton « je t'explique vite » pour les jeunes, texte qui **parle vite** (~220 mots/min), indications de voix entre crochets dans le script. Voix ElevenLabs « Ilan – Friendly professional ».
+- Rendu **propre, smooth, dynamique** : studio 2,5D coloré, schémas animés (billets, banque, flux), le bonhomme dans plusieurs plans, animations au ressort, musique pop rythmée synthétisée sous la voix, whoosh à chaque coupe, sons de pièces / ka-tching.
+- Pas de logo de marque réel : banque générique (rose, symbole €).
