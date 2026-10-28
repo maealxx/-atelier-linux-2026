@@ -14,6 +14,8 @@ import {DUREE_HYPERGAMIE, Hypergamie} from './Hypergamie';
 import {DUREE_TENTE, LaTente} from './LaTente';
 import {DUREE_BABYPHONE, LeBabyphone} from './LeBabyphone';
 import {TestForet} from './TestForet';
+import {TestStation} from './TestStation';
+import {TestStation2} from './TestStation2';
 import {DUREE_RENTREZ, RentrezChezVous} from './RentrezChezVous';
 import {DUREE_CHALET, NeLuiOuvrePas} from './NeLuiOuvrePas';
 import {DUREE_STATION, LaStation} from './LaStation';
@@ -23,6 +25,8 @@ export const Root = () => (
     <Composition id="LaStation" component={LaStation} durationInFrames={DUREE_STATION} fps={30} width={1080} height={1920} />
     <Composition id="NeLuiOuvrePas" component={NeLuiOuvrePas} durationInFrames={DUREE_CHALET} fps={30} width={1080} height={1920} />
     <Composition id="Rentrez" component={RentrezChezVous} durationInFrames={DUREE_RENTREZ} fps={30} width={1080} height={1920} />
+    <Composition id="TestStation" component={TestStation} durationInFrames={12} fps={30} width={1080} height={1920} />
+    <Composition id="TestStation2" component={TestStation2} durationInFrames={12} fps={30} width={1080} height={1920} />
     <Composition id="TestForet" component={TestForet} durationInFrames={60} fps={30} width={1080} height={1920} />
     <Composition id="Babyphone" component={LeBabyphone} durationInFrames={DUREE_BABYPHONE} fps={30} width={1080} height={1920} />
     <Composition

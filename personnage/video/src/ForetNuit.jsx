@@ -288,6 +288,7 @@ export const foret = (cam, f, o = {}) => {
   const feuilles = [];
   FEUILLES.forEach((l, k) => {
     if (Math.abs(l.z - cam.z) > 7) return;
+    if (opts.feuillesDegage === false && bloque({...l, r: 0})) return;
     const dd = cam.profondeur(l.z, l.x, SOL);
     if (dd < 0.1 || dd > 6.5) return;
     const [x, y] = cam.proj(l.x, SOL, l.z);

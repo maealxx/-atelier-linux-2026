@@ -1,17 +1,19 @@
 import {AbsoluteFill, Easing, interpolate, random, Series, spring, staticFile, useCurrentFrame} from 'remotion';
+import {Voile} from './ForetNuit';
 import {montage, Plan} from './montage';
 import {clamp, Finition, makeCam, Perso} from './moteur';
 import {Chrono, ChoixBoite, Screamer, VHS, fmt} from './NeLuiOuvrePas';
-import {COUCHE, doigts, DEBOUT, galop, melange, PENCHE, QUATRE, ECARTE, Rodeur, RodeurMonde} from './Rodeur';
-import {BOUT, gresille, station, VOIT} from './Station';
-import {Arriere, Facade, Interieur, Plafond, Quai} from './Station2D';
+import {COUCHE, DEBOUT, doigts, ECARTE, galop, melange, PENCHE, QUATRE, RodeurMonde} from './Rodeur';
+import {BOUT, CAISSE_P, COMPTOIR, dedans, eclaire, eclaireDedans, MOI, NEONS, PLAFONNIERS, PORTE, PORTE_G, POMPE, stationNuit, VOIT} from './StationNuit';
 import PLANS from './station/plans.json';
 import timeline from './station/timeline.json';
 
-// « La station-service » (2,5D illustrée) : 3 h du matin, tu fais le plein au milieu de la forêt. La caissière colle une
-// feuille contre la vitre : « NE LÈVE PAS LES YEUX ». Quelque chose goutte sur ton épaule : une créature couchée sur le toit
-// de ta voiture. Dilemme au milieu : la voiture (tu meurs, rembobinage VHS) ou la boutique. Dedans, les néons s'éteignent
-// un à un, et la caissière sourit… beaucoup trop grand. Dilemme final : le générateur, ou rester avec elle ?
+// « La station-service », dans le style de « Rentrez chez vous » : une vraie station en 3D au milieu de la forêt de
+// nuit, éclairée par ses néons (lumière qui tombe, brume, asphalte mouillé), caméra à l'épaule, plans subjectifs,
+// plans dynamiques sur le bonhomme. 3 h du matin, la caissière colle une feuille contre la vitre : « NE LÈVE PAS LES
+// YEUX ». Quelque chose goutte sur ton épaule : une créature, sur le toit de ta voiture, penchée au-dessus de toi.
+// Dilemme au milieu : la voiture (tu meurs, rembobinage VHS) ou la boutique. Dedans, les néons s'éteignent un à un,
+// et la caissière sourit… beaucoup trop grand. Dilemme final : le générateur, ou rester avec elle ?
 const {decoupe, repere, SCENES} = montage(timeline, PLANS);
 export const DUREE_STATION = SCENES.reduce((t, [, d]) => t + d, 0);
 const START = {};
@@ -27,14 +29,74 @@ const lisse = (t, d) => EZ(Math.min(1, Math.max(0, t / Math.max(1, d))));
 const ease = (f, a, b, e = EZ) => interpolate(f, [a, b], [0, 1], {...clamp, easing: e});
 const lerp = (a, b, t) => a + (b - a) * t;
 const tremble = (f, k, cle) => k * (random(`${cle}${f}`) - 0.5);
-// caméra 2D portée à la main
-const main = (f, k = 1) => ({x: k * (6 * Math.sin(f / 23) + 4 * Math.sin(f / 9.7)), y: k * 4 * Math.sin(f / 17 + 1), r: k * 0.4 * Math.sin(f / 31)});
-const cam2 = (fg, x, y, zoom, k = 1) => {
-  const m = main(fg, k);
-  return {x: x + m.x / zoom, y: y + m.y / zoom, zoom, roll: m.r};
+const deg = (r) => (r * 180) / Math.PI;
+
+// ----- caméra -----
+const vise = (p, c, extra = {}) => {
+  const dx = c[0] - p[0];
+  const dy = c[1] - p[1];
+  const dz = (c[2] - p[2]) * 1000;
+  return {x: p[0], y: p[1], z: p[2], yaw: deg(Math.atan2(dx, dz)), pitch: deg(Math.atan2(dy, Math.hypot(dx, dz))), ...extra};
 };
-const camMix = (a, b, u) => ({x: lerp(a.x, b.x, u), y: lerp(a.y, b.y, u), zoom: lerp(a.zoom, b.zoom, u)});
-const R2 = (f, seed, k) => (random(`${seed}${Math.floor(f / 2)}`) > 0.35 * k ? 1 : 0.2);
+const mixP = (a, b, u) => a.map((x, i) => x + (b[i] - x) * u);
+// caméra portée à la main : petite dérive permanente ; pas : balancement de la marche / course
+const main = (f, k = 1) => ({dx: k * (5 * Math.sin(f / 23) + 3 * Math.sin(f / 9.7)), dy: k * 3 * Math.sin(f / 17 + 1), r: k * 0.35 * Math.sin(f / 31)});
+const OEIL = -150;
+const pov = (fg, p, c, {k = 1, pas = 0, v = 0.21} = {}) => {
+  const m = main(fg, k);
+  const q = [p[0] + m.dx + Math.sin(fg * v) * 9 * pas, p[1] + m.dy - Math.abs(Math.sin(fg * v)) * 16 * pas, p[2]];
+  return {...vise(q, c), roll: m.r + Math.sin(fg * v) * 0.9 * pas};
+};
+// vitesse de rotation (pour le flou de bougé des panoramiques rapides)
+const vitesseYaw = (a, b) => Math.abs((((b.yaw - a.yaw + 540) % 360) - 180));
+
+// ----- les lumières -----
+const R2 = (f, seed, k) => (random(`${seed}${Math.floor(f / 2)}`) > 0.35 * k ? 1 : 0.12);
+// l'auvent : un néon grésille de temps en temps
+const auv = (fg) => NEONS.map((_, k) => (k === 1 ? (fg % 113 < 7 ? R2(fg, 'a1', 1) : 1) : k === 5 ? R2(fg, 'a5', 0.12) : 1));
+const compteur = (fg) => Math.min(41.8, 18.2 + fg * 0.035);
+const DEHORS = (fg, extra = {}) => ({compteur: compteur(fg), auvent: auv(fg), ...extra});
+
+// ----- les vues -----
+const Vue = ({fg, cam: c, o = {}, items = [], zoom = 1, roll = 0, noir = 0, flou = null, dessus = null, voile = 0.45, grain = 0.035}) => {
+  const cam = makeCam(c);
+  const its = typeof items === 'function' ? items(cam) : items;
+  const d = stationNuit(cam, fg, {...o, extra: [...(o.extra || []), ...its.filter(Boolean)]});
+  return <Plan grain={grain} vignette={0.85} f={fg} cam={cam} decor={d} items={[]} zoom={zoom} roll={roll + (c.roll || 0)} noir={noir} flou={flou} dessus={<g>{d.poussiere}<Voile L={d.L} P={d.P} k={voile} />{dessus}</g>} />;
+};
+const VueIn = ({fg, cam: c, o = {}, items = [], dehors = [], zoom = 1, roll = 0, noir = 0, flou = null, dessus = null}) => {
+  const cam = makeCam(c);
+  const its = typeof items === 'function' ? items(cam) : items;
+  const deh = typeof dehors === 'function' ? dehors(cam) : dehors;
+  const d = dedans(cam, fg, {...o, dehors: {...(o.dehors || {}), extra: deh.filter(Boolean)}, extra: its.filter(Boolean)});
+  return <Plan grain={0.04} vignette={0.88} f={fg} cam={cam} decor={d} items={[]} zoom={zoom} roll={roll + (c.roll || 0)} noir={noir} flou={flou} dessus={dessus} />;
+};
+
+// ----- les personnages, éclairés par ce qui les entoure -----
+const moi = (cam, o, {x = MOI.x, z = MOI.z, id = 'moi', dedansL = false, k = 1, ...pose}) => {
+  const t = dedansL ? eclaireDedans(o, [x, -100, z], k) : eclaire(o, [x, -100, z], k);
+  return {z, x, el: <Perso cam={cam} id={id} x={x} z={z} lum={1} teinte={t} ombre={0.45} {...pose} />};
+};
+const CAISS = {coiffure: 'queue', cils: true, couleurs: {haut: '#2a6a8a', hautO: '#1f5470', chev: '#3a2418'}};
+// la caissière : derrière la vitrine (vue de dehors), ou dans la boutique
+const caissiere = (cam, o, {x = 740, z = BOUT.z0 + 0.2, id = 'cai', k = 1, ...pose}) => {
+  const t = eclaireDedans(o, [x, -150, z], k);
+  return {z, x, el: <Perso cam={cam} id={id} x={x} z={z} lum={1} teinte={t} ombre={0.3} {...CAISS} {...pose} />};
+};
+// la créature sur le toit de la voiture, penchée, la tête juste au-dessus de la tienne
+const TOIT_Y = -126;
+const TOIT_X = MOI.x - 450 * 0.55;
+const creature = (cam, o, fg, {x = TOIT_X, y = TOIT_Y, z = MOI.z - 0.05, pose = PENCHE, tete = 25 + 8 * Math.sin(fg / 40), ouvre = 0, echelle = 0.55, lum = null, id = 'cr'} = {}) => {
+  const l = lum ?? Math.max(...eclaire(o, [x, y - 300, z], 0.9));
+  return {z, x, y, el: <RodeurMonde cam={cam} x={x} z={z} y={y} pose={pose} echelle={echelle} tete={tete} ouvre={ouvre} respire={0.5 + 0.5 * Math.sin(fg / 14)} lum={l} id={`${id}${fg}`} />};
+};
+
+const Deux = ({f, a, b, choisi = 0}) => (
+  <g>
+    <ChoixBoite f={f} debut={a} x={540} y={300} texte="LA VOITURE" emoji="1f697" couleur="#ffb03a" etat={choisi === 1 ? 1 : choisi === 2 ? -1 : 0} />
+    <ChoixBoite f={f} debut={b} x={540} y={500} texte="LA BOUTIQUE" emoji="1f3ea" couleur="#5ab0ff" etat={choisi === 2 ? 1 : choisi === 1 ? -1 : 0} />
+  </g>
+);
 
 // le cadre commun : un décor 2D + flou de bougé éventuel + finition (grain, vignette)
 const Ecran = ({fg, roll = 0, flou = 0, noir = 0, children, dessus = null}) => (
@@ -71,93 +133,75 @@ const imageA = (fg) => {
   return RENDUS[nom]({f, fg, i, t, d, bornes, R: (mot, def) => repere(nom, mot, def)});
 };
 
-// ----- ce qui ne change pas d'un plan à l'autre -----
-const compteur = (fg) => Math.min(41.8, 18.2 + fg * 0.04);
-const neonsA = (fg) => [R2(fg, 'a0', 0.12), 1, fg % 97 < 6 ? R2(fg, 'a2', 0.9) : 1];
-// elle est sur le toit de la voiture, penchée : sa tête pend juste au-dessus de la tienne
-const CACHEE = (fg) => ({pose: COUCHE, tete: 15 * Math.sin(fg / 40), x: -230, y: 40, s: 0.5});
-const CREAT = (fg, extra = {}) => ({pose: PENCHE, tete: 25 + 10 * Math.sin(fg / 40), x: 8, y: 40, s: 0.55, ...extra});
-const MOI = (pose = {}) => ({pose: {epauleD: -20, coudeD: 120, ...pose}});
-const TETE_MOI = {x: 230, y: -200};
-const TOIT = {x: 235, y: -240};
-const ECRAN_P = {x: 640, y: -80};
+const TETE = [MOI.x, -150, MOI.z];
+const EPAULE = [MOI.x + 72, -70, MOI.z];
+const VITRE_C = [740, -150, BOUT.z0];
 
-// ----- quelques plans en vraie 3D (la station entière, la contre-plongée, la course vers la boutique) -----
-const deg = (r) => (r * 180) / Math.PI;
-const vise = (p, c) => {
-  const dx = c[0] - p[0];
-  const dy = c[1] - p[1];
-  const dz = (c[2] - p[2]) * 1000;
-  return {x: p[0], y: p[1], z: p[2], yaw: deg(Math.atan2(dx, dz)), pitch: deg(Math.atan2(dy, Math.hypot(dx, dz)))};
-};
-const main3 = (f, k = 1) => ({dx: k * (5 * Math.sin(f / 23) + 3 * Math.sin(f / 9.7)), dy: k * 3 * Math.sin(f / 17 + 1), r: k * 0.35 * Math.sin(f / 31)});
-const OEIL = -150;
-const pov = (fg, p, c, {k = 1, pas = 0, v = 0.21} = {}) => {
-  const m = main3(fg, k);
-  return vise([p[0] + m.dx + Math.sin(fg * v) * 9 * pas, p[1] + m.dy - Math.abs(Math.sin(fg * v)) * 16 * pas, p[2]], c);
-};
-const roulis = (fg, k = 1, pas = 0, v = 0.21) => main3(fg, k).r + Math.sin(fg * v) * 0.9 * pas;
-const mix3 = (a, b, u) => a.map((x, i) => x + (b[i] - x) * u);
-const NEON_T = [0.84, 0.92, 1.05];
-const auvent = (fg) => [gresille(fg, 'a0', 0.15), 1, fg % 97 < 6 ? gresille(fg, 'a2', 1) : 1, 1];
-const MOI3 = {x: 60, z: 1.1};
-const caissiere3 = (cam, {x = 870, z = BOUT.z0 + 0.25, id = 'ca', ...pose}) => ({z, x, el: <Perso cam={cam} id={id} x={x} z={z} lum={0.95} teinte={[0.95, 0.97, 1.0]} ombre={0.25} coiffure="queue" cils couleurs={{haut: '#2a6a8a', hautO: '#1f5470', chev: '#3a2418'}} {...pose} />});
-const moi3 = (cam, {id, ...pose}) => ({z: MOI3.z, x: MOI3.x, el: <Perso cam={cam} id={id} x={MOI3.x} z={MOI3.z} lum={0.85} teinte={NEON_T} ombre={0.35} epauleD={-20} coudeD={120} {...pose} />});
-// sur le toit : couchée au fond (cachée), ou penchée, la tête juste au-dessus de la tienne
-const toit3 = (cam, fg, {penche = true, ouvre = 0, tete = 25} = {}) => {
-  const x = penche ? MOI3.x - 450 * 0.55 : -470;
-  return {z: MOI3.z + 0.05, x, y: VOIT.toit, el: <RodeurMonde cam={cam} x={x} z={MOI3.z + 0.05} y={VOIT.toit} pose={penche ? PENCHE : COUCHE} echelle={0.55} tete={penche ? tete : 15 * Math.sin(fg / 40)} ouvre={ouvre} respire={0.5 + 0.5 * Math.sin(fg / 14)} lum={0.9} id={`rt${fg}`} />};
-};
-const Vue3D = ({fg, cam: c, items = [], o = {}, zoom = 1, roll = 0, noir = 0, dessus = null}) => {
-  const cam = makeCam(c);
-  const its = typeof items === 'function' ? items(cam) : items;
-  const d = station(cam, fg, {auvent: auvent(fg), compteur: compteur(fg), ...o, extra: its.filter(Boolean)});
-  return <Plan grain={0.03} vignette={0.8} f={fg} cam={cam} decor={d} items={[]} zoom={zoom} roll={roll} noir={noir} dessus={dessus} />;
-};
-
-const Deux = ({f, a, b, choisi = 0}) => (
-  <g>
-    <ChoixBoite f={f} debut={a} x={540} y={300} texte="LA VOITURE" emoji="1f697" couleur="#ffb03a" etat={choisi === 1 ? 1 : choisi === 2 ? -1 : 0} />
-    <ChoixBoite f={f} debut={b} x={540} y={500} texte="LA BOUTIQUE" emoji="1f3ea" couleur="#5ab0ff" etat={choisi === 2 ? 1 : choisi === 1 ? -1 : 0} />
-  </g>
-);
-
-// ===== 1. 3 h du matin, tu fais le plein au milieu de la forêt (1re image : toi) =====
-const Pompe = scene('pompe', ({fg, i, t, d}) => {
+// ===== 1. Imagine. 3 h du matin. Tu fais le plein dans une station perdue au milieu de la forêt (1re image : toi) =====
+const Pompe = scene('pompe', ({f, fg, i, t, d}) => {
   const k = lisse(t, d);
-  const o = {compteur: compteur(fg), neons: neonsA(fg), moi: MOI({pupilX: 6}), creature: CACHEE(fg)};
+  const o = DEHORS(fg);
+  const pose = {epauleD: -20, coudeD: 120, pupilX: 6, pupilY: 4};
+  if (i === 0) {
+    // plan serré sur toi sous les néons ; un néon claque au-dessus de ta tête dès la 1re seconde
+    const zap = f >= 4 && f < 14 ? R2(fg, 'z0', 0.9) : 1;
+    const c = pov(fg, [MOI.x + 200 - 60 * k, -230 + 20 * k, MOI.z - 0.95 + 0.25 * k], [MOI.x - 10, -170, MOI.z], {k: 0.6});
+    return <Vue fg={fg} cam={c} o={{...o, auvent: o.auvent.map((v, j) => (j === 4 ? zap : v))}} zoom={interpolate(f, [0, 6], [1.18, 1.05], {...clamp, easing: Easing.out(Easing.cubic)})} items={(cam) => [moi(cam, o, {id: 'p0', ...pose})]} />;
+  }
+  if (i === 1) {
+    // gros plan : les litres qui défilent sur l'écran de la pompe
+    const c = vise([POMPE.x - 360 + 40 * k, -150, POMPE.z - 0.1 + 0.05 * k], [POMPE.x - 86, -140, POMPE.z]);
+    return <Vue fg={fg} cam={c} o={o} />;
+  }
   if (i === 2) {
-    // en 3D : la station, seule au milieu de la forêt, la grue descend vers toi
-    const c = vise([-2600 + 600 * k, -700, -5.5 + 1.5 * k], [0, -300, 2.5]);
-    return <Vue3D fg={fg} cam={c} items={(cam) => [moi3(cam, {id: 'p2', pupilX: 6}), toit3(cam, fg, {penche: false})]} />;
+    // la station, seule au milieu de la forêt : on descend des arbres vers la lumière
+    const c = vise([-250 + 150 * k, lerp(-2700, -1050, k), lerp(-14, -6.5, k)], [0, lerp(-300, -200, k), 3]);
+    return <Vue fg={fg} cam={c} o={o} voile={0.6} items={(cam) => [moi(cam, o, {id: 'p2', ...pose})]} />;
   }
-  if (i < 2) {
-    const c = [
-      () => cam2(fg, TETE_MOI.x - 20, TETE_MOI.y + 80 - 30 * k, 2.4 + 0.25 * k),
-      () => cam2(fg, ECRAN_P.x, ECRAN_P.y, 5.2 + 0.4 * k, 0.6),
-    ][i]();
-    return <Ecran fg={fg} roll={c.roll}><Quai cam={c} f={fg} o={o} /></Ecran>;
-  }
-  // tu lèves les yeux vers la boutique : la caissière te fixe
-  const c = cam2(fg, 0, -150, 1.05 + 0.25 * k, 0.8);
-  return <Ecran fg={fg} roll={c.roll}><Facade cam={c} f={fg} o={{caissiere: {pose: {eyes: 1.3, worry: 0.8}}}} /></Ecran>;
+  // au ras du sol mouillé, travelling vers toi
+  const c = vise([MOI.x + 160 - 80 * k, 330, MOI.z - 2.3 + 0.6 * k], [MOI.x, -150, MOI.z]);
+  return <Vue fg={fg} cam={c} o={o} items={(cam) => [moi(cam, o, {id: 'p3', ...pose, pupilX: 14})]} />;
 });
 
-// ===== 2. La caissière tape contre la vitre. Fort. =====
+// ===== 2. Et d'un coup, la caissière tape contre la vitre. Fort. =====
+const BRAS_TAPE = (tape) => ({epauleD: -150 - 30 * tape, coudeD: -40, epauleG: 150 + 30 * tape, coudeG: 40, eyes: 1.45, worry: 1, scream: 0.3});
 const Vitre = scene('vitre', ({f, fg, i, t, d, R}) => {
   const k = lisse(t, d);
-  const tape = f > R('tape', 43) - 4 ? Math.max(0, Math.sin(f * 0.9)) : 0;
-  const bras = {epauleD: -150 - 30 * tape, coudeD: -40, epauleG: 150 + 30 * tape, coudeG: 40, eyes: 1.45, worry: 1, scream: 0.3};
-  const c = i === 0 ? cam2(fg, 0, -120, 1.3 + 0.3 * k, 1 + tape) : cam2(fg, 0, -237, 2.6 + 0.2 * k, 0.8 + tape);
-  return <Ecran fg={fg} roll={c.roll}><Facade cam={c} f={fg} o={{tape, caissiere: {pose: bras}}} /></Ecran>;
+  const tape = f > R('tape', 39) - 4 ? Math.max(0, Math.sin(f * 0.9)) : 0;
+  const o = DEHORS(fg);
+  const cais = (cam) => caissiere(cam, o, {id: 'v', ...BRAS_TAPE(tape)});
+  if (i === 0) {
+    // tu tournes la tête d'un coup vers la boutique (panoramique rapide, flou)
+    const u = ease(t, 2, 11, Easing.inOut(Easing.cubic));
+    const a = pov(fg, [MOI.x, OEIL, MOI.z - 0.1], [POMPE.x, -140, POMPE.z + 0.1], {k: 0.8});
+    const b = pov(fg, [MOI.x, OEIL, MOI.z - 0.1], VITRE_C, {k: 0.8});
+    const c = {...b, yaw: lerp(a.yaw, b.yaw, u), pitch: lerp(a.pitch, b.pitch, u)};
+    const v = Math.abs(lerp(a.yaw, b.yaw, ease(t + 1, 2, 11, Easing.inOut(Easing.cubic))) - c.yaw);
+    return <Vue fg={fg} cam={c} o={{...o, caissiere: cais(makeCam(c))}} zoom={1.05 + 0.75 * ease(t, 8, 22, Easing.out(Easing.cubic))} flou={v > 1 ? [Math.min(40, v * 3), 0] : null} />;
+  }
+  // plus près : ses mains qui frappent le verre (la vitre tremble)
+  const sh = tremble(fg, 10 * tape, 'vt');
+  const c = vise([740 + sh, -230 + sh * 0.5, BOUT.z0 - 1.35 + 0.25 * k], [740, -230, BOUT.z0 + 0.2]);
+  return <Vue fg={fg} cam={c} o={{...o, caissiere: cais(makeCam(c))}} zoom={1.0 + 0.04 * tape} />;
 });
 
-// ===== 3. Elle colle une feuille contre le verre : « Ne lève pas les yeux. » =====
+// ===== 3. Elle colle une feuille contre le verre. Dessus : « Ne lève pas les yeux. » =====
+const BRAS_FEUILLE = {epauleD: -110, coudeD: -60, epauleG: 110, coudeG: 60, eyes: 1.4, worry: 1};
 const Feuille = scene('feuille', ({f, fg, i, t, d, R}) => {
   const k = lisse(t, d);
-  const feuille = ease(f, R('colle', 10), R('feuille', 28) + 6);
-  const c = i === 0 ? cam2(fg, 0, -150, 1.4 + 0.3 * k, 0.7) : cam2(fg, 0, -130, 2.5 + 0.35 * k, 0.5);
-  return <Ecran fg={fg} roll={c.roll}><Facade cam={c} f={fg} o={{feuille: i === 0 ? feuille : 1, caissiere: {pose: {epauleD: -110, coudeD: -60, epauleG: 110, coudeG: 60, eyes: 1.4, worry: 1}}}} /></Ecran>;
+  const o = DEHORS(fg);
+  if (i === 0) {
+    // par-dessus ton épaule : toi de dos, elle derrière la vitre qui plaque la feuille
+    const feuille = ease(f, R('colle', 10), R('feuille', 28) + 6);
+    const c = vise([MOI.x - 170 + 40 * k, -330, MOI.z - 0.8 + 0.15 * k], [700, -150, BOUT.z0]);
+    return (
+      <Vue fg={fg} cam={c} o={{...o, feuille, caissiere: caissiere(makeCam(c), o, {id: 'f0', ...BRAS_FEUILLE})}} zoom={1.15}
+        items={(cam) => [moi(cam, o, {id: 'f0m', dos: true, epauleD: -20, coudeD: 120, k: 0.8})]} />
+    );
+  }
+  // la feuille, en gros ; ses yeux au-dessus
+  const c = vise([745 + main(fg, 0.5).dx, -60, BOUT.z0 - 1.05 + 0.3 * k], [740, -40, BOUT.z0]);
+  return <Vue fg={fg} cam={c} o={{...o, feuille: 1, caissiere: caissiere(makeCam(c), o, {id: 'f1', ...BRAS_FEUILLE, pupilX: 4})}} />;
 });
 
 // gouttes noires qui tombent (repère écran)
@@ -178,26 +222,6 @@ const Gouttes = ({f, t0, x, y, y0 = -80, n = 4, s = 1}) => (
   </g>
 );
 
-// ===== 4. Tu ne comprends pas. Quelque chose goutte sur ton épaule. Noir. Épais. =====
-const Goutte = scene('goutte', ({f, fg, i, t, d, R}) => {
-  const k = lisse(t, d);
-  const peur = ease(f, R('noir', 113), R('noir', 113) + 8);
-  // on ne la voit pas encore : seulement les gouttes qui tombent du haut de l'image
-  const o = {compteur: compteur(fg), neons: neonsA(fg)};
-  if (i === 0) {
-    const c = cam2(fg, TETE_MOI.x, TETE_MOI.y + 60, 2.6 + 0.2 * k);
-    return <Ecran fg={fg} roll={c.roll}><Quai cam={c} f={fg} o={{...o, moi: MOI({brows: 6, pupilX: 10, worry: 0.3})}} /></Ecran>;
-  }
-  // gros plan : l'épaule, les gouttes noires qui tombent dessus
-  const c = cam2(fg, TETE_MOI.x - 50, TETE_MOI.y + 120, 4.2 + 0.3 * k, 0.6);
-  const ep = {x: 540 + (258 - c.x) * c.zoom, y: 960 + (-15 - c.y) * c.zoom};
-  return (
-    <Ecran fg={fg} roll={c.roll} dessus={<Gouttes f={f} t0={R('goutte', 72) - 26} x={ep.x} y={ep.y} s={c.zoom / 2.5} />}>
-      <Quai cam={c} f={fg} o={{...o, moi: MOI({eyes: 1.15 + 0.35 * peur, worry: 0.4 + 0.6 * peur, pupilX: -12 * peur, pupilY: -6 * peur})}} />
-    </Ecran>
-  );
-});
-
 // longs doigts gris qui entrent par le haut de l'image
 const Doigts = ({x, y, s = 2.2, plie = 0.25}) => (
   <g transform={`translate(${x} ${y}) scale(${s})`}>
@@ -210,60 +234,89 @@ const Doigts = ({x, y, s = 2.2, plie = 0.25}) => (
   </g>
 );
 
-// ===== 5. Ça vient du toit. Quelque chose est couché sur le toit. Juste au-dessus de ta tête. =====
-const Toit = scene('toit', ({fg, i, t, d}) => {
+
+// ===== 4. Tu ne comprends pas. Et là, quelque chose goutte sur ton épaule. Noir. Épais. (on ne la voit pas encore) =====
+const Goutte = scene('goutte', ({f, fg, i, t, d, R}) => {
   const k = lisse(t, d);
-  const o = {compteur: compteur(fg), neons: neonsA(fg), moi: MOI({pupilX: 8})};
+  const o = DEHORS(fg);
   if (i === 0) {
-    // en 3D, contre-plongée au ras du sol : toi… et, juste au-dessus de ta tête, elle
-    const c = vise([MOI3.x + 520 - 120 * k, 330, MOI3.z - 0.75 + 0.2 * k], [MOI3.x - 60, -420 - 60 * k, MOI3.z]);
-    return <Vue3D fg={fg} cam={c} noir={0.2} zoom={1.02 + 0.06 * k} roll={roulis(fg, 0.6)} items={(cam) => [moi3(cam, {id: 't0', pupilX: 8}), toit3(cam, fg, {ouvre: 0.3})]} />;
+    // de face : tu regardes la boutique, tu ne comprends pas
+    const regard = interpolate(f, [0, 14, 30, 44], [0, 1, 1, -0.4], {...clamp, easing: EZ});
+    const c = pov(fg, [MOI.x + 140 - 50 * k, -210, MOI.z - 1.05 + 0.2 * k], [MOI.x, -170, MOI.z], {k: 0.5});
+    return <Vue fg={fg} cam={c} o={o} items={(cam) => [moi(cam, o, {id: 'g0', epauleD: -20, coudeD: 120, brows: 6, pupilX: 12 * regard, tilt: 3 * regard, worry: 0.4})]} />;
   }
-  if (i === 1) {
-    // gros plan : sa tête, penchée vers toi
-    const c = cam2(fg, TOIT.x - 20, TOIT.y + 90, 3.0 + 0.3 * k, 0.5);
-    return <Ecran fg={fg} roll={c.roll}><Quai cam={c} f={fg} o={{...o, creature: CREAT(fg, {tete: 25 + 25 * ease(t, 6, 36), ouvre: 0.4 * ease(t, 10, 40)})}} /></Ecran>;
-  }
-  // tu fixes la pompe sans lever les yeux… les doigts descendent dans l'image
-  const c = cam2(fg, ECRAN_P.x - 60, ECRAN_P.y + 40, 3.6, 0.6);
+  // gros plan : ton épaule ; les gouttes noires tombent d'en haut (hors champ)
+  const peur = ease(f, R('noir', 109), R('noir', 109) + 8);
+  const c = vise([MOI.x + 120 + main(fg, 0.4).dx, -90, MOI.z - 0.42 + 0.04 * k], [MOI.x + 40, -70, MOI.z]);
+  const cam = makeCam(c);
+  const [ex, ey] = cam.proj(...EPAULE);
   return (
-    <Ecran fg={fg} roll={c.roll} dessus={<Doigts x={330} y={lerp(-330, 140, ease(t, 4, d))} />}>
-      <Quai cam={c} f={fg} o={{...o, creature: CREAT(fg)}} />
-    </Ecran>
+    <Vue fg={fg} cam={c} o={o} zoom={1.0 + 0.05 * k}
+      items={[moi(cam, o, {id: 'g1', epauleD: -20, coudeD: 120, eyes: 1.15 + 0.35 * peur, worry: 0.4 + 0.6 * peur, pupilX: 12 * peur, pupilY: -6 * peur})]}
+      dessus={<Gouttes f={f} t0={R('goutte', 72) - 26} x={ex} y={ey} s={cam.scale(MOI.z, ...EPAULE.slice(0, 2)) * 0.9} />} />
   );
 });
 
+// ===== 5. Ça vient du toit de ta voiture. Quelque chose est couché sur le toit. Juste au-dessus de ta tête. =====
+const Toit = scene('toit', ({f, fg, i, t, d}) => {
+  const k = lisse(t, d);
+  const o = DEHORS(fg);
+  const pose = {epauleD: -20, coudeD: 120, eyes: 1.25, worry: 0.8, pupilX: 6};
+  if (i === 0) {
+    // la caméra remonte le long de la goutte : de ton épaule… jusqu'au bord du toit, et ce qui est dessus
+    const u = ease(t, 3, d - 4, Easing.inOut(Easing.cubic));
+    const c = vise([MOI.x + 170, 40 - 60 * u, MOI.z - 0.8], mixP([MOI.x + 40, 40, MOI.z], [MOI.x - 90, -380, MOI.z], u));
+    return <Vue fg={fg} cam={c} o={o} roll={main(fg, 0.6).r} items={(cam) => [moi(cam, o, {id: 't0', ...pose}), creature(cam, o, fg, {ouvre: 0.25})]} />;
+  }
+  if (i === 1) {
+    // contre-plongée : toi, immobile, et elle, penchée juste au-dessus de ta tête
+    const c = vise([MOI.x + 10 - 40 * k, 340, MOI.z - 1.25 + 0.2 * k], [MOI.x - 110, -330, MOI.z]);
+    return <Vue fg={fg} cam={c} o={o} zoom={1.02 + 0.05 * k} roll={-3 + main(fg, 0.5).r} voile={0.6} items={(cam) => [moi(cam, o, {id: 't1', ...pose}), creature(cam, o, fg, {ouvre: 0.35 * ease(t, 10, 40), tete: 25 + 15 * ease(t, 6, 40)})]} />;
+  }
+  // tu ne lèves pas les yeux : tu fixes la pompe… de longs doigts gris entrent par le haut de l'image
+  const c = pov(fg, [MOI.x - 10, OEIL + 10, MOI.z - 0.15], [POMPE.x - 86, -130, POMPE.z - 0.1], {k: 0.4});
+  return <Vue fg={fg} cam={c} o={o} zoom={1.1} dessus={<Doigts x={380} y={lerp(-330, 160, ease(t, 4, d))} />} />;
+});
+
 // ===== 6. Trois secondes : la voiture, ou la boutique ? (chrono en millisecondes) =====
-const PORTIERE = {x: -80, y: -40, zoom: 1.6};
-const BOUTIQUE_P = {x: 980, y: -120, zoom: 1.8};
-const Choix = scene('choix', ({f, fg, i, t, R}) => {
+const PORTIERE = [VOIT.x1, 80, VOIT.z0 + 0.75];
+const Choix = scene('choix', ({f, fg, i, t, d, R}) => {
   const t0 = R('boutique', 90) + 12;
   const reste = 3 - Math.max(0, f - t0) / 30;
-  let c0;
-  let vit = 0;
-  if (i === 0) {
-    const w = ease(t, 0, 8, Easing.out(Easing.cubic));
-    c0 = camMix({x: ECRAN_P.x, y: ECRAN_P.y, zoom: 2.6}, PORTIERE, w);
-    vit = t < 8 ? 1 - w : 0;
-  } else if (i === 1) {
-    const w = ease(t, 0, 8, Easing.out(Easing.cubic));
-    c0 = camMix(PORTIERE, BOUTIQUE_P, w);
-    vit = t < 8 ? 1 - w : 0;
+  const o = DEHORS(fg, {compteur: 41.8});
+  const tension = i === 2 ? 1 - reste / 3 : 0;
+  let c;
+  let flou = null;
+  let items = [];
+  if (i < 2) {
+    // regard vers la portière… puis vers la boutique (panoramiques rapides)
+    const de = i === 0 ? [POMPE.x - 86, -130, POMPE.z] : PORTIERE;
+    const vers = i === 0 ? PORTIERE : VITRE_C;
+    const u = ease(t, 0, 9, Easing.out(Easing.cubic));
+    const a = pov(fg, [MOI.x, OEIL, MOI.z - 0.1], de, {k: 1.2});
+    const b = pov(fg, [MOI.x, OEIL, MOI.z - 0.1], vers, {k: 1.2});
+    const dyaw = ((b.yaw - a.yaw + 540) % 360) - 180;
+    c = {...b, yaw: a.yaw + dyaw * u, pitch: lerp(a.pitch, b.pitch, u)};
+    const v = Math.abs(dyaw) * Math.abs(ease(t + 1, 0, 9, Easing.out(Easing.cubic)) - u);
+    flou = v > 1 ? [Math.min(40, v * 3), 0] : null;
+    items = (cam) => [creature(cam, o, fg, {ouvre: 0.3})];
   } else {
-    c0 = camMix(PORTIERE, BOUTIQUE_P, 0.5 + 0.5 * Math.sin(t * (0.12 + t * 0.0014)));
+    // de l'extérieur : toi entre la voiture et la boutique ; elle au-dessus ; la caméra tourne autour de toi
+    const a = lerp(200, 160, lisse(t, d));
+    const r = 1.6;
+    c = {x: MOI.x - Math.sin((a * Math.PI) / 180) * r * 1000 + tremble(fg, 8 * tension, 'ch'), y: -120, z: MOI.z - Math.cos((a * Math.PI) / 180) * r, yaw: a, pitch: -6};
+    items = (cam) => [moi(cam, o, {id: 'ch', epauleD: -20, coudeD: 120, eyes: 1.4, worry: 1, sweat: 1, pupilX: 14 * Math.sin(fg / 9)}), creature(cam, o, fg, {ouvre: 0.4, tete: 40})];
   }
-  const c = cam2(fg, c0.x, c0.y, c0.zoom, 1.2 + (i === 2 ? 1 - reste / 3 : 0));
+  const pouls = Math.max(0, Math.sin(f / 4.5)) ** 8;
   return (
-    <Ecran fg={fg} roll={c.roll} flou={30 * vit}
+    <Vue fg={fg} cam={c} o={o} items={items} flou={flou} zoom={1.05 + 0.03 * pouls * (0.5 + tension)}
       dessus={
         <g>
-          <Deux f={f} a={R('voiture', 54) - 4} b={R('boutique', 90) - 6} />
+          <Deux f={f} a={R('voiture', 55) - 4} b={R('boutique', 90) - 6} />
           {f >= t0 - 4 && <Chrono reste={reste} />}
           <rect width="1080" height="1920" fill="#ff1a1a" opacity={f >= t0 ? 0.05 + 0.06 * Math.max(0, Math.sin(f / 2.5)) * (1 - reste / 3) : 0} />
         </g>
-      }>
-      <Quai cam={c} f={fg} o={{compteur: 41.8, neons: neonsA(fg), moi: MOI({eyes: 1.4, worry: 1, sweat: 1}), creature: CREAT(fg)}} />
-    </Ecran>
+      } />
   );
 });
 
@@ -339,23 +392,19 @@ const Bras = ({descend, tap = 0}) => {
   );
 };
 
-// ===== 7. La voiture : la portière, la clé, le moteur tousse… le bras, un, deux, trois, la vitre explose =====
+// ===== 7. La voiture : tu fonces, la portière… la clé, le moteur tousse, le bras, un, deux, trois, la vitre explose =====
 const Voiture = scene('voiture', ({f, fg, i, t, d, R}) => {
   if (i === 0) {
-    // tu fonces vers la portière (zoom rapide), noir quand elle claque
-    const u = ease(t, 0, d - 8, Easing.in(Easing.cubic));
-    const c0 = camMix(PORTIERE, {x: -250, y: 120, zoom: 6.5}, u);
-    const c = cam2(fg, c0.x, c0.y, c0.zoom, 1.5);
-    return (
-      <Ecran fg={fg} roll={c.roll} flou={12 * u} noir={ease(t, d - 10, d)} dessus={<Deux f={f + 300} a={0} b={0} choisi={1} />}>
-        <Quai cam={c} f={fg} o={{compteur: 41.8, neons: neonsA(fg), creature: CREAT(fg)}} />
-      </Ecran>
-    );
+    // vue subjective : tu te jettes sur la portière ; au-dessus, ses doigts sur le bord du toit
+    const o = DEHORS(fg, {compteur: 41.8});
+    const u = ease(t, 0, d - 6, Easing.in(Easing.quad));
+    const c = pov(fg, mixP([MOI.x, OEIL, MOI.z - 0.1], [VOIT.x1 + 170, -60, VOIT.z0 + 0.95], u), mixP(PORTIERE, [VOIT.x1, 120, VOIT.z0 + 0.75], u), {k: 1.6, pas: 1.4 * (1 - u), v: 0.42});
+    return <Vue fg={fg} cam={c} o={o} flou={[14 * u, 4 * u]} noir={ease(t, d - 8, d)} items={(cam) => [creature(cam, o, fg, {ouvre: 0.5, tete: 45})]} dessus={<Deux f={f + 300} a={0} b={0} choisi={1} />} />;
   }
-  const claque = interpolate(f - R('claques', 43), [0, 2, 8], [0, 1, 0], clamp);
-  const clef = ease(f, R('tournes', 80) - 4, R('clé', 92));
-  const tousse = f > R('moteur', 106) - 4 && f < R('et', 140) ? 1 : 0;
-  const descend = ease(f, R('long', 151) - 10, R('pare-brise', 193) + 8, Easing.out(Easing.cubic));
+  const claque = interpolate(f - R('claques', 44), [0, 2, 8], [0, 1, 0], clamp);
+  const clef = ease(f, R('tournes', 79) - 4, R('clé', 92));
+  const tousse = f > R('moteur', 112) - 4 && f < R('et', 140) ? 1 : 0;
+  const descend = ease(f, R('long', 152) - 10, R('pare-brise', 194) + 8, Easing.out(Easing.cubic));
   const taps = [R('tapotent', 230) + 37, R('deux', 287) - 2, R('trois', 308) - 2];
   const tap = taps.reduce((s, tt) => s + (f >= tt && f < tt + 6 ? 1 - (f - tt) / 6 : 0), 0);
   const fiss = taps.filter((tt) => f >= tt).map((tt, j) => [560 + j * 40, 760 + j * 30, 0.6 + 0.4 * j + 0.3 * Math.min(1, (f - tt) / 8)]);
@@ -423,45 +472,9 @@ const Rembobine = scene('rembobine', ({f, fg}) => {
   return <VHS f={fg} force={interpolate(f, [fin, D], [0.8, 0.15], clamp)} texte="▶ PLAY" compteur={fmt(b / 30)}>{imageA(b)}</VHS>;
 });
 
-// ===== 10. Cette fois, la boutique ! La caissière t'ouvre et verrouille derrière toi. =====
-// vue de la boutique : elle s'est tassée sur le toit (moins haute, pour rester dans la vitrine)
-const TASSEE = melange(COUCHE, PENCHE, 0.4);
-const DEHORS = (fg, extra = {}) => ({compteur: 41.8, neons: neonsA(fg), creature: CREAT(fg, {pose: TASSEE, x: -230}), ...extra});
-const Boutique = scene('boutique', ({f, fg, i, t, d, R}) => {
-  const k = lisse(t, d);
-  if (i === 0) {
-    // en 3D, vue subjective : tu cours vers la boutique
-    const u = ease(t, 0, d, Easing.in(Easing.quad));
-    const c = pov(fg, mix3([520, OEIL, MOI3.z + 0.2], [870, OEIL, BOUT.z0 - 0.45], u), [870, -170, BOUT.z0 + 0.3], {k: 1.5, pas: 1.4, v: 0.42});
-    return <Vue3D fg={fg} cam={c} roll={roulis(fg, 1.5, 1.4, 0.42)} zoom={1.05} noir={0.2} o={{compteur: 41.8, caissiere: caissiere3(makeCam(c), {epauleD: -150, coudeD: -40 + 30 * Math.sin(fg * 0.5), eyes: 1.4, worry: 1})}} items={(cam) => [toit3(cam, fg)]} dessus={<Deux f={f + 300} a={0} b={0} choisi={2} />} />;
-  }
-  // dedans : elle verrouille ; dehors, la voiture… et ce qu'il y a sur le toit
-  const verrou = ease(f, R('verrouille', 98), R('derrière', 109));
-  const c = cam2(fg, -150 + 100 * k, -100, 1.0 + 0.1 * k, 0.9);
-  return (
-    <Ecran fg={fg} roll={c.roll}>
-      <Interieur cam={c} f={fg} o={{dehors: DEHORS(fg), caissiere: {x: -560, y: 760, s: 1.05, pose: {epauleD: -60 - 30 * verrou, coudeD: -90, eyes: 1.4, worry: 1}}}} />
-    </Ecran>
-  );
-});
-
-// ===== 11. Par la vitre, tu la vois descendre du toit. À quatre pattes. =====
-const Descend = scene('descend', ({f, fg, t, d, R}) => {
-  const k = lisse(t, d);
-  const u = ease(f, R('vois', 36), R('pattes', 89) + 6);
-  const creature = {pose: galop(melange(TASSEE, QUATRE, ease(u, 0, 0.4)), fg * 0.2, Math.sin(u * Math.PI) * 0.8), x: lerp(-230, 380, u), y: lerp(40, 380, ease(u, 0.15, 0.7)), s: 0.5, tete: -20};
-  const c = cam2(fg, -120, -80, 1.25 + 0.3 * k, 0.6);
-  return (
-    <Ecran fg={fg} roll={c.roll}>
-      <Interieur cam={c} f={fg} o={{dehors: DEHORS(fg, {creature})}} />
-    </Ecran>
-  );
-});
-
-// ----- caméras de surveillance (noir et blanc) -----
 const CCTV = ({f, fg, n, children}) => (
   <AbsoluteFill style={{background: '#000'}}>
-    <AbsoluteFill style={{filter: 'grayscale(1) contrast(1.35) brightness(1.1)'}}>{children}</AbsoluteFill>
+    <AbsoluteFill style={{filter: 'grayscale(1) contrast(1.25) brightness(1.7)'}}>{children}</AbsoluteFill>
     <svg viewBox="0 0 1080 1920" width={1080} height={1920} style={{position: 'absolute'}}>
       <defs>
         <pattern id="cc-l" width="4" height="5" patternUnits="userSpaceOnUse">
@@ -481,100 +494,147 @@ const CCTV = ({f, fg, n, children}) => (
   </AbsoluteFill>
 );
 
+
+// ===== 10. Cette fois, tu cours vers la boutique ! La caissière t'ouvre, et verrouille derrière toi. =====
+const MOI_IN = {x: 230, z: 6.25};
+const Boutique = scene('boutique', ({f, fg, i, t, d, R}) => {
+  const k = lisse(t, d);
+  if (i === 0) {
+    // vue subjective : tu sprintes vers la porte vitrée, elle te fait signe
+    const o = DEHORS(fg, {compteur: 41.8});
+    const u = ease(t, 0, d, Easing.in(Easing.quad));
+    const c = pov(fg, mixP([MOI.x + 60, OEIL + 20, MOI.z + 0.2], [720, OEIL + 20, BOUT.z0 - 0.45], u), [740, -170, BOUT.z0 + 1.2], {k: 1.6, pas: 2.2, v: 0.42});
+    return (
+      <Vue fg={fg} cam={c} o={{...o, caissiere: caissiere(makeCam(c), o, {id: 'b0', x: 760, epauleD: -60, coudeD: -90 + 40 * Math.sin(fg * 0.5), eyes: 1.4, worry: 1})}} flou={[0, 3]} zoom={1.04}
+        items={(cam) => [creature(cam, o, fg, {ouvre: 0.4, tete: 40})]} dessus={<Deux f={f + 300} a={0} b={0} choisi={2} />} />
+    );
+  }
+  // dedans : elle verrouille ; dehors, sous les néons, la voiture… et ce qu'il y a sur le toit
+  const verrou = ease(f, R('verrouille', 93), R('derrière', 105));
+  const o = {dehors: DEHORS(fg, {compteur: 41.8})};
+  const c = pov(fg, [MOI_IN.x - 150, OEIL, MOI_IN.z + 0.9 - 0.2 * k], [600, -120, BOUT.z0], {k: 0.9});
+  return (
+    <VueIn fg={fg} cam={c} o={o}
+      items={(cam) => [caissiere(cam, o, {id: 'b1', x: 760, z: BOUT.z0 + 0.35, dos: true, epauleD: -60 - 40 * verrou, coudeD: -90})]} dehors={(cam) => [creature(cam, o.dehors, fg, {ouvre: 0.2})]} />
+  );
+});
+
+// ===== 11. Par la vitre, tu la vois descendre du toit. À quatre pattes. =====
+const Descend = scene('descend', ({f, fg, t, d, R}) => {
+  const k = lisse(t, d);
+  const u = ease(f, R('vois', 33) - 4, d - 2);
+  const bas = ease(u, 0.1, 0.45);
+  const o = {dehors: DEHORS(fg, {compteur: 41.8})};
+  const x = lerp(TOIT_X, 150, ease(u, 0.3, 1));
+  const y = lerp(TOIT_Y, 432, bas);
+  const z = lerp(MOI.z - 0.05, 4.4, ease(u, 0.35, 1));
+  const pose = galop(melange(PENCHE, QUATRE, ease(u, 0, 0.3)), fg * 0.22, 0.4 + 0.5 * ease(u, 0.3, 0.5));
+  const c = pov(fg, [350, OEIL + 30, BOUT.z0 + 0.55 - 0.15 * k], [lerp(-150, 150, u), lerp(-150, 150, u), lerp(2.2, 4.4, u)], {k: 0.6});
+  return <VueIn fg={fg} cam={c} o={o} zoom={1.7 + 0.3 * k} dehors={(cam) => [creature(cam, o.dehors, fg, {x, y, z, pose, tete: -15, ouvre: 0.2})]} />;
+});
+
 // ===== 12. Sur les écrans de surveillance, elle fait le tour de la boutique. Lentement. =====
 const Ecrans = scene('ecrans', ({f, fg, i, t, d}) => {
   const k = lisse(t, d);
+  const o = DEHORS(fg, {compteur: 41.8});
   const pose = galop(QUATRE, fg * 0.18, 0.5);
-  if (i === 0) {
-    return (
-      <CCTV f={f} fg={fg} n="01">
-        <svg viewBox="0 0 1080 1920" width={1080} height={1920}>
-          <Facade cam={{x: lerp(-140, 80, k), y: 120, zoom: 0.7}} f={fg} o={{creature: {x: lerp(-1300, 700, k), y: 455, s: 0.7, pose}}} />
-        </svg>
-      </CCTV>
-    );
-  }
-  const creature = {pose, x: i === 1 ? lerp(-900, 900, k) : lerp(1100, -600, k), y: 380, s: 0.5, tete: -10};
+  const VUES = [
+    {c: vise([1750, -1000, -0.4], [-200, 250, 2.6]), x: lerp(-900, 700, k), z: 3.6},
+    {c: vise([-1800, -1000, 0.2], [600, 300, 4.8]), x: lerp(1500, -800, k), z: 5.0},
+    {c: vise([-2700, -850, 11.4], [-1500, 250, 8.6]), x: lerp(-2400, -1950, k), z: lerp(10.2, 7.0, k)},
+  ];
+  const v = VUES[i];
   return (
     <CCTV f={f} fg={fg} n={`0${i + 1}`}>
-      <svg viewBox="0 0 1080 1920" width={1080} height={1920}>
-        <Quai cam={{x: i === 1 ? 0 : 300, y: -250, zoom: 0.72}} f={fg} o={{compteur: 41.8, neons: neonsA(fg), creature}} />
-      </svg>
+      <Vue fg={fg} cam={v.c} o={o} voile={0.2} grain={0} items={(cam) => [creature(cam, o, fg, {x: v.x, y: 432, z: v.z, pose, tete: -10, lum: 0.8, echelle: 0.6})]} />
     </CCTV>
   );
 });
 
 // ===== 13. La caissière chuchote : « Tant que la lumière est allumée, elle ne peut pas entrer. » =====
-const VISAGE = {x: 950, y: 560 - (922 - 192) * 0.85};
-const Regle = scene('regle', ({fg, i, t, d}) => {
+const VISAGE = [CAISSE_P.x, -110, CAISSE_P.z];
+const Regle = scene('regle', ({f, fg, i, t, d}) => {
   const k = lisse(t, d);
+  const o = {boutique: [1, R2(fg, 'rg', 0.08), 1, 1], dehors: DEHORS(fg, {compteur: 41.8})};
   if (i === 0) {
-    const c = cam2(fg, VISAGE.x - 60, VISAGE.y + 60, 2.8 + 0.2 * k, 0.5);
-    return <Ecran fg={fg} roll={c.roll}><Interieur cam={c} f={fg} o={{dehors: DEHORS(fg, {creature: null}), caissiere: {pose: {eyes: 1.3, worry: 1, pupilX: -8, epauleD: -150, coudeD: -20}}}} /></Ecran>;
+    // gros plan : elle chuchote, penchée sur le comptoir
+    const c = pov(fg, [CAISSE_P.x - 90, -112, 5.95 + 0.1 * k], VISAGE, {k: 0.4});
+    return <VueIn fg={fg} cam={c} o={o} zoom={2.0} items={(cam) => [caissiere(cam, o, {id: 'r0', x: CAISSE_P.x, z: CAISSE_P.z, eyes: 1.3, worry: 1, pupilX: -6, brows: 6})]} />;
   }
-  // tu lèves les yeux vers les néons du plafond
-  const c = cam2(fg, 0, 0, 1.0 + 0.1 * k, 0.5);
-  return <Ecran fg={fg} roll={c.roll}><Plafond cam={c} f={fg} /></Ecran>;
+  // tu lèves les yeux vers les plafonniers
+  const c = pov(fg, [MOI_IN.x, OEIL, MOI_IN.z + 0.3], [300, -800, 7.3 + 0.3 * k], {k: 0.5});
+  return <VueIn fg={fg} cam={c} o={o} />;
 });
 
 // ===== 14. Les néons grésillent. Un par un, ils s'éteignent. Il n'en reste qu'un. =====
+// le dernier qui reste allumé : celui au-dessus de la caissière
 const neonsB = (f, R) => {
-  const g = f > R('grésiller', 60) - 4;
-  const off = [R('un', 81), R('par', 86) + 10, R('séteignent', 110) + 6];
-  return [0, 1, 2, 3].map((k) => (k < 3 && f >= off[k] ? 0 : g ? R2(f, `nb${k}`, 0.6) : 1));
+  const g = f > R('grésiller', 56) - 4;
+  const off = {0: R('un', 76), 2: R('par', 82) + 10, 3: R('séteignent', 104) + 6};
+  return [0, 1, 2, 3].map((k) => (off[k] !== undefined && f >= off[k] ? 0 : g ? R2(f, `nb${k}`, 0.6) : 1));
 };
 const Neons = scene('neons', ({f, fg, i, t, d, R}) => {
   const k = lisse(t, d);
   const nb = neonsB(f, R);
+  const noirs = 4 - nb.reduce((a, b) => a + b, 0);
   if (i === 0) {
-    const c = cam2(fg, 0, 0, 1.1 + 0.05 * k, 0.8 + 0.8 * (1 - (nb[0] + nb[1] + nb[2] + nb[3]) / 4));
-    return <Ecran fg={fg} roll={c.roll}><Plafond cam={c} f={fg} o={{neons: nb}} /></Ecran>;
+    // la boutique entière : les plafonniers claquent un à un, la nuit gagne la pièce
+    const o = {boutique: nb, frigos: nb[0] > 0.5 ? 1 : 0.2, dehors: DEHORS(fg, {compteur: 41.8})};
+    const c = pov(fg, [-1500, -430, 5.85], [700, 0, 8.0], {k: 0.6 + 0.4 * noirs});
+    return (
+      <VueIn fg={fg} cam={c} o={o} zoom={1.0 + 0.04 * k}
+        items={(cam) => [caissiere(cam, o, {id: 'n0', x: CAISSE_P.x, z: CAISSE_P.z, eyes: 1.2, pupilY: -8}), moi(cam, o, {id: 'n0m', x: MOI_IN.x, z: MOI_IN.z, dedansL: true, dos: true, epauleD: -10, coudeD: 30})]} />
+    );
   }
-  // dans le noir qui gagne : elle est debout derrière la vitre, collée au verre
-  const c = cam2(fg, -100, -150, 1.2 + 0.15 * k, 0.8);
-  const plaque = (
-    <g transform="translate(-120 260) scale(0.95)">
-      <Rodeur pose={melange(DEBOUT, ECARTE, 0.35)} tete={-20 + 4 * Math.sin(fg / 20)} respire={0.5 + 0.5 * Math.sin(fg / 14)} lum={0.75} id="r2" />
-    </g>
-  );
-  return <Ecran fg={fg} roll={c.roll}><Interieur cam={c} f={fg} o={{neons: nb, dehors: DEHORS(fg, {creature: null, lit: 0}), plaque, caissiere: {pose: {}}}} /></Ecran>;
+  // dans le noir : derrière la vitre, elle est debout, collée au verre, à contre-jour des néons de l'auvent
+  const o = {boutique: [0, 1, 0, 0], frigos: 0.2, dehorsLum: 0.6, dehors: DEHORS(fg, {compteur: 41.8, vitrine: 0})};
+  const c = pov(fg, [250, OEIL, 7.7 - 0.35 * k], [-60, -330, BOUT.z0], {k: 0.6});
+  return <VueIn fg={fg} cam={c} o={o} dehors={(cam) => [creature(cam, o.dehors, fg, {x: -60, y: 432, z: BOUT.z0 - 0.12, pose: melange(DEBOUT, ECARTE, 0.35), tete: -20 + 4 * Math.sin(fg / 20), echelle: 0.82, lum: 0.32})]} />;
 });
 
 // ===== 15. Tu te tournes vers la caissière. Elle sourit. Beaucoup trop grand. =====
-const NB_FIN = [0, 0, 0, 1];
+const NB_FIN = [0, 1, 0, 0];
 const Sourit = scene('sourire', ({f, fg, i, t, R}) => {
+  const o = {boutique: NB_FIN, frigos: 0.2, dehors: DEHORS(fg, {compteur: 41.8, vitrine: 0})};
   if (i === 0) {
-    const w = ease(t, 0, 14, Easing.out(Easing.cubic));
-    const c0 = camMix({x: -100, y: -150, zoom: 1.3}, {x: VISAGE.x - 40, y: VISAGE.y + 120, zoom: 2.0}, w);
-    const c = cam2(fg, c0.x, c0.y, c0.zoom, 0.8);
-    return <Ecran fg={fg} roll={c.roll} flou={t < 12 ? 24 * (1 - w) : 0}><Interieur cam={c} f={fg} o={{neons: NB_FIN, dehors: DEHORS(fg, {creature: null, lit: 0}), caissiere: {pose: {eyes: 1.1}}}} /></Ecran>;
+    // tu te retournes d'un coup (flou), elle est là, sous le dernier néon
+    const u = ease(t, 0, 12, Easing.out(Easing.cubic));
+    const a = pov(fg, [MOI_IN.x + 250, OEIL, 6.0], [-60, -300, BOUT.z0], {k: 0.7});
+    const b = pov(fg, [MOI_IN.x + 250, OEIL, 6.0], VISAGE, {k: 0.7});
+    const dyaw = ((b.yaw - a.yaw + 540) % 360) - 180;
+    const c = {...b, yaw: a.yaw + dyaw * u, pitch: lerp(a.pitch, b.pitch, u)};
+    const v = Math.abs(dyaw) * Math.abs(ease(t + 1, 0, 12, Easing.out(Easing.cubic)) - u);
+    return <VueIn fg={fg} cam={c} o={o} flou={v > 1 ? [Math.min(40, v * 3), 0] : null} zoom={1.05} items={(cam) => [caissiere(cam, o, {id: 's0', x: CAISSE_P.x, z: CAISSE_P.z, eyes: 1.1})]} />;
   }
-  const s = ease(f, R('sourit', 59) - 4, R('grand', 98) + 8, Easing.inOut(Easing.cubic));
-  const c = cam2(fg, VISAGE.x, VISAGE.y + 30, 3.0 + 0.5 * s, 0.4);
-  return <Ecran fg={fg} roll={c.roll}><Interieur cam={c} f={fg} o={{neons: NB_FIN, dehors: DEHORS(fg, {creature: null, lit: 0}), caissiere: {pose: {grin: s, eyes: 1 + 0.35 * s, brows: -4 * s}}}} /></Ecran>;
+  // gros plan : son sourire s'étire, beaucoup trop grand
+  const s = ease(f, R('sourit', 56) - 4, R('grand', 89) + 8, Easing.inOut(Easing.cubic));
+  const c = pov(fg, [CAISSE_P.x - 25, -112, 5.95], VISAGE, {k: 0.3});
+  return <VueIn fg={fg} cam={c} o={o} zoom={2.1 + 0.5 * s} items={(cam) => [caissiere(cam, o, {id: 's1', x: CAISSE_P.x, z: CAISSE_P.z, grin: s, eyes: 1 + 0.35 * s, brows: -4 * s})]} />;
 });
 
 // ===== 16. Le générateur est dans l'arrière-boutique. Tu y vas ? Ou tu restes dans le noir… avec elle ? =====
 const Dilemme = scene('dilemme', ({f, fg, t, d, R}) => {
   const k = lisse(t, d);
-  const nb = [0, 0, 0, R2(fg, 'dl', 0.3)];
-  const dis = R('dis-le', 180);
+  const nb = [0, R2(fg, 'dl', 0.3), 0, 0];
+  const o = {boutique: nb, frigos: 0.2, dehors: DEHORS(fg, {compteur: 41.8, vitrine: 0})};
+  const dis = R('dis-le', 181);
+  const haut = pov(fg, [700, OEIL, 8.0 - 0.3 * k], [(PORTE_G.x0 + PORTE_G.x1) / 2, -150, BOUT.z1], {k: 0.6});
+  const bas = pov(fg, [CAISSE_P.x - 25, -112, 5.95], VISAGE, {k: 0.3});
   return (
     <AbsoluteFill style={{background: '#000'}}>
-      <svg viewBox="0 0 1080 1920" width={1080} height={1920}>
-        <defs>
-          <clipPath id="di-h"><rect width="1080" height="956" /></clipPath>
-          <clipPath id="di-b"><rect y="964" width="1080" height="956" /></clipPath>
-        </defs>
-        <g clipPath="url(#di-h)">
-          <g transform="translate(0 -480)"><Arriere cam={cam2(fg, 640, -150, 1.25 + 0.1 * k, 0.6)} f={fg} o={{neons: nb}} /></g>
-        </g>
-        <g clipPath="url(#di-b)">
-          <g transform="translate(0 480)"><Interieur cam={cam2(fg, VISAGE.x, VISAGE.y + 60, 2.6 + 0.15 * k, 0.4)} f={fg} o={{neons: nb, dehors: DEHORS(fg, {creature: null, lit: 0}), caissiere: {pose: {grin: 1, eyes: 1.35, brows: -4}}}} /></g>
-        </g>
-        <Finition f={fg} grain={0.03} vignette={0.8} />
+      <div style={{position: 'absolute', left: 0, top: 0, width: 1080, height: 956, overflow: 'hidden'}}>
+        <div style={{position: 'absolute', left: 0, top: -480, width: 1080, height: 1920}}>
+          <VueIn fg={fg} cam={haut} o={{...o, veilleuse: 0.6 + 0.4 * Math.sin(fg / 6)}} />
+        </div>
+      </div>
+      <div style={{position: 'absolute', left: 0, top: 964, width: 1080, height: 956, overflow: 'hidden'}}>
+        <div style={{position: 'absolute', left: 0, top: -480, width: 1080, height: 1920}}>
+          <VueIn fg={fg} cam={bas} o={o} zoom={2.4} items={(cam) => [caissiere(cam, o, {id: 'd1', x: CAISSE_P.x, z: CAISSE_P.z, grin: 1, eyes: 1.35, brows: -4})]} />
+        </div>
+      </div>
+      <svg viewBox="0 0 1080 1920" width={1080} height={1920} style={{position: 'absolute'}}>
         <rect x="0" y="956" width="1080" height="8" fill="#000" />
-        <ChoixBoite f={f} debut={R('rallumer', 75) - 6} x={540} y={850} texte="LE GÉNÉRATEUR" emoji="1f526" couleur="#ffd23a" />
+        <ChoixBoite f={f} debut={R('rallumer', 76) - 6} x={540} y={850} texte="LE GÉNÉRATEUR" emoji="1f526" couleur="#ffd23a" />
         <ChoixBoite f={f} debut={R('restes', 121) - 6} x={540} y={1075} texte="JE RESTE AVEC ELLE" emoji="1fae3" couleur="#ff3a4a" />
         {f >= dis && (
           <g transform={`translate(540 1730) scale(${spring({frame: f - dis, fps: 30, config: {damping: 10}})})`}>
