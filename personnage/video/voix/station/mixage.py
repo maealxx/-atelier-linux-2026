@@ -471,7 +471,7 @@ claque(rep("voiture", "claques") - 0.05, 0.3)
 clic(rep("voiture", "clé") - 0.1, 0.1)
 demarreur(rep("voiture", "moteur") - 0.15, 1.2, 0.1)
 grincement(rep("voiture", "long") - 0.2, 1.5, 0.05, 130)
-coeur(bv[1], bv[4], 0.5, 0.12)
+coeur(bv[1], bv[-1] - 0.5, 0.5, 0.12)
 for tt_ in (img("voiture", "tapotent", 230) + 37, img("voiture", "deux", 287) - 2, img("voiture", "trois", 308) - 2):
     vitre_toc(tt_ / FPS, 0.25)
 ex = (img("voiture", "explose", 350) - 4) / FPS
