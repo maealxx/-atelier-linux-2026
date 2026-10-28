@@ -323,6 +323,24 @@ const Pub = scene('pub', ({f, fg, i, t, k, R}) => {
     const sw = Math.sin((f - 130) / 7) * 6 * Math.exp(-(f - 130) / 30);
     return (
       <Ecran fg={fg} theme="or" t={t} cam={derive(k, {z0: 1.0, z1: 1.08, y0: -40, y1: 0})}>
+        <Couche p={0.55}>
+          {/* les pubs tournent autour et l'argent file vers l'étiquette */}
+          {[0, 1, 2, 3, 4].map((j) => {
+            const a = (j / 5) * Math.PI * 2 + fg / 45;
+            const x = 540 + Math.cos(a) * 360;
+            const y = 700 + Math.sin(a) * 240;
+            const u = ((f * 1.4 + j * 11) % 30) / 30;
+            return (
+              <g key={j}>
+                <line x1={x} y1={y} x2="540" y2="520" stroke="#fff" strokeWidth="4" strokeDasharray="10 14" opacity="0.35" />
+                <Billet id={`pcb${j}`} x={lerp(x, 540, u)} y={lerp(y, 540, u)} s={0.22} rot={u * 200} flip={Math.cos(u * 8)} />
+                <Tuile x={x} y={y} s={0.62} w={260} h={260} c="#ffffff">
+                  {[<Tele key="t" x={0} y={-10} s={0.62} ecran={<Emo c="1f3e6" x={0} y={-6} s={90} />} />, <IconeInsta key="i" x={0} y={0} s={0.8} />, <IconePlay key="p" x={0} y={0} s={0.7} />, <Influenceuse key="n" x={0} y={50} s={0.85} f={f} />, <Emo key="e" c="1f4fa" x={0} y={0} s={160} />][j]}
+                </Tuile>
+              </g>
+            );
+          })}
+        </Couche>
         <Couche p={1}>
           <Fig x={540} y={1800} s={1.0} smile={0.3} eyes={fin ? 1.3 : 1} pupilY={-12} breath={Math.sin(fg / 7) * 3} worry={fin ? 0.5 : 0} />
           <g transform={`rotate(${sw} 540 200)`}>
@@ -529,6 +547,43 @@ const Pote = scene('pote', ({f, fg, i, t, k, R}) => {
         {[0, 1].map((q) => (
           <path key={q} d={`M${q ? 1180 : -100},-100 L${q ? 640 : 440},1600 L${q ? 900 : 180},1600 Z`} fill="#fff6d8" opacity={0.07 + 0.03 * Math.sin(fg / 9 + q)} />
         ))}
+        {/* tableau des ventes */}
+        <g transform="translate(40 300) rotate(-4)">
+          <rect x="0" y="0" width="380" height="300" rx="20" fill="#ffffff" />
+          <rect x="0" y="0" width="380" height="60" rx="20" fill={P.rose} />
+          <text x="190" y="42" textAnchor="middle" fontFamily={TITRE} fontSize="30" fill="#fff">FILLEULS</text>
+          {[0, 1, 2, 3, 4].map((j) => {
+            const h = (40 + j * 38) * ease(f, 76 + j * 5, 96 + j * 5);
+            return <rect key={j} x={40 + j * 64} y={270 - h} width="44" height={h} rx="8" fill={j === 4 ? P.vert : '#c8c4e8'} />;
+          })}
+        </g>
+        {/* affiche de la banque */}
+        <g transform="translate(760 260) rotate(5)">
+          <rect x="0" y="0" width="280" height="380" rx="20" fill={P.rose} />
+          <circle cx="140" cy="130" r="80" fill="#fff" opacity="0.2" />
+          <text x="140" y="160" textAnchor="middle" fontFamily={TITRE} fontSize="90" fill="#fff">€</text>
+          <text x="140" y="280" textAnchor="middle" fontFamily={TITRE} fontSize="52" fill="#fff">100 €</text>
+          <text x="140" y="330" textAnchor="middle" fontFamily={TEXTE} fontWeight="800" fontSize="26" fill="#fff">OFFERTS</text>
+        </g>
+      </Couche>
+      <Couche p={1.25}>
+        {/* les nouveaux clients qu'il ramène */}
+        {[[170, 820], [920, 860], [130, 1120], [960, 1150]].map(([x, y], j) => {
+          const u = pop(f, tc + 8 + j * 6);
+          return (
+            <g key={j} transform={`translate(${x} ${y + 8 * Math.sin(f / 9 + j)}) scale(${u})`}>
+              <circle r="62" fill="#fff" />
+              <clipPath id={`fl${j}`}>
+                <circle r="56" />
+              </clipPath>
+              <g clipPath={`url(#fl${j})`}>
+                <Fig x={0} y={300} s={0.4} {...PASSANTS[j]} smile={0.6} ombre={false} />
+              </g>
+              <circle cx="46" cy="-46" r="24" fill={P.vert} />
+              <text x="46" y="-36" textAnchor="middle" fontFamily={TITRE} fontSize="28" fill="#fff">+1</text>
+            </g>
+          );
+        })}
       </Couche>
       <Couche p={1}>
         <g transform={`translate(540 0) scale(${Math.max(0.03, Math.abs(sx))} 1) translate(-540 0)`}>
@@ -604,6 +659,31 @@ const Conditions = scene('conditions', ({f, fg, i, t, k, R}) => {
     <Ecran fg={fg} theme={fini ? 'or' : 'vert'} t={t} cam={derive(k, {z0: 1.0, z1: 1.06})}>
       <Couche p={0.5}>
         <circle cx="540" cy="980" r={380 + 60 * jauge} fill="#fff6c8" opacity={0.12 * jauge} filter="url(#flou14)" />
+        {/* la banque en fond, qui surveille */}
+        <g opacity={0.6 * (1 - jauge)}>
+          <Banque x={880} y={1250} s={0.45} yeux={{ouvert: 1, px: -0.8}} />
+        </g>
+        {/* le contrat qui s'envole quand il râle */}
+        <g transform={`translate(${200 - 40 * relou} ${700 - 30 * Math.sin(f / 10)}) rotate(${-12 + 6 * Math.sin(f / 8)})`} opacity={1 - jauge}>
+          <rect x="-110" y="-150" width="220" height="300" rx="14" fill="#fff" />
+          <rect x="-110" y="-150" width="220" height="44" rx="14" fill={P.rose} />
+          {[...Array(6)].map((_, j) => <rect key={j} x="-80" y={-80 + j * 34} width={150 - (j % 2) * 40} height="10" rx="5" fill="#d8d4ec" />)}
+        </g>
+      </Couche>
+      <Couche p={1.15}>
+        {/* ses opérations s'enchaînent : il devient actif */}
+        {[['1f959', 'Kebab', '− 9 €', 200, 820], ['1f4b3', 'Paiement CB', '− 23 €', 880, 900], ['1f4b6', 'Virement', '+ 500 €', 200, 1110], ['1f697', 'Essence', '− 40 €', 880, 1160], ['1f4f1', 'Forfait', '− 20 €', 880, 650]].map(([e, n, m, x, y], j) => {
+          const u = pop(f, R('deviennes', 154) - 4 + j * 8);
+          return (
+            <g key={j} transform={`translate(${x} ${y + 6 * Math.sin(f / 10 + j)}) scale(${u})`} opacity={Math.min(1, u * 1.5)}>
+              <rect x="-150" y="-44" width="300" height="88" rx="24" fill="#000" opacity="0.2" transform="translate(6 10)" />
+              <rect x="-150" y="-44" width="300" height="88" rx="24" fill="#fff" />
+              <Emo c={e} x={-104} y={0} s={52} />
+              <text x="-66" y="-4" fontFamily={TEXTE} fontWeight="700" fontSize="22" fill="#333">{n}</text>
+              <text x="-66" y="26" fontFamily={TITRE} fontSize="24" fill={m[0] === '+' ? P.vert : '#555'}>{m}</text>
+            </g>
+          );
+        })}
       </Couche>
       <Couche p={1}>
         <Fig x={540} y={1840} s={1.05} {...pose} />
@@ -945,6 +1025,31 @@ const Reste = scene('reste', ({f, fg, i, t, k, R}) => {
     const sway = Math.sin(f / 9) * 3;
     return (
       <Ecran fg={fg} theme="violet" t={t} cam={derive(k, {z0: 1.0, z1: 1.06, x0: 20, x1: -20})}>
+        <Couche p={0.55}>
+          {/* le salon : fenêtre de nuit, cadre, lampe, plante, tapis */}
+          <rect x="560" y="300" width="420" height="520" rx="18" fill="#2a2e6a" />
+          <rect x="580" y="320" width="380" height="480" rx="10" fill="#141a44" />
+          {[...Array(9)].map((_, j) => <rect key={j} x={600 + (j % 3) * 120} y={560 + Math.floor(j / 3) * 70 - (j % 2) * 60} width="90" height={240} fill="#20285a" />)}
+          {[...Array(14)].map((_, j) => <rect key={`w${j}`} x={620 + (j * 53) % 330} y={600 + ((j * 37) % 170)} width="14" height="18" fill="#ffd866" opacity={0.5 + 0.4 * Math.sin(fg / 20 + j)} />)}
+          <circle cx="880" cy="400" r="34" fill="#fff6d8" />
+          <rect x="764" y="320" width="12" height="480" fill="#2a2e6a" />
+          <rect x="580" y="556" width="380" height="12" fill="#2a2e6a" />
+          <rect x="120" y="760" width="0" height="0" />
+          <g transform="translate(470 420) rotate(-3)">
+            <rect x="-60" y="-80" width="120" height="160" rx="8" fill="#ffc83a" />
+            <rect x="-48" y="-68" width="96" height="136" rx="4" fill="#4fc3ff" />
+            <circle cx="0" cy="-10" r="24" fill="#ffd866" />
+          </g>
+          <ellipse cx="740" cy="1600" rx="520" ry="90" fill="#4a3aa8" opacity="0.7" />
+          <ellipse cx="740" cy="1600" rx="420" ry="66" fill="none" stroke="#8a7aff" strokeWidth="8" opacity="0.6" />
+        </Couche>
+        <Couche p={0.75}>
+          {/* lampe et plante */}
+          <rect x="1050" y="700" width="10" height="560" fill="#2a2c3a" />
+          <path d="M990,700 L1120,700 L1090,600 L1020,600 Z" fill="#ffd866" />
+          <path d="M990,700 L1120,700 L1200,1300 L910,1300 Z" fill="#fff6c8" opacity="0.07" />
+          <rect x="430" y="1200" width="0" height="0" />
+        </Couche>
         <Couche p={0.85}>
           {/* la pile de paperasse */}
           <g transform={`rotate(${sway} 260 1300)`}>
@@ -1055,6 +1160,17 @@ const Retiens = scene('retiens', ({f, fg, i, t, k, R}) => {
       <Couche p={0.4}>
         <path d="M380,-100 L120,1920 L960,1920 L700,-100 Z" fill="#fff6d8" opacity="0.08" />
         <circle cx="540" cy="900" r="520" fill="#7a5aff" opacity="0.18" filter="url(#flou14)" />
+        <g opacity="0.45" filter="url(#flou4)">
+          <Banque x={230} y={760} s={0.55} yeux={{ouvert: 1, px: 0.8, malin: 0.4}} />
+        </g>
+        {/* sa valeur qui grimpe derrière lui */}
+        <path d={`M600,760 C700,720 760,600 860,520 S980,300 1040,220`} fill="none" stroke="#86efac" strokeWidth="10" strokeLinecap="round" pathLength="1" strokeDasharray="1" strokeDashoffset={1 - ease(f, 80, 160)} opacity="0.6" />
+      </Couche>
+      <Couche p={0.7}>
+        {[...Array(10)].map((_, j) => {
+          const y = 1500 - ((f * 5 + j * 170) % 1500);
+          return <Piece key={j} x={j % 2 ? 140 + (j * 37) % 160 : 800 + (j * 53) % 200} y={y} r={22 + (j % 3) * 6} tourne={f / 20 + j} o={0.75} />;
+        })}
       </Couche>
       <Couche p={1}>
         <Fig x={540} y={2420} s={2.0} {...pose} ombre={false} />

@@ -56,7 +56,7 @@ export const Couche = ({p = 1, children, flou = 0}) => {
   );
 };
 // cam : {x, y, z, r}. Entrée de plan : petit coup de zoom (t = image dans le plan).
-export const Cadre = ({cam = {}, t = 99, children, punch = 0.06}) => {
+export const Cadre = ({cam = {}, t = 99, children, punch = 0.04}) => {
   const k = interpolate(t, [0, 10], [1 + punch, 1], {...clamp, easing: Easing.out(Easing.cubic)});
   const c = {x: 0, y: 0, z: 1, r: 0, ...cam};
   c.z *= k;
