@@ -1,0 +1,199 @@
+{
+ "fps": 30,
+ "voix": "hopital/voix_finale.wav",
+ "scenes": [
+  {
+   "nom": "bloc",
+   "frames": 219,
+   "texte": "Bloc opératoire, trois heures du matin. Derrière le rideau, le patient se réveille. Et il mord le chirurgien.",
+   "reperes": {
+    "bloc": 0,
+    "opératoire": 8,
+    "trois": 37,
+    "heures": 43,
+    "du": 47,
+    "matin": 50,
+    "derrière": 71,
+    "le": 80,
+    "rideau": 85,
+    "patient": 106,
+    "se": 116,
+    "réveille": 123,
+    "et": 138,
+    "il": 148,
+    "mord": 151,
+    "chirurgien": 159
+   }
+  },
+  {
+   "nom": "chambre",
+   "frames": 162,
+   "texte": "Toi, t'es deux étages plus haut. Chambre 412. Opéré de l'appendicite. Tu dors.",
+   "reperes": {
+    "toi": 2,
+    "tes": 21,
+    "deux": 24,
+    "étages": 29,
+    "plus": 38,
+    "haut": 45,
+    "chambre": 61,
+    "412": 68,
+    "opéré": 96,
+    "de": 107,
+    "lappendicite": 111,
+    "tu": 143,
+    "dors": 145
+   }
+  },
+  {
+   "nom": "alarme",
+   "frames": 161,
+   "texte": "Code rouge. Toutes les lumières passent au rouge. Ton cœur s'emballe. Cent cinquante-deux.",
+   "reperes": {
+    "code": 2,
+    "rouge": 6,
+    "toutes": 30,
+    "les": 35,
+    "lumières": 38,
+    "passent": 46,
+    "au": 54,
+    "ton": 77,
+    "cœur": 81,
+    "semballe": 89,
+    "cent": 121,
+    "cinquante-deux": 121
+   }
+  },
+  {
+   "nom": "couloir",
+   "frames": 174,
+   "texte": "Tu passes la tête dans le couloir. Des patients avancent. Lentement. Les bras tendus. Et leurs yeux brillent.",
+   "reperes": {
+    "tu": 2,
+    "passes": 5,
+    "la": 12,
+    "tête": 17,
+    "dans": 21,
+    "le": 25,
+    "couloir": 29,
+    "des": 48,
+    "patients": 51,
+    "avancent": 60,
+    "lentement": 83,
+    "les": 111,
+    "bras": 114,
+    "tendus": 120,
+    "et": 136,
+    "leurs": 144,
+    "yeux": 148,
+    "brillent": 154
+   }
+  },
+  {
+   "nom": "plan",
+   "frames": 121,
+   "texte": "Deux chambres. Une seule salle de bain entre les deux. Et le couloir est bloqué.",
+   "reperes": {
+    "deux": 2,
+    "chambres": 9,
+    "une": 30,
+    "seule": 34,
+    "salle": 41,
+    "de": 50,
+    "bain": 54,
+    "entre": 60,
+    "les": 66,
+    "et": 85,
+    "le": 87,
+    "couloir": 91,
+    "est": 100,
+    "bloqué": 103
+   }
+  },
+  {
+   "nom": "infirmiere",
+   "frames": 144,
+   "texte": "Une infirmière déboule dans ta chambre. Elle verrouille la porte et te chuchote: par la salle de bain.",
+   "reperes": {
+    "une": 2,
+    "infirmière": 6,
+    "déboule": 20,
+    "dans": 29,
+    "ta": 33,
+    "chambre": 37,
+    "elle": 56,
+    "verrouille": 61,
+    "la": 72,
+    "porte": 75,
+    "et": 82,
+    "te": 86,
+    "chuchote": 91,
+    "par": 103,
+    "salle": 119,
+    "de": 128,
+    "bain": 132
+   }
+  },
+  {
+   "nom": "porte",
+   "frames": 143,
+   "texte": "Trop tard. Quelque chose est à la porte. Puis dix. Puis vingt.",
+   "reperes": {
+    "trop": 2,
+    "tard": 7,
+    "quelque": 25,
+    "chose": 33,
+    "est": 41,
+    "à": 46,
+    "la": 48,
+    "porte": 51,
+    "puis": 69,
+    "dix": 79,
+    "vingt": 105
+   }
+  },
+  {
+   "nom": "fuite",
+   "frames": 192,
+   "texte": "Tu traverses la salle de bain, tu sors par la 414, et tu cours. Et oui, ta blouse est ouverte derrière.",
+   "reperes": {
+    "tu": 2,
+    "traverses": 7,
+    "la": 21,
+    "salle": 24,
+    "de": 31,
+    "bain": 35,
+    "sors": 53,
+    "par": 60,
+    "414": 70,
+    "et": 101,
+    "cours": 110,
+    "oui": 134,
+    "ta": 150,
+    "blouse": 153,
+    "est": 161,
+    "ouverte": 164,
+    "derrière": 173
+   }
+  },
+  {
+   "nom": "dilemme",
+   "frames": 193,
+   "texte": "Au bout du couloir: l'ascenseur, ou l'escalier de secours? Dis-le en commentaire.",
+   "reperes": {
+    "au": 3,
+    "bout": 6,
+    "du": 11,
+    "couloir": 15,
+    "lascenseur": 36,
+    "ou": 59,
+    "lescalier": 68,
+    "de": 80,
+    "secours": 83,
+    "dis-le": 103,
+    "en": 115,
+    "commentaire": 116
+   }
+  }
+ ]
+}
