@@ -1,3 +1,4 @@
+import {DUREE_RIRE, LeRire} from './LeRire';
 import {DUREE_TEST_CLASSE, TestClasse} from './LaClasse';
 import {Composition} from 'remotion';
 import {DernierBus, DUREE_BUS} from './DernierBus';
@@ -25,6 +26,7 @@ import {DUREE_BABYPHONE2, LeBabyphone2} from './LeBabyphone2';
 
 export const Root = () => (
   <>
+    <Composition id="LeRire" component={LeRire} durationInFrames={DUREE_RIRE} fps={30} width={1080} height={1920} />
     <Composition id="TestClasse" component={TestClasse} durationInFrames={DUREE_TEST_CLASSE} fps={30} width={1080} height={1920} />
     <Composition id="LeBabyphone2" component={LeBabyphone2} durationInFrames={DUREE_BABYPHONE2} fps={30} width={1080} height={1920} />
     <Composition id="Parrainage" component={ParrainageVideo} durationInFrames={DUREE_PARRAINAGE} fps={30} width={1080} height={1920} />

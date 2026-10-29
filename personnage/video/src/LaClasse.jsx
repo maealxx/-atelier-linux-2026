@@ -36,7 +36,7 @@ export const CheveuxMatin = () => (
   </g>
 );
 export const MAMAN = {coiffure: 'carre', cils: true, couleurs: {chev: '#5a3424', haut: '#f7a8c4', hautO: '#e88aac', pant: '#f7a8c4', peau: '#f2c3a0', peauO: '#e3a984'}};
-const ELEVES = [
+export const ELEVES = [
   {couleurs: {chev: '#1a1210', haut: '#3a8ad8', hautO: '#2a70b8', peau: '#c8906a', peauO: '#b07a58'}},
   {coiffure: 'queue', couleurs: {chev: '#c8803a', haut: '#ffd23a', hautO: '#e8b820'}},
   {couleurs: {chev: '#3a2418', haut: '#3ad86a', hautO: '#2ab858'}},
@@ -44,7 +44,7 @@ const ELEVES = [
 ];
 
 // ---------- la salle de classe ----------
-const Craie = ({id = 'craie'}) => (
+export const Craie = ({id = 'craie'}) => (
   <filter id={id} x="-5%" y="-5%" width="110%" height="110%">
     <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="3" result="n" />
     <feDisplacementMap in="SourceGraphic" in2="n" scale="5" result="d" />
@@ -55,7 +55,7 @@ const Craie = ({id = 'craie'}) => (
   </filter>
 );
 // tableau : x, y = coin haut-gauche, w, h ; contenu = dessin à la craie
-const Tableau = ({x, y, w, h, children}) => (
+export const Tableau = ({x, y, w, h, children}) => (
   <g>
     <rect x={x - 26} y={y - 26} width={w + 52} height={h + 52} rx="10" fill="#9a6a3a" />
     <rect x={x - 26} y={y - 26} width={w + 52} height="14" rx="6" fill="#b88654" />
@@ -67,7 +67,7 @@ const Tableau = ({x, y, w, h, children}) => (
     {children}
   </g>
 );
-export const Classe = ({f, titre = [], ecrit = 1, schema = null}) => (
+export const Classe = ({f, titre = [], ecrit = 1, schema = null, soleil = 1}) => (
   <g>
     <defs>
       <linearGradient id="cl-mur" x1="0" y1="0" x2="0" y2="1">
@@ -98,7 +98,8 @@ export const Classe = ({f, titre = [], ecrit = 1, schema = null}) => (
       <ellipse cx={-150 + 20 * Math.sin(f / 60)} cy="460" rx="90" ry="34" fill="#fff" opacity="0.9" />
       <rect x="-150" y="350" width="12" height="600" fill="#f8f4ea" />
       <rect x="-280" y="640" width="280" height="12" fill="#f8f4ea" />
-      <path d="M20,360 L620,1400 L380,1400 L20,800 Z" fill="url(#cl-rayon)" opacity={0.6 + 0.1 * Math.sin(f / 40)} />
+      <rect x="-280" y="350" width="280" height="600" fill="#5a6a80" opacity={0.6 * (1 - soleil)} />
+      <path d="M20,360 L620,1400 L380,1400 L20,800 Z" fill="url(#cl-rayon)" opacity={(0.6 + 0.1 * Math.sin(f / 40)) * soleil} />
       {/* horloge, affiches */}
       <g transform="translate(540 230)">
         <circle r="62" fill="#fff" stroke="#3a3a48" strokeWidth="10" />
@@ -130,7 +131,7 @@ export const Classe = ({f, titre = [], ecrit = 1, schema = null}) => (
   </g>
 );
 // le bureau du prof (premier plan à gauche)
-const Bureau = () => (
+export const Bureau = () => (
   <g>
     <Ombre x={250} y={1640} rx={380} ry={40} o={0.35} />
     <rect x="-80" y="1300" width="640" height="60" rx="10" fill="#a8743e" />
@@ -141,7 +142,7 @@ const Bureau = () => (
     <Emo c="1f34e" x={400} y={1250} s={90} />
   </g>
 );
-const Eleves = ({f, rire = 0}) => (
+export const Eleves = ({f, rire = 0}) => (
   <g>
     {ELEVES.map((e, k) => {
       const x = [120, 400, 690, 960][k];
@@ -150,7 +151,7 @@ const Eleves = ({f, rire = 0}) => (
     })}
   </g>
 );
-const Poussiere = ({f, t0, x, y}) => {
+export const Poussiere = ({f, t0, x, y}) => {
   const u = f - t0;
   if (u < 0 || u > 30) return null;
   return (
@@ -165,7 +166,7 @@ const Poussiere = ({f, t0, x, y}) => {
 };
 
 // ---------- la cuisine du matin ----------
-const Cuisine = ({f, fane = 0}) => (
+export const Cuisine = ({f, fane = 0}) => (
   <g>
     <defs>
       <linearGradient id="cu-mur" x1="0" y1="0" x2="0" y2="1">
