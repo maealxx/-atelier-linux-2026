@@ -1,11 +1,11 @@
-import {AbsoluteFill, random} from 'remotion';
+import {AbsoluteFill} from 'remotion';
 import {Rond} from './Rond';
 
 // Photo de profil « horreur » : la moitié du visage du perso déjà transformée en zombie.
 const S = 1.75;
 const CX = 540;
 const CY = 500;
-// fissure entre les deux moitiés (repère du perso)
+// ligne de partage entre les deux moitiés (repère du perso)
 const FISSURE = [[0, -1000], [18, -930], [-14, -870], [20, -810], [-10, -760], [16, -700], [-8, -640], [10, -560], [0, -420]];
 export const PP = () => {
   const bord = FISSURE.map(([x, y]) => `${x},${y}`).join(' L');
@@ -59,17 +59,7 @@ export const PP = () => {
             <circle cx="62" cy="-800" r="26" fill="#ffffff" />
             <path d="M0,-735 Q30,-690 70,-700 L60,-680 L48,-698 L36,-676 L24,-696 L12,-676 L0,-694 Z" fill="#ffffff" opacity="0.9" />
           </g>
-          {/* la fissure et le sang qui coule */}
-          <polyline points={FISSURE.map((p) => p.join(',')).join(' ')} fill="none" stroke="#8a0a12" strokeWidth="7" strokeLinejoin="round" />
-          {[[18, -930, 60], [20, -810, 110], [16, -700, 80], [10, -560, 130]].map(([x, y, h], j) => (
-            <g key={j}>
-              <path d={`M${x - 4},${y} Q${x - 3},${y + h * 0.7} ${x - 7},${y + h} A7,7 0 1 0 ${x + 7},${y + h} Q${x + 3},${y + h * 0.7} ${x + 4},${y} Z`} fill="#9a0c14" />
-            </g>
-          ))}
         </g>
-        {[...Array(30)].map((_, j) => (
-          <circle key={j} cx={random(`pa${j}`) * 1080} cy={random(`pb${j}`) * 1080} r={2 + random(`pc${j}`) * 4} fill="#ff6a5a" opacity={0.2 + 0.4 * random(`pd${j}`)} />
-        ))}
         <rect width="1080" height="1080" fill="url(#pp-vig)" />
       </svg>
     </AbsoluteFill>
