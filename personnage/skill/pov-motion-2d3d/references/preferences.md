@@ -103,3 +103,9 @@ Modèle à suivre : `RentrezChezVous.jsx` + `ForetNuit.jsx` + `Rodeur.jsx` + `Te
 - Ton « je t'explique vite » pour les jeunes, texte qui **parle vite** (~220 mots/min), indications de voix entre crochets dans le script. Voix ElevenLabs « Ilan – Friendly professional ».
 - Rendu **propre, smooth, dynamique** : studio 2,5D coloré, schémas animés (billets, banque, flux), le bonhomme dans plusieurs plans, animations au ressort, musique pop rythmée synthétisée sous la voix, whoosh à chaque coupe, sons de pièces / ka-tching.
 - Pas de logo de marque réel : banque générique (rose, symbole €).
+
+## Série « La classe » (29/10) : vidéos explicatives drôles d'1 min
+- Un prof dans une salle de classe lance le sujet (il ne parle pas « comme un prof », c'est visuel), le reste = mises en situation avec le bonhomme + schémas à la craie / zooms (ex. intérieur de la bouche). Code : `LaClasse.jsx`.
+- **La 1re phrase dit directement le sujet** (« Pourquoi tu pues de la gueule dès le matin ? »), pas de « Asseyez-vous ».
+- **Pas de musique**, seulement quelques bruitages (craie, pops, whoosh, gags sonores).
+- DA validée sur le test de 10 s : classe jaune chaude, prof à lunettes/moustache/cravate rouge, élèves de dos flous au premier plan.
