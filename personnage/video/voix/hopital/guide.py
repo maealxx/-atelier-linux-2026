@@ -9,7 +9,7 @@ k = Kokoro(f"{sys.argv[1]}/kokoro-v1.0.int8.onnx", f"{sys.argv[1]}/voices-v1.0.b
 morceaux, sr = [], 24000
 for nom, texte in json.load(open(f"{ici}/scenes.json")):
     for p in [b for b in re.split(r"(?<=[.,…?!:])\s+", texte) if b.strip()]:
-        a, sr = k.create(p, voice="ff_siwis", speed=1.15, lang="fr-fr")
+        a, sr = k.create(p, voice="ff_siwis", speed=1.22, lang="fr-fr")
         nz = np.where(np.abs(a) > 0.01)[0]
         a = a[max(0, nz[0] - 200) : nz[-1] + 1200] if len(nz) else a
         morceaux += [a, np.zeros(int(sr * (0.35 if p.endswith(("…", ".", "?")) else 0.22)), np.float32)]

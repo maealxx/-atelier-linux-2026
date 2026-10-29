@@ -1,11 +1,38 @@
 [
- ["bloc", "Bloc opératoire, trois heures du matin. Derrière le rideau, le patient se réveille. Et il mord le chirurgien."],
- ["chambre", "Toi, t'es deux étages plus haut. Chambre 412. Opéré de l'appendicite. Tu dors."],
- ["alarme", "Code rouge. Toutes les lumières passent au rouge. Ton cœur s'emballe. Cent cinquante-deux."],
- ["couloir", "Tu passes la tête dans le couloir. Des patients avancent. Lentement. Les bras tendus. Et leurs yeux brillent."],
- ["plan", "Deux chambres. Une seule salle de bain entre les deux. Et le couloir est bloqué."],
- ["infirmiere", "Une infirmière déboule dans ta chambre. Elle verrouille la porte et te chuchote: par la salle de bain."],
- ["porte", "Trop tard. Quelque chose est à la porte. Puis dix. Puis vingt."],
- ["fuite", "Tu traverses la salle de bain, tu sors par la 414, et tu cours. Et oui, ta blouse est ouverte derrière."],
- ["dilemme", "Au bout du couloir: l'ascenseur, ou l'escalier de secours? Dis-le en commentaire."]
+ [
+  "bloc",
+  "Bloc opératoire, trois heures du matin. Le patient se réveille. Et il mord le chirurgien."
+ ],
+ [
+  "chambre",
+  "Toi, t'es deux étages plus haut. Chambre 412. Opéré de l'appendicite hier soir."
+ ],
+ [
+  "alarme",
+  "Code rouge. Toutes les lumières passent au rouge. Ton cœur s'emballe. Cent cinquante-deux."
+ ],
+ [
+  "couloir",
+  "Tu passes la tête dans le couloir. Des patients avancent. Lentement. Les bras tendus. Et leurs yeux brillent."
+ ],
+ [
+  "plan",
+  "Deux chambres. Une seule salle de bain entre les deux. Et le couloir est bloqué."
+ ],
+ [
+  "infirmiere",
+  "Une infirmière déboule dans ta chambre. Elle verrouille la porte et te chuchote: par la salle de bain."
+ ],
+ [
+  "porte",
+  "Trop tard. Quelque chose est à la porte. Puis dix. Puis vingt."
+ ],
+ [
+  "fuite",
+  "Tu traverses la salle de bain, tu sors par la 414, et tu cours. Et oui, ta blouse est ouverte derrière."
+ ],
+ [
+  "dilemme",
+  "Au bout du couloir: l'ascenseur, ou l'escalier de secours? Dis-le en commentaire."
+ ]
 ]

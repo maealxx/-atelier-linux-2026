@@ -112,7 +112,7 @@ pose(filtre(bruit(0.4), "bandpass", [1500, 6000]) * np.exp(-ts(0.4) * 8), mord -
 croque(mord, 0.35)
 cri(mord + 0.1, 1.4, 0.25)
 grogne(mord + 0.2, 1.6, 0.12, 70)
-pose(np.sin(2 * np.pi * 1000 * ts(2.2)), mord + 1.0, 0.04)
+pose(np.sin(2 * np.pi * 1000 * ts(2.2)), mord + 0.8, 0.04)
 for j in range(4): pose(filtre(bruit(0.06), "bandpass", [300, 1500]) * np.exp(-ts(0.06) * 50), mord + 0.8 + j * 0.05, 0.15)
 # 2. chambre : calme, bip lent, respiration
 b = bornes("chambre")
@@ -142,6 +142,7 @@ coup_porte(b[0] + 0.05, 0.2)
 for j in range(3): pose(filtre(bruit(0.04), "bandpass", [2000, 6000]) * np.exp(-ts(0.04) * 80), rep("infirmiere", "verrouille") + j * 0.07, 0.12)
 pose(filtre(bruit(1.2), "bandpass", [2000, 6000]) * np.sin(np.pi * ts(1.2) / 1.2) * (0.5 + 0.5 * np.sin(2 * np.pi * 4 * ts(1.2))), rep("infirmiere", "chuchote") - 0.1, 0.04)
 coeur(b[0], bornes("porte")[-1], 0.5, 0.1)
+whoosh(rep("infirmiere", "salle") - 0.03, 0.12, 0.4)
 # 7. porte : coups, poignée, grognements qui s'empilent
 t = rep("porte", "porte") - 0.1
 for j in range(14):
@@ -154,6 +155,7 @@ for m, n in (("quelque", 1), ("dix", 4), ("vingt", 8)):
 b = bornes("fuite")
 pas(b[0], b[-1], 0.2, 0.07)
 pose(filtre(bruit(0.4), "lowpass", 800) * np.exp(-ts(0.4) * 10), rep("fuite", "sors") - 0.1, 0.1)
+coup_porte(rep("fuite", "sors"), 0.22)
 pose(note(1568, 0.3, 8), rep("fuite", "oui") - 0.05, 0.04)
 for j in range(5): grogne(b[2] + j * 0.4, 1.0, 0.06, 80)
 # 9. dilemme : ding de l'ascenseur, grognements derrière, bulle

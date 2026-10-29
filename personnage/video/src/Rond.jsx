@@ -35,6 +35,13 @@ export const Rond = ({
   souffle = 0,
   oeilZ = '#ffffff',
   sansYeux = false,
+  profil = 0, // vue de 3/4 : -1 (regarde à gauche) → 1 (regarde à droite)
+  assis = false, // sans les jambes (dans un lit, sous la couverture)
+  cou = 0, // allonge le cou (tête plus haute)
+  bracelet = false, // bracelet d'hôpital au poignet gauche
+  oxymetre = false, // pince au doigt de la main droite (lumière rouge + câble)
+  penche = 0, // inclinaison de la tête (degrés)
+  brasDevant = false, // bras dessinés devant le corps (mains posées sur le ventre)
 }) => {
   const noir = '#0b0d16';
   const c = zombie
@@ -57,6 +64,25 @@ export const Rond = ({
   const jD = lg(62, 1);
   const membre = (pts, w, col, key) => <polyline key={key} points={pts.map((p) => p.join(',')).join(' ')} fill="none" stroke={col} strokeWidth={w} strokeLinecap="round" strokeLinejoin="round" />;
   const corpsChemin = tenue === 'blouse' || zombie ? `M-150,${-620 + y0} Q0,${-660 + y0} 150,${-620 + y0} L178,-170 Q0,-140 -178,-170 Z` : `M-145,${-620 + y0} Q0,${-655 + y0} 145,${-620 + y0} L150,-210 Q0,-195 -150,-210 Z`;
+  const brasFace = (
+    [[epG, cG, mG], [epD, cD, mD]].map(([e, co, m], k) => (
+      <g key={`b${k}`}>
+        {membre([e, co, m], 54, c.peau, `ba${k}`)}
+        {tenue === 'blouse' || zombie ? membre([e, [e[0] + (co[0] - e[0]) * 0.45, e[1] + (co[1] - e[1]) * 0.45]], 74, c.haut, `bm${k}`) : membre([e, [e[0] + (co[0] - e[0]) * 0.5, e[1] + (co[1] - e[1]) * 0.5]], 66, c.haut, `bm${k}`)}
+        <circle cx={m[0]} cy={m[1]} r="36" fill={c.peau} />
+        {bracelet && k === 0 && !zombie && <rect x={m[0] - 34} y={m[1] - 70} width="68" height="24" rx="10" fill="#f4f6fa" stroke="#c8d0dc" strokeWidth="3" transform={`rotate(${-brasG[0] - brasG[1]} ${m[0]} ${m[1] - 58})`} />}
+        {oxymetre && k === 1 && !zombie && (
+          <g>
+            <path d={`M${m[0]},${m[1] + 30} C${m[0] + 30},${m[1] + 160} ${m[0] - 120},${m[1] + 200} ${m[0] - 220},${m[1] + 420}`} stroke="#d8dce4" strokeWidth="9" fill="none" />
+            <rect x={m[0] - 26} y={m[1] + 6} width="52" height="44" rx="14" fill="#8a929e" />
+            <circle cx={m[0]} cy={m[1] + 28} r="9" fill="#ff3a3a" />
+            <circle cx={m[0]} cy={m[1] + 28} r="26" fill="#ff3a3a" opacity="0.3" />
+          </g>
+        )}
+        {!zombie && <path d={`M${m[0] - 20},${m[1] - 26} l-6,-22 M${m[0]},${m[1] - 32} l0,-24 M${m[0] + 20},${m[1] - 26} l6,-22`} stroke={c.peau} strokeWidth="18" strokeLinecap="round" opacity={Math.abs(m[1] - e[1]) < 120 ? 1 : 0} />}
+      </g>
+    ))
+  );
   return (
     <g>
       <defs>
@@ -69,6 +95,16 @@ export const Rond = ({
           <rect width="30" height="10" fill="#e83a3a" />
           <rect width="10" height="30" fill="#e83a3a" opacity="0.7" />
         </pattern>
+        <linearGradient id="rd-corps" x1="0" y1="0" x2="1" y2="0.3">
+          <stop offset="0" stopColor="#ffffff" stopOpacity="0.14" />
+          <stop offset="0.5" stopColor="#ffffff" stopOpacity="0" />
+          <stop offset="1" stopColor="#1a1030" stopOpacity="0.26" />
+        </linearGradient>
+        <radialGradient id="rd-modele" cx="0.38" cy="0.32" r="0.75">
+          <stop offset="0" stopColor="#ffffff" stopOpacity="0.22" />
+          <stop offset="0.55" stopColor="#ffffff" stopOpacity="0" />
+          <stop offset="1" stopColor="#3a1a20" stopOpacity="0.28" />
+        </radialGradient>
         {zombie && (
           <radialGradient id="rd-oz">
             <stop offset="0" stopColor="#ffffff" />
@@ -77,26 +113,20 @@ export const Rond = ({
           </radialGradient>
         )}
       </defs>
-      <ellipse cx="0" cy="8" rx="170" ry="26" fill="#000" opacity="0.28" />
+      {!assis && <ellipse cx="0" cy="8" rx="170" ry="26" fill="#000" opacity="0.28" />}
       {/* jambes */}
-      {[jG, jD].map((j, k) => (
+      {!assis && [jG, jD].map((j, k) => (
         <g key={k}>
           {membre(j, 62, tenue === 'blouse' && !zombie ? c.peau : c.bas, `j${k}`)}
           <ellipse cx={j[2][0] + (k ? 22 : -22)} cy={j[2][1] + 4} rx="58" ry="28" fill={c.chaus} />
         </g>
       ))}
       {/* bras derrière (vue de dos : les deux bras sont devant le corps) */}
-      {!dos && [[epG, cG, mG], [epD, cD, mD]].map(([e, co, m], k) => (
-        <g key={`b${k}`}>
-          {membre([e, co, m], 54, c.peau, `ba${k}`)}
-          {tenue === 'blouse' || zombie ? membre([e, [e[0] + (co[0] - e[0]) * 0.45, e[1] + (co[1] - e[1]) * 0.45]], 74, c.haut, `bm${k}`) : membre([e, [e[0] + (co[0] - e[0]) * 0.5, e[1] + (co[1] - e[1]) * 0.5]], 66, c.haut, `bm${k}`)}
-          <circle cx={m[0]} cy={m[1]} r="36" fill={c.peau} />
-          {!zombie && <path d={`M${m[0] - 20},${m[1] - 26} l-6,-22 M${m[0]},${m[1] - 32} l0,-24 M${m[0] + 20},${m[1] - 26} l6,-22`} stroke={c.peau} strokeWidth="18" strokeLinecap="round" opacity={Math.abs(m[1] - e[1]) < 120 ? 1 : 0} />}
-        </g>
-      ))}
+      {!dos && !brasDevant && brasFace}
       {/* corps */}
       <path d={corpsChemin} fill={c.haut} />
       {tenue === 'blouse' && !zombie && !dos && <path d={corpsChemin} fill="url(#rd-pois)" opacity="0.6" />}
+      {!zombie && <path d={corpsChemin} fill="url(#rd-corps)" />}
       {tenue === 'blouse' && !zombie && dos && (
         <g>
           <path d={corpsChemin} fill="url(#rd-pois)" opacity="0.6" />
@@ -120,15 +150,19 @@ export const Rond = ({
           <circle cx={m[0]} cy={m[1]} r="36" fill={c.peau} />
         </g>
       ))}
+      {!dos && brasDevant && brasFace}
+      {/* cou */}
+      {!zombie && cou > 0 && <rect x={-40 + 16 * profil} y={-690 + y0 - cou} width="80" height={110 + cou} rx="26" fill={c.peauO} />}
       {/* tête */}
-      <g transform={`translate(0 ${y0})`}>
+      <g transform={`translate(0 ${y0 - cou}) rotate(${penche} 0 -640)`}>
         {cheveux === 'chignon' && !zombie && <circle cx={dos ? 0 : 60} cy="-1000" r="80" fill={c.chev} />}
+        {!zombie && !dos && profil <= 0.3 && <g><circle cx={170 + 20 * profil} cy="-780" r="36" fill={c.peauO} /><circle cx={172 + 20 * profil} cy="-780" r="16" fill="#000" opacity="0.12" /></g>}
+        {!zombie && !dos && profil >= -0.3 && <g><circle cx={-170 + 20 * profil} cy="-780" r="36" fill={c.peauO} /><circle cx={-172 + 20 * profil} cy="-780" r="16" fill="#000" opacity="0.12" /></g>}
         <circle cx="0" cy="-800" r="175" fill={c.peau} />
-        {!zombie && !dos && <circle cx="-170" cy="-780" r="34" fill={c.peauO} />}
-        {!zombie && !dos && <circle cx="170" cy="-780" r="34" fill={c.peauO} />}
+        {!zombie && <circle cx="0" cy="-800" r="175" fill="url(#rd-modele)" />}
         {dos && !zombie && <path d="M-176,-800 A176,176 0 0 1 176,-800 Q176,-700 120,-660 Q0,-630 -120,-660 Q-176,-700 -176,-800 Z" fill={c.chev} />}
         {!dos && !zombie && cheveux === 'pointes' && (
-          <path d="M-178,-790 Q-196,-930 -110,-985 L-120,-1050 L-50,-1000 L-30,-1075 L20,-1005 L70,-1065 L90,-990 L160,-1020 L140,-940 Q190,-880 176,-780 Q150,-880 70,-900 Q10,-860 -60,-900 Q-140,-880 -178,-790 Z" fill={c.chev} />
+          <path transform={`translate(${-14 * profil} 0)`} d="M-178,-790 Q-196,-930 -110,-985 L-120,-1050 L-50,-1000 L-30,-1075 L20,-1005 L70,-1065 L90,-990 L160,-1020 L140,-940 Q190,-880 176,-780 Q150,-880 70,-900 Q10,-860 -60,-900 Q-140,-880 -178,-790 Z" fill={c.chev} />
         )}
         {!dos && !zombie && cheveux === 'chignon' && <path d="M-178,-780 Q-180,-960 0,-978 Q180,-960 178,-780 Q150,-900 20,-905 Q-120,-900 -178,-780 Z" fill={c.chev} />}
         {!dos && !zombie && tenue === 'chirurgien' && (
@@ -139,9 +173,9 @@ export const Rond = ({
         )}
         {/* visage */}
         {!dos && !zombie && (
-          <g>
+          <g transform={`translate(${52 * profil} 0)`}>
             {[-62, 62].map((x) => (
-              <g key={x} transform={`translate(${x + pupX} ${-800 + pupY}) scale(1 ${yeux})`}>
+              <g key={x} transform={`translate(${x * (1 - 0.12 * Math.abs(profil)) + pupX} ${-800 + pupY}) scale(${1 - (Math.sign(x) === -Math.sign(profil) ? 0.22 * Math.abs(profil) : 0)} ${yeux})`}>
                 <ellipse rx="22" ry="30" fill="#141218" />
                 <circle cx="7" cy="-10" r="7" fill="#ffffff" />
               </g>
@@ -195,3 +229,23 @@ export const RondMonde = ({cam, x, z, y = 432, echelle = 1, teinte = [1, 1, 1], 
     </g>
   );
 };
+
+// Cinématique inverse d'un bras : angles [épaule, coude] pour poser la main sur `cible` (repère du perso).
+// cote : -1 bras gauche, 1 bras droit. vers : 1 coude vers l'extérieur, -1 vers l'intérieur.
+export const ikBras = (cote, cible, vers = 1, L1 = 165, L2 = 155) => {
+  const ep = [128 * cote, -585];
+  const dx = cible[0] - ep[0];
+  const dy = cible[1] - ep[1];
+  const D = Math.min(L1 + L2 - 1, Math.max(Math.abs(L1 - L2) + 1, Math.hypot(dx, dy)));
+  const th = Math.atan2(dx, dy);
+  const al = Math.acos((L1 * L1 + D * D - L2 * L2) / (2 * L1 * D));
+  const essais = [th + al, th - al].map((r1) => {
+    const e = [ep[0] + Math.sin(r1) * L1, ep[1] + Math.cos(r1) * L1];
+    const r2 = Math.atan2(cible[0] - e[0], cible[1] - e[1]);
+    return {e, a: (r1 * 180) / Math.PI / cote, c: ((r2 - r1) * 180) / Math.PI / cote};
+  });
+  essais.sort((p, q) => vers * (q.e[0] * cote - p.e[0] * cote));
+  return [essais[0].a, essais[0].c];
+};
+// position de la main (repère du perso) pour des angles donnés
+export const mainRond = (cote, [a, c]) => bras([128 * cote, -585], a, c)[1];
