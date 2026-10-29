@@ -60,7 +60,7 @@ const DefsHop = ({flou}) => (
   </defs>
 );
 // image finale : décor + étalonnage rouge (alarme) + habillage + grain/vignette
-const Ecran = ({fg, children, dessus = null, rouge = 0, vignette = 0.6, flou = null, fond = '#000'}) => {
+const Ecran = ({fg, children, dessus = null, rouge = 0, teinte = null, vignette = 0.6, flou = null, fond = '#000'}) => {
   const pulse = 0.5 + 0.5 * Math.sin(fg / 4.5);
   return (
     <AbsoluteFill style={{background: fond}}>
@@ -75,6 +75,7 @@ const Ecran = ({fg, children, dessus = null, rouge = 0, vignette = 0.6, flou = n
             <rect width="1080" height="1920" fill="#000" opacity={0.18 * rouge * (1 - pulse)} />
           </g>
         )}
+        {teinte && <rect width="1080" height="1920" fill={teinte[0]} opacity={teinte[1]} style={{mixBlendMode: 'multiply'}} />}
         {dessus}
         <Finition f={fg} id="hpf" grain={0.03} vignette={vignette} />
       </svg>
@@ -756,7 +757,7 @@ const Alarme = scene('alarme', ({f, fg, i, t, k, R}) => {
 
 // ===================== 4. Tu passes la tête dans le couloir : ils avancent, bras tendus, les yeux qui brillent =====================
 // mur du couloir vu de face (élévation), avec une porte
-const MurPorte = ({num, ouvre = 0, fg, children, devant = null, sens = 1, couloirRouge = true}) => (
+const MurPorte = ({num, ouvre = 0, fg, children, devant = null, sens = 1, couloirRouge = true, plaque = '#1e3a7a'}) => (
   <g>
     <defs>
       <linearGradient id="mp-mur" x1="0" y1="0" x2="0" y2="1">
@@ -775,7 +776,7 @@ const MurPorte = ({num, ouvre = 0, fg, children, devant = null, sens = 1, couloi
     <rect x="-600" y="1620" width="2280" height="600" fill="#6a7896" />
     <rect x="-600" y="1580" width="2280" height="44" fill="#2a3450" />
     <rect x="300" y="480" width="480" height="1110" fill="#eef2f8" />
-    <rect x="320" y="400" width="440" height="60" rx="8" fill="#1e3a7a" />
+    <rect x="320" y="400" width="440" height="60" rx="8" fill={plaque} />
     <text x="540" y="449" textAnchor="middle" fontFamily={POLICE} fontSize="50" fill="#ffffff">{num}</text>
     <rect x="324" y="500" width="432" height="1090" fill="#0a0e18" />
     {couloirRouge && <rect x="324" y="500" width="432" height="1090" fill="#5a1a1e" opacity="0.5" />}
@@ -1135,9 +1136,10 @@ const Porte = scene('porte', ({f, fg, i, t, k, R}) => {
   );
 });
 
+const course = (ph) => ({jambes: Math.sin(ph), brasG: [40 + 32 * Math.sin(ph), -40], brasD: [40 - 32 * Math.sin(ph), -40]});
+
 // ===================== 8. La salle de bain, la 414, tu cours… et oui, ta blouse est ouverte derrière =====================
 const Fuite = scene('fuite', ({f, fg, i, t, k, d: dd, R}) => {
-  const course = (ph) => ({jambes: Math.sin(ph), brasG: [40 + 32 * Math.sin(ph), -40], brasD: [40 - 32 * Math.sin(ph), -40]});
   if (i === 0) {
     const u = ease(t, 0, dd, Easing.inOut(Easing.sin));
     const bob = Math.abs(Math.sin(fg / 2.5)) * -24;
@@ -1241,43 +1243,977 @@ const Fuite = scene('fuite', ({f, fg, i, t, k, d: dd, R}) => {
   );
 });
 
-// ===================== 9. L'ascenseur ou l'escalier de secours ? =====================
-const Dilemme = scene('dilemme', ({f, fg, i, t, k, R}) => {
-  const asc = ease(f, R('lascenseur', 32) - 2, R('lascenseur', 32) + 6);
-  const sortie = ease(f, R('lescalier', 59) - 2, R('lescalier', 59) + 6);
-  const persos = [
-    {X: 120, Z: i ? 7.9 : 6.9, dos: true, brasG: [20, 0], brasD: [20, 0], souffle: Math.sin(fg / 3) * 10},
-    {X: -110, Z: i ? 8.1 : 7.1, ...INF, dos: true, brasG: [20, 0], brasD: [60, 20]},
-  ];
+// ===================== 9. L'ascenseur ou l'escalier ? L'ascenseur s'ouvre… il est plein. =====================
+// le fond du couloir vu de face : l'ascenseur (x ≈ 540) et la porte de l'escalier de secours (x ≈ 1500)
+const AscenseurMonde = ({fg, ouvre = 0, yeux = 0, ding = 0, porteEsc = 0, persos = null}) => {
+  const W = 290 * ouvre;
+  return (
+    <g>
+      <defs>
+        <linearGradient id="as-mur" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#c0cde2" />
+          <stop offset="1" stopColor="#8ea2c2" />
+        </linearGradient>
+        <linearGradient id="as-inox" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stopColor="#c8d0dc" />
+          <stop offset="0.5" stopColor="#eef2f8" />
+          <stop offset="1" stopColor="#a8b2c2" />
+        </linearGradient>
+        <clipPath id="as-clip">
+          <rect x="250" y="460" width="580" height="1130" />
+        </clipPath>
+      </defs>
+      <rect x="-600" y="-200" width="3000" height="1820" fill="url(#as-mur)" />
+      <rect x="-600" y="1150" width="3000" height="36" rx="12" fill="#c89a62" />
+      <rect x="-600" y="1620" width="3000" height="600" fill="#6a7896" />
+      <rect x="-600" y="1580" width="3000" height="44" fill="#2a3450" />
+      {/* escalier de secours */}
+      <g transform="translate(960 0)">
+        <MurPorte num="ESCALIER" plaque="#1a9a4a" ouvre={porteEsc} fg={fg} sens={1} couloirRouge={false}>
+          <rect x="324" y="500" width="432" height="1090" fill="#2a3a34" />
+          <path d="M324,1590 L756,1300 L756,1590 Z" fill="#4a5a54" />
+        </MurPorte>
+        <rect x="390" y="260" width="300" height="100" rx="12" fill="#1ac85a" />
+        <text x="540" y="336" textAnchor="middle" fontFamily={POLICE} fontSize="70" fill="#ffffff">SORTIE</text>
+        <ellipse cx="540" cy="310" rx="300" ry="160" fill="#3aff8a" opacity="0.35" filter="url(#hp-flou)" />
+      </g>
+      {/* ascenseur */}
+      <rect x="220" y="430" width="640" height="1170" rx="10" fill="#7a8496" />
+      <g clipPath="url(#as-clip)">
+        <rect x="250" y="460" width="580" height="1130" fill="#2a2830" />
+        <rect x="250" y="460" width="580" height="1130" fill="#ff3a2a" opacity={0.12 + 0.08 * Math.sin(fg / 2)} />
+        <rect x="250" y="460" width="580" height="160" fill="#ffe8b0" opacity={0.18 * ouvre} />
+        {[[330, 1640, 0.62], [740, 1640, 0.6], [540, 1660, 0.66], [420, 1700, 0.72], [660, 1700, 0.74], [300, 1760, 0.8], [800, 1760, 0.8], [540, 1790, 0.86]].map(([x, y, s], j) => (
+          <g key={j} transform={`translate(${x + 8 * Math.sin(fg / 7 + j)} ${y}) scale(${s * (1 + 0.06 * yeux)})`}>
+            <Rond {...ZOMBIE(fg / 9, j)} sansYeux={yeux < 0.5} brasG={[lerp(20, 95, yeux), -10]} brasD={[lerp(20, 100, yeux), -10]} />
+          </g>
+        ))}
+        <rect x={250 - W} y="460" width="290" height="1130" fill="url(#as-inox)" />
+        <rect x={540 + W} y="460" width="290" height="1130" fill="url(#as-inox)" />
+        <rect x={538 - W} y="460" width="4" height="1130" fill="#5a6274" />
+      </g>
+      <rect x="400" y="300" width="280" height="100" rx="14" fill="#120c08" />
+      <text x="500" y="378" textAnchor="middle" fontFamily={POLICE} fontSize="80" fill="#ffa03a">4</text>
+      <path d="M600,370 L630,320 L660,370 Z" fill="#ffa03a" opacity={ding > 0 ? 1 : 0.3} />
+      {ding > 0 && <ellipse cx="540" cy="350" rx="260" ry="140" fill="#ffb03a" opacity={0.45 * ding} filter="url(#hp-flou)" />}
+      <rect x="900" y="980" width="70" height="150" rx="14" fill="#d8dee6" />
+      <circle cx="935" cy="1025" r="20" fill={ding > 0 ? '#ffd23a' : '#a8b0bc'} />
+      <circle cx="935" cy="1085" r="20" fill="#a8b0bc" />
+      {persos}
+    </g>
+  );
+};
+const Ascenseur = scene('ascenseur', ({f, fg, i, t, k, R}) => {
+  const asc = ease(f, R('lascenseur', 31) - 2, R('lascenseur', 31) + 6);
   if (i === 0) {
     const cam = camC(lerp(5.0, 5.8, k), {y: -230});
+    const persos = [
+      {X: 120, Z: 6.9, dos: true, brasG: [20, 0], brasD: [20, 0], souffle: Math.sin(fg / 3) * 10},
+      {X: -110, Z: 7.1, ...INF, dos: true, brasG: [20, 0], brasD: [60, 20]},
+    ];
     return (
       <Ecran fg={fg} rouge={1}>
         <Vue z={punchZ(t, 0.05)}>
-          <CouloirMonde cam={cam} fg={fg} rouge={1} persos={persos} asc={asc} sortie={sortie} />
+          <CouloirMonde cam={cam} fg={fg} rouge={1} persos={persos} asc={asc} sortie={0.3} />
         </Vue>
       </Ecran>
     );
   }
-  const cam = camC(lerp(6.5, 6.9, k), {y: -230, vy: 1000});
-  const dis = R('dis-le', 94);
+  if (i === 1) {
+    // panoramique éclair : de l'ascenseur à la sortie de secours
+    const e = R('lescalier', 56);
+    const pan = ease(f, e - 6, e + 3);
+    const vit = Math.abs(ease(f + 1, e - 6, e + 3) - ease(f - 1, e - 6, e + 3));
+    return (
+      <Ecran fg={fg} rouge={1} flou={[90 * vit, 0]}>
+        <Vue x={lerp(540, 1500, pan)} y={lerp(900, 860, k)} z={1.2}>
+          <AscenseurMonde fg={fg} ding={1} />
+        </Vue>
+      </Ecran>
+    );
+  }
+  if (i === 2) {
+    const ouvre = ease(f, R('souvrent', 103) - 10, R('souvrent', 103) + 22, Easing.inOut(Easing.sin));
+    const yeux = f >= R('plein', 142) - 3 ? 1 : 0;
+    const choc = yeux && f < R('plein', 142) + 8 ? tremble(fg, 18, 'as') : 0;
+    return (
+      <Ecran fg={fg} rouge={1}>
+        <Vue x={540 + choc} y={lerp(1040, 1000, k)} z={lerp(1.35, 1.55, k) * (yeux ? punchZ(f - R('plein', 142) + 3, 0.12) : 1)}>
+          <AscenseurMonde fg={fg} ouvre={ouvre} yeux={yeux} ding={1 - ouvre * 0.5} />
+        </Vue>
+      </Ecran>
+    );
+  }
+  // demi-tour : ils foncent dans l'escalier
+  const es = R('escalier', 163);
+  const ouvre = ease(f, es - 4, es + 3, Easing.out(Easing.cubic));
+  const u = ease(t, 0, 40, Easing.in(Easing.quad));
+  const choc = f >= es && f < es + 8 ? tremble(fg, 20, 'es') : 0;
   return (
-    <Ecran fg={fg} rouge={0.9}
-      dessus={
-        <g>
-          <ChoixBoite f={f} debut={Math.max(62, R('lascenseur', 32))} x={540} y={420} texte="L'ASCENSEUR" emoji="1f6d7" couleur="#ffb03a" />
-          <ChoixBoite f={f} debut={Math.max(70, R('lescalier', 59))} x={540} y={600} texte="L'ESCALIER" emoji="1f3c3" couleur="#3ad86a" />
-          <BulleCommentaire f={f} t0={dis - 2} y={1700} />
-        </g>
-      }>
-      <Vue z={punchZ(t, 0.05)}>
-        <CouloirMonde cam={cam} fg={fg} rouge={1} persos={persos} asc={1} sortie={1} />
+    <Ecran fg={fg} rouge={1}>
+      <Vue x={1500 + choc} y={1000} z={1.1 * punchZ(f - es, 0.08)}>
+        <AscenseurMonde fg={fg} ouvre={1} yeux={1} porteEsc={ouvre}
+          persos={
+            <g>
+              <g transform={`translate(${lerp(900, 1500, Math.min(1, u * 1.2))} ${lerp(1700, 1560, u)}) scale(${lerp(0.95, 0.6, u)})`}>
+                <Rond {...INF} profil={0.7} bouche="serre" sourcils={-0.5} {...course(fg / 2.3 + 1)} />
+              </g>
+              <g transform={`translate(${lerp(760, 1460, u)} ${lerp(1760, 1580, u)}) scale(${lerp(1.05, 0.62, u)})`}>
+                <Rond profil={0.7} yeux={1.3} bouche="cri" sourcils={1} sueur={0.8} {...course(fg / 2.3)} />
+              </g>
+            </g>
+          } />
       </Vue>
     </Ecran>
   );
 });
 
-const COMPOSANTS = {bloc: Bloc, chambre: Chambre, alarme: Alarme, couloir: Couloir, plan: Plan, infirmiere: Infirmiere, porte: Porte, fuite: Fuite, dilemme: Dilemme};
+// ===================== 10. Quatre étages pieds nus, les points de suture qui tirent =====================
+// la cage d'escalier vue de haut (vertige)
+const CageVue = ({fg, f, u}) => (
+  <g>
+    <rect x="-400" y="-200" width="1880" height="2320" fill="#0e1014" />
+    {[...Array(7)].map((_, j) => {
+      const s = 1 - j * 0.13;
+      const w = 900 * s;
+      const h = 1500 * s;
+      const c = Math.round(160 - j * 20);
+      return (
+        <g key={j}>
+          <rect x={540 - w / 2} y={960 - h / 2} width={w} height={h} rx="20" fill={`rgb(${c},${c + 8},${c + 20})`} />
+          <rect x={540 - w / 2 + 120 * s} y={960 - h / 2 + 120 * s} width={w - 240 * s} height={h - 240 * s} rx="12" fill={`rgb(${c - 50},${c - 44},${c - 36})`} />
+          <rect x={540 - w / 2 + 116 * s} y={960 - h / 2 + 116 * s} width={w - 232 * s} height={h - 232 * s} rx="12" fill="none" stroke="#e8c070" strokeWidth={10 * s} />
+          {j < 5 && <text x={540 - w / 2 + 60 * s} y={960 - h / 2 + 90 * s} textAnchor="middle" fontFamily={POLICE} fontSize={70 * s} fill="#1ac85a">{4 - j}</text>}
+        </g>
+      );
+    })}
+    <rect x="490" y="910" width="100" height="100" fill="#000" />
+    {/* vous deux, vus d'en haut, qui tournent en descendant */}
+    {[0, 1].map((q) => {
+      const a = u * Math.PI * 3.2 - q * 0.5;
+      const lvl = u * 3.5 - q * 0.12;
+      const s = 1 - lvl * 0.13;
+      const x = 540 + Math.cos(a) * 390 * s;
+      const y = 960 + Math.sin(a) * 680 * s;
+      return (
+        <g key={q} transform={`translate(${x} ${y}) scale(${0.28 * s})`}>
+          <ellipse cx="0" cy="40" rx="150" ry="110" fill={q ? '#2a4a8a' : '#a8ccf4'} />
+          <circle r="120" fill={q ? '#1a1210' : '#141218'} />
+          {q === 1 && <circle cx="0" cy="-20" r="56" fill="#2a1a14" />}
+        </g>
+      );
+    })}
+  </g>
+);
+// une volée de marches vue de côté
+const Marches = ({fg, persos = null, etage = 3}) => (
+  <g>
+    <defs>
+      <linearGradient id="ma-mur" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stopColor="#a8b2c0" />
+        <stop offset="1" stopColor="#6a7484" />
+      </linearGradient>
+    </defs>
+    <rect x="-800" y="-600" width="3200" height="3400" fill="url(#ma-mur)" />
+    <text x="760" y="520" textAnchor="middle" fontFamily={POLICE} fontSize="420" fill="#1ac85a" opacity="0.85">{etage}</text>
+    <rect x="-800" y="700" width="3200" height="30" fill="#1ac85a" opacity="0.7" />
+    {[...Array(26)].map((_, j) => <rect key={j} x={-300 + j * 80} y={600 + j * 60} width="90" height="2400" fill={j % 2 ? '#5a6474' : '#545e6e'} />)}
+    {[...Array(26)].map((_, j) => <rect key={`n${j}`} x={-300 + j * 80} y={600 + j * 60} width="90" height="10" fill="#e8c070" opacity="0.8" />)}
+    <path d="M-340,420 L1800,2020" stroke="#c89a62" strokeWidth="22" strokeLinecap="round" />
+    {[...Array(9)].map((_, j) => <path key={j} d={`M${-260 + j * 240},${480 + j * 180} l0,180`} stroke="#8a929e" strokeWidth="10" />)}
+    {persos}
+    <ellipse cx="300" cy="-100" rx="500" ry="300" fill="#ffffff" opacity="0.15" filter="url(#hp-flou2)" />
+  </g>
+);
+const Escalier = scene('escalier', ({f, fg, i, t, k, d, R}) => {
+  if (i === 0) {
+    const u = ease(t, 0, d, Easing.inOut(Easing.sin));
+    return (
+      <Ecran fg={fg} rouge={0.55}>
+        <Vue x={540} y={960} z={lerp(1.1, 1.5, u)} r={lerp(0, 40, u)}>
+          <CageVue fg={fg} f={f} u={u} />
+        </Vue>
+      </Ecran>
+    );
+  }
+  if (i === 1) {
+    // pieds nus sur les marches : travelling en diagonale
+    const u = ease(t, 0, d, Easing.linear);
+    const pos = (q) => {
+      const x = lerp(100, 1300, u) - q * 300;
+      return [x, 600 + ((x + 300) / 80) * 60 - 40];
+    };
+    const [hx, hy] = pos(0);
+    return (
+      <Ecran fg={fg} rouge={0.55}>
+        <Vue x={hx + 60} y={hy - 300} z={1.15} r={-4}>
+          <Marches fg={fg} etage={lerp(3, 2, u) > 2.5 ? 3 : 2}
+            persos={
+              <g>
+                {[1, 0].map((q) => {
+                  const [x, y] = pos(q);
+                  const bob = Math.abs(Math.sin(fg / 2.2 + q)) * -26;
+                  return (
+                    <g key={q} transform={`translate(${x} ${y + bob}) rotate(-6) scale(0.82)`}>
+                      <Rond {...(q ? INF : {})} profil={0.75} yeux={q ? 1.1 : 1.3} bouche={q ? 'serre' : 'o'} sourcils={q ? -0.4 : 0.9} {...course(fg / 2.2 + q)} />
+                    </g>
+                  );
+                })}
+              </g>
+            } />
+        </Vue>
+      </Ecran>
+    );
+  }
+  if (i === 2) {
+    // gros plan : la grimace, la main sur le ventre
+    const main = ikBras(-1, [-30, -330], -1);
+    return (
+      <Ecran fg={fg} rouge={0.55}>
+        <Vue x={540} y={960 + Math.sin(fg / 2.2) * 14} z={1}>
+          <g filter="url(#flou8)" transform={`translate(0 ${-((fg * 40) % 600)})`}>
+            <Marches fg={fg} etage={2} />
+          </g>
+          <g transform="translate(540 2150) scale(1.55)">
+            <Rond brasDevant cou={16} profil={0.3} yeux={0.75} bouche="serre" sourcils={1.1} sueur={(f / 14) % 1} brasG={main} brasD={[40 + 30 * Math.sin(fg / 2.2), -40]} souffle={Math.sin(fg / 2.5) * 12} />
+          </g>
+        </Vue>
+      </Ecran>
+    );
+  }
+  // insert : le pansement qui rougit
+  const rouge = ease(f, R('ventre', 149) - 6, 167);
+  return (
+    <Ecran fg={fg} rouge={0.45}>
+      <Vue x={540} y={960} z={lerp(1, 1.08, k) * punchZ(f - R('ventre', 149), 0.08)}>
+        <rect x="-200" y="-200" width="1480" height="2320" fill="#a8ccf4" />
+        <pattern id="es-pois" width="76" height="76" patternUnits="userSpaceOnUse">
+          <circle cx="20" cy="20" r="10" fill="#5a8ad8" />
+          <circle cx="58" cy="58" r="10" fill="#5a8ad8" />
+        </pattern>
+        <rect x="-200" y="-200" width="1480" height="2320" fill="url(#es-pois)" opacity="0.6" />
+        <path d="M-200,700 Q540,560 1280,720 L1280,1500 Q540,1380 -200,1520 Z" fill="#f0c7a0" />
+        <path d="M-200,700 Q540,560 1280,720" stroke="#88b0e0" strokeWidth="30" fill="none" />
+        <rect x="380" y="840" width="380" height="300" rx="30" fill="#f8f8f4" transform="rotate(-8 570 990)" />
+        <ellipse cx="570" cy="990" rx={60 + 70 * rouge} ry={30 + 40 * rouge} fill="#b0101a" opacity={0.25 + 0.6 * rouge} filter="url(#hp-ombre)" />
+        {[0, 1, 2, 3].map((j) => <path key={j} d={`M${470 + j * 60},${960 - j * 8} l0,60`} stroke="#3a2a4a" strokeWidth="6" opacity="0.5" />)}
+        <g transform={`translate(${880 + 10 * Math.sin(fg / 3)} 1180)`}>
+          <ellipse rx="170" ry="120" fill="#f0c7a0" />
+          {[-100, -40, 20, 80].map((x) => <rect key={x} x={x - 26} y="-230" width="52" height="160" rx="26" fill="#f0c7a0" transform="rotate(-20)" />)}
+        </g>
+      </Vue>
+    </Ecran>
+  );
+});
+
+// ===================== 11. Rez-de-chaussée : porte bloquée. Il reste le sous-sol. =====================
+const PalierRdc = ({fg, secoue = 0, persos = null}) => (
+  <g>
+    <rect x="-600" y="-200" width="2280" height="2320" fill="#9aa4b4" />
+    <rect x="-600" y="1580" width="2280" height="600" fill="#5a6474" />
+    <text x="900" y="760" textAnchor="middle" fontFamily={POLICE} fontSize="360" fill="#1ac85a" opacity="0.85">0</text>
+    <text x="900" y="900" textAnchor="middle" fontFamily={POLICE} fontSize="80" fill="#1ac85a" opacity="0.85">RDC</text>
+    <g transform={`translate(${secoue * 6} 0)`}>
+      <rect x="140" y="440" width="560" height="1150" fill="#d8dee6" />
+      <rect x="164" y="464" width="512" height="1126" fill="#5a7a74" />
+      <rect x="320" y="560" width="200" height="300" fill="#141a20" />
+      <rect x="200" y="1020" width="440" height="40" rx="18" fill="#d8dee6" />
+      <rect x="200" y="1020" width="440" height="12" rx="6" fill="#ffffff" opacity="0.5" />
+    </g>
+    {persos}
+  </g>
+);
+const Rez = scene('rez', ({f, fg, i, t, k, R}) => {
+  if (i === 0) {
+    const pousse = f > 14 ? Math.sin(f * 2.2) * ease(f, 14, 20) : 0;
+    return (
+      <Ecran fg={fg} rouge={0.55}>
+        <Vue x={460} y={1000} z={lerp(1.1, 1.18, k) * punchZ(t)}>
+          <PalierRdc fg={fg} secoue={pousse}
+            persos={
+              <g>
+                <g transform={`translate(${430 + pousse * 10} 1700) scale(1.0)`}>
+                  <Rond {...INF} dos brasG={[150, 20]} brasD={[150, 20]} />
+                </g>
+                <g transform="translate(860 1780) scale(1.05)">
+                  <Rond dos brasG={[20, 0]} brasD={[20, 0]} souffle={Math.sin(fg / 3) * 10} />
+                </g>
+              </g>
+            } />
+        </Vue>
+      </Ecran>
+    );
+  }
+  if (i === 1) {
+    // à travers la vitre : ils sont collés de l'autre côté
+    const coup = f % 9 < 3 ? tremble(fg, 14, 'rz') : 0;
+    return (
+      <Ecran fg={fg} rouge={1}>
+        <Vue x={475 + coup} y={lerp(700, 660, k)} z={1.75 * punchZ(t)}>
+          <PorteMonde f={f} fg={fg} n={8} secoue={Math.sin(f * 1.9)} apparu={1} />
+        </Vue>
+      </Ecran>
+    );
+  }
+  // les marches qui descendent dans le noir, « -1 SOUS-SOL » qui grésille
+  const gr = random(`ss${Math.floor(fg / 3)}`) < 0.35 ? 0.2 : 1;
+  const sign = ease(f, R('sous-sol', 130) - 4, R('sous-sol', 130) + 2);
+  return (
+    <Ecran fg={fg} rouge={0.45}>
+      <Vue x={540} y={lerp(1000, 1080, k)} z={lerp(1.0, 1.12, k)}>
+        <defs>
+          <linearGradient id="rz-noir" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor="#6a7484" />
+            <stop offset="1" stopColor="#020204" />
+          </linearGradient>
+        </defs>
+        <rect x="-400" y="-200" width="1880" height="2320" fill="#4a5262" />
+        {[...Array(12)].map((_, j) => {
+          const w = 900 - j * 50;
+          const y = 900 + j * 70;
+          return <rect key={j} x={540 - w / 2} y={y} width={w} height="70" fill={`rgb(${110 - j * 9},${118 - j * 9},${130 - j * 10})`} />;
+        })}
+        <rect x="-400" y="900" width="1880" height="1300" fill="url(#rz-noir)" opacity="0.55" />
+        <path d="M80,900 L300,1800 M1000,900 L780,1800" stroke="#c89a62" strokeWidth="18" />
+        <g transform="translate(540 600)" opacity={gr * (0.35 + 0.65 * sign)}>
+          <rect x="-260" y="-80" width="520" height="160" rx="16" fill="#1ac85a" />
+          <text y="40" textAnchor="middle" fontFamily={POLICE} fontSize="100" fill="#ffffff">-1 · SOUS-SOL</text>
+          <ellipse rx="400" ry="200" fill="#3aff8a" opacity="0.3" filter="url(#hp-flou)" />
+        </g>
+        <g transform="translate(300 2060) scale(1.3)"><Rond dos brasG={[20, 0]} brasD={[20, 0]} souffle={Math.sin(fg / 3) * 10} /></g>
+        <g transform="translate(800 2120) scale(1.35)"><Rond {...INF} dos brasG={[20, 0]} brasD={[30, 10]} /></g>
+      </Vue>
+    </Ecran>
+  );
+});
+
+// ===================== 12. La morgue : froid, tiroirs ouverts… tous vides =====================
+const MorgueMonde = ({fg, f, ouvert = () => 0, flick = 1, porte = 0}) => (
+  <g>
+    <defs>
+      <linearGradient id="mo-mur" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stopColor="#8aa0b8" />
+        <stop offset="1" stopColor="#4a5a72" />
+      </linearGradient>
+      <linearGradient id="mo-inox" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stopColor="#e8eef4" />
+        <stop offset="1" stopColor="#8a96a8" />
+      </linearGradient>
+    </defs>
+    <rect x="-600" y="-200" width="2280" height="2320" fill="url(#mo-mur)" />
+    {[...Array(14)].map((_, j) => <path key={j} d={`M-600,${1500 + j * 60} L1680,${1500 + j * 60}`} stroke="#3a4a60" strokeWidth="3" />)}
+    <rect x="-600" y="1480" width="2280" height="800" fill="#5a6a82" opacity="0.6" />
+    {/* néon */}
+    <rect x="240" y="90" width="600" height="30" rx="14" fill={flick > 0.5 ? '#f0faff' : '#5a6a7a'} />
+    <ellipse cx="540" cy="300" rx="700" ry="400" fill="#dff4ff" opacity={0.3 * flick} filter="url(#hp-flou2)" />
+    <text x="540" y="260" textAnchor="middle" fontFamily={POLICE} fontSize="90" fill="#2a3a5a" letterSpacing="10">MORGUE</text>
+    {/* le mur de tiroirs */}
+    <rect x="70" y="330" width="940" height="1170" rx="16" fill="#9aa6b6" />
+    {[...Array(12)].map((_, j) => {
+      const c = j % 4;
+      const r = Math.floor(j / 4);
+      const x = 100 + c * 225;
+      const y = 360 + r * 380;
+      const o = ouvert(j);
+      return (
+        <g key={j}>
+          <rect x={x} y={y} width="205" height="350" rx="12" fill="#0a0e14" />
+          <g transform={`translate(${x + 102} ${y + 175}) scale(${1 + 0.45 * o}) translate(${-102} ${-175 + 120 * o})`}>
+            <rect width="205" height="350" rx="12" fill="url(#mo-inox)" />
+            {o > 0.05 && <rect x="10" y="350" width="185" height={140 * o} fill="#c8d0dc" />}
+            {o > 0.05 && <path d={`M30,${350 + 40 * o} q40,${-20 * o} 80,0 t70,${10 * o}`} stroke="#f4f6fa" strokeWidth="18" fill="none" />}
+            <rect x="72" y="40" width="60" height="40" rx="4" fill="#f4f6fa" />
+            <rect x="62" y="250" width="80" height="22" rx="11" fill="#5a6474" />
+          </g>
+        </g>
+      );
+    })}
+    {/* la porte par laquelle vous entrez (à gauche) */}
+    {porte > 0 && <rect x="-560" y="400" width="420" height="1100" fill="#1ac85a" opacity={0.25 * porte} filter="url(#hp-flou)" />}
+  </g>
+);
+const Vapeur = ({fg, x, y, s = 1}) => (
+  <g>
+    {[0, 1, 2].map((j) => {
+      const u = ((fg / 24 + j / 3) % 1);
+      return <ellipse key={j} cx={x + 60 * u * s} cy={y - 140 * u * s} rx={(30 + 60 * u) * s} ry={(20 + 40 * u) * s} fill="#ffffff" opacity={0.5 * (1 - u)} filter="url(#hp-flou)" />;
+    })}
+  </g>
+);
+const Morgue = scene('morgue', ({f, fg, i, t, k, R}) => {
+  const flick = random(`mf${Math.floor(fg / 2)}`) < 0.2 ? 0.2 : 1;
+  const BLEU = ['#7aa8ff', 0.35];
+  const ouv = R('ouverts', 121);
+  const ouvert = (j) => ease(f, ouv - 10 + ((j * 7) % 12), ouv - 2 + ((j * 7) % 12), Easing.out(Easing.back(1.4)));
+  if (i === 0) {
+    const entre = ease(t, 4, 50, Easing.out(Easing.quad));
+    return (
+      <Ecran fg={fg} teinte={BLEU}>
+        <Vue x={lerp(400, 460, k)} y={1000} z={lerp(1.05, 1.15, k)}>
+          <MorgueMonde fg={fg} f={f} flick={flick} />
+          <g transform={`translate(${lerp(-200, 260, entre)} ${lerp(1700, 1820, entre)}) scale(1.0)`}>
+            <Rond {...INF} profil={0.6} yeux={1.2} sourcils={0.6} bouche="serre" {...course(fg / 4)} jambes={Math.sin(fg / 4) * (1 - entre)} />
+          </g>
+          <g transform={`translate(${lerp(-420, 40, entre)} ${lerp(1760, 1900, entre)}) scale(1.08)`}>
+            <Rond profil={0.6} yeux={1.25} sourcils={1} bouche="o" {...course(fg / 4 + 1)} jambes={Math.sin(fg / 4 + 1) * (1 - entre)} />
+          </g>
+          <Vapeur fg={fg} x={130} y={980} s={1.3} />
+        </Vue>
+      </Ecran>
+    );
+  }
+  if (i === 1) {
+    // il fait froid : tu grelottes, la buée sort de ta bouche
+    const gr = tremble(fg, 8, 'gr');
+    return (
+      <Ecran fg={fg} teinte={BLEU}>
+        <Vue x={540 + gr} y={980} z={punchZ(t, 0.06)}>
+          <g filter="url(#flou8)">
+            <MorgueMonde fg={fg} f={f} flick={flick} />
+          </g>
+          <g transform="translate(540 2160) scale(1.6)">
+            <Rond brasDevant cou={16} profil={-0.2} yeux={1.2} bouche="serre" sourcils={0.9} brasG={ikBras(-1, [80, -420])} brasD={ikBras(1, [-80, -430])} />
+          </g>
+          <Vapeur fg={fg} x={560} y={1030} s={2} />
+          <rect x="-400" y="-200" width="1880" height="2320" fill="none" stroke="#e8f8ff" strokeWidth="160" opacity="0.25" filter="url(#hp-flou2)" />
+        </Vue>
+      </Ecran>
+    );
+  }
+  if (i === 2) {
+    return (
+      <Ecran fg={fg} teinte={BLEU}>
+        <Vue x={540} y={lerp(960, 920, k)} z={lerp(1.1, 1.2, k) * punchZ(f - ouv, 0.06)}>
+          <MorgueMonde fg={fg} f={f} flick={flick} ouvert={ouvert} />
+        </Vue>
+      </Ecran>
+    );
+  }
+  // gros plan dans un tiroir : vide, le drap déchiré
+  const vides = R('vides', 178);
+  return (
+    <Ecran fg={fg} teinte={BLEU}>
+      <Vue x={lerp(320, 330, k)} y={lerp(1120, 1080, k)} z={lerp(2.6, 3.1, k) * punchZ(f - vides, 0.14)}>
+        <MorgueMonde fg={fg} f={f} flick={flick} ouvert={() => 1} />
+        {/* traces de griffes à l'intérieur */}
+        {[0, 1, 2].map((j) => <path key={j} d={`M${300 + j * 22},${930} l${12},${110}`} stroke="#3a0a10" strokeWidth="6" strokeLinecap="round" opacity={f > vides - 4 ? 0.9 : 0.5} />)}
+      </Vue>
+    </Ecran>
+  );
+});
+
+// ===================== 13. Le garage des ambulances =====================
+// ambulance vue de côté (avant vers la droite), sol en y = 0
+const Ambulance = ({fg, gyro = 0, phares = 0, roule = 0, cabine = null}) => {
+  const bleu = gyro > 0 && Math.floor(fg / 4) % 2 === 0;
+  return (
+    <g>
+      <ellipse cx="0" cy="0" rx="560" ry="40" fill="#000" opacity="0.4" filter="url(#hp-ombre)" />
+      {gyro > 0 && <ellipse cx="-100" cy="-600" rx="700" ry="260" fill={bleu ? '#3a7aff' : '#ff3a3a'} opacity={0.35 * gyro} filter="url(#hp-flou2)" />}
+      <rect x="-470" y="-560" width="740" height="470" rx="30" fill="#f4f6fa" />
+      <rect x="-470" y="-200" width="740" height="110" rx="20" fill="#dfe4ec" />
+      <path d="M260,-90 L260,-430 L380,-430 Q440,-420 470,-310 L500,-210 L500,-90 Z" fill="#f4f6fa" />
+      <path d="M280,-410 L370,-410 Q415,-398 445,-300 L280,-300 Z" fill="#22304a" />
+      <clipPath id="am-vitre">
+        <path d="M280,-410 L370,-410 Q415,-398 445,-300 L280,-300 Z" />
+      </clipPath>
+      <g clipPath="url(#am-vitre)">{cabine}</g>
+      <path d="M296,-400 L330,-400 L300,-320 Z" fill="#ffffff" opacity="0.3" />
+      <rect x="-470" y="-280" width="970" height="44" fill="#e83a3a" />
+      <rect x="-470" y="-230" width="970" height="12" fill="#ffb03a" />
+      <text x="-110" y="-340" textAnchor="middle" fontFamily={POLICE} fontSize="96" fill="#e83a3a" letterSpacing="4">AMBULANCE</text>
+      <g transform="translate(-370 -470)">
+        <circle r="54" fill="#2a6ae8" />
+        <rect x="-12" y="-38" width="24" height="76" fill="#ffffff" />
+        <rect x="-12" y="-38" width="24" height="76" fill="#ffffff" transform="rotate(60)" />
+        <rect x="-12" y="-38" width="24" height="76" fill="#ffffff" transform="rotate(-60)" />
+      </g>
+      <rect x="-440" y="-590" width="640" height="34" rx="12" fill="#c8ccd6" />
+      {[...Array(8)].map((_, j) => <rect key={j} x={-430 + j * 78} y="-588" width="66" height="28" rx="8" fill={j % 2 ? (gyro && bleu ? '#5aa0ff' : '#2a4a8a') : gyro && !bleu ? '#ff5a4a' : '#8a2a2a'} />)}
+      <line x1="-460" y1="-540" x2="-460" y2="-100" stroke="#c8ccd6" strokeWidth="6" />
+      <ellipse cx="490" cy="-170" rx="20" ry="30" fill={phares ? '#fff8c8' : '#d8dce4'} />
+      {phares > 0 && <path d="M500,-180 L1300,-320 L1300,40 Z" fill="#fff8c8" opacity={0.25 * phares} filter="url(#hp-flou)" />}
+      {[-300, 330].map((x) => (
+        <g key={x} transform={`translate(${x} -40) rotate(${roule})`}>
+          <circle r="78" fill="#1a1c22" />
+          <circle r="40" fill="#9aa2b0" />
+          {[0, 60, 120].map((a) => <rect key={a} x="-4" y="-38" width="8" height="76" fill="#6a7280" transform={`rotate(${a})`} />)}
+        </g>
+      ))}
+    </g>
+  );
+};
+const GarageMonde = ({fg, children}) => (
+  <g>
+    <defs>
+      <linearGradient id="ga-mur" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stopColor="#3a3e4a" />
+        <stop offset="1" stopColor="#5a5e6a" />
+      </linearGradient>
+    </defs>
+    <rect x="-1200" y="-400" width="3600" height="2000" fill="url(#ga-mur)" />
+    <rect x="1350" y="300" width="900" height="1300" fill="#0a1430" />
+    <circle cx="1900" cy="520" r="40" fill="#f4f0d8" opacity="0.8" />
+    {[-900, -300, 300, 900].map((x) => (
+      <g key={x}>
+        <ellipse cx={x} cy="700" rx="300" ry="700" fill="#ffb050" opacity="0.18" filter="url(#hp-flou2)" />
+        <rect x={x - 60} y="200" width="120" height="30" rx="10" fill="#ffd090" />
+      </g>
+    ))}
+    <rect x="-200" y="160" width="700" height="110" rx="14" fill="#c8202a" />
+    <text x="150" y="240" textAnchor="middle" fontFamily={POLICE} fontSize="70" fill="#ffffff">URGENCES · AMBULANCES</text>
+    {[-700, 1150].map((x) => <rect key={x} x={x} y="200" width="110" height="1400" fill="#6a6e7a" />)}
+    <rect x="-1200" y="1600" width="3600" height="800" fill="#4a4e58" />
+    {[...Array(8)].map((_, j) => <rect key={j} x={-1100 + j * 460} y="1780" width="240" height="22" fill="#e8c03a" opacity="0.8" />)}
+    {children}
+  </g>
+);
+const Garage = scene('garage', ({f, fg, i, t, k, R}) => {
+  const ORANGE = ['#ffb070', 0.25];
+  const moteur = f >= R('moteur', 85) - 2;
+  if (i === 0) {
+    const entre = ease(t, 0, 50, Easing.out(Easing.quad));
+    return (
+      <Ecran fg={fg} teinte={ORANGE}>
+        <Vue x={lerp(300, 420, k)} y={1050} z={lerp(0.78, 0.84, k)}>
+          <GarageMonde fg={fg}>
+            <g transform="translate(560 1640) scale(1.05)"><Ambulance fg={fg} /></g>
+            <g transform={`translate(${lerp(-700, -260, entre)} 1720) scale(0.85)`}><Rond {...INF} profil={0.6} {...course(fg / 2.4 + 1)} jambes={Math.sin(fg / 2.4) * (1 - entre * 0.7)} /></g>
+            <g transform={`translate(${lerp(-1000, -520, entre)} 1740) scale(0.9)`}><Rond profil={0.6} yeux={1.25} bouche="o" sourcils={0.8} {...course(fg / 2.4)} /></g>
+          </GarageMonde>
+        </Vue>
+      </Ecran>
+    );
+  }
+  if (i === 1) {
+    return (
+      <Ecran fg={fg} teinte={ORANGE}>
+        <Vue x={lerp(900, 960, k)} y={1350} z={lerp(1.35, 1.45, k) * (moteur ? punchZ(f - R('moteur', 85), 0.06) : 1)}>
+          <GarageMonde fg={fg}>
+            <g transform={`translate(560 ${1640 + (moteur ? Math.sin(fg * 2.5) * 3 : 0)}) scale(1.05)`}><Ambulance fg={fg} gyro={f >= R('allumé', 96) - 2 ? 1 : 0} phares={moteur ? 1 : 0} /></g>
+            {moteur && <Vapeur fg={fg} x={50} y={1620} s={1.6} />}
+          </GarageMonde>
+        </Vue>
+      </Ecran>
+    );
+  }
+  // l'arrière : les portes ouvertes, la cabine éclairée
+  const ouv = ease(f, R('portes', 115) - 6, R('ouvertes', 121) + 2, Easing.out(Easing.back(1.2)));
+  return (
+    <Ecran fg={fg} teinte={ORANGE}>
+      <Vue x={540} y={1000} z={lerp(1.0, 1.1, k)}>
+        <GarageMonde fg={fg}>
+          <AmbuArriere fg={fg} ouvre={ouv} gyro={1} />
+        </GarageMonde>
+      </Vue>
+    </Ecran>
+  );
+});
+// l'ambulance vue de l'arrière, portes qui s'ouvrent sur la cabine éclairée
+const AmbuArriere = ({fg, ouvre = 0, gyro = 0, x = 540, y = 1600, s = 1, dedans = null}) => {
+  const bleu = Math.floor(fg / 4) % 2 === 0;
+  const pw = 330 * (1 - ouvre * 0.85);
+  return (
+    <g transform={`translate(${x} ${y}) scale(${s})`}>
+      <ellipse cx="0" cy="10" rx="480" ry="40" fill="#000" opacity="0.45" filter="url(#hp-ombre)" />
+      {gyro > 0 && <ellipse cx="0" cy="-880" rx="600" ry="200" fill={bleu ? '#3a7aff' : '#ff3a3a'} opacity="0.4" filter="url(#hp-flou2)" />}
+      {[-300, 300].map((xx) => <rect key={xx} x={xx - 60} y="-110" width="120" height="120" rx="20" fill="#1a1c22" />)}
+      <rect x="-400" y="-860" width="800" height="760" rx="30" fill="#e8ecf2" />
+      <rect x="-340" y="-800" width="680" height="660" fill="#f4faff" />
+      <rect x="-340" y="-800" width="680" height="660" fill="#bfe0ff" opacity="0.35" />
+      <rect x="-300" y="-360" width="420" height="80" rx="20" fill="#ffffff" />
+      <rect x="-300" y="-290" width="420" height="40" fill="#8a92a2" />
+      <rect x="-320" y="-780" width="640" height="120" fill="#d8e0ea" />
+      <rect x="200" y="-640" width="60" height="200" rx="24" fill="#3ab86a" />
+      {dedans}
+      <rect x="-340" y="-140" width="680" height="40" fill="#c8ccd6" />
+      {/* portes */}
+      <g>
+        <rect x={-340} y="-800" width={pw} height="660" fill="#f4f6fa" stroke="#c8ccd6" strokeWidth="4" />
+        <rect x={-340 + pw * 0.15} y="-740" width={pw * 0.7} height="200" fill="#22304a" />
+        <rect x={-340} y="-420" width={pw} height="40" fill="#e83a3a" />
+        <rect x={340 - pw} y="-800" width={pw} height="660" fill="#f4f6fa" stroke="#c8ccd6" strokeWidth="4" />
+        <rect x={340 - pw + pw * 0.15} y="-740" width={pw * 0.7} height="200" fill="#22304a" />
+        <rect x={340 - pw} y="-420" width={pw} height="40" fill="#e83a3a" />
+      </g>
+      {[-370, 370].map((xx) => <rect key={xx} x={xx - 22} y="-300" width="44" height="90" rx="10" fill="#ff3a3a" />)}
+      <rect x="-420" y="-110" width="840" height="50" rx="14" fill="#5a6070" />
+      {[...Array(6)].map((_, j) => <rect key={j} x={-280 + j * 96} y="-900" width="80" height="36" rx="8" fill={j % 2 ? (gyro && bleu ? '#5aa0ff' : '#2a4a8a') : gyro && !bleu ? '#ff5a4a' : '#8a2a2a'} />)}
+    </g>
+  );
+};
+
+// ===================== 14. Elle saute au volant, tu plonges à l'arrière… ceux-là courent =====================
+// depuis l'intérieur de l'ambulance, on regarde par les portes arrière ouvertes
+const AmbuInterieur = ({fg, dehors, devant = null}) => (
+  <g>
+    <defs>
+      <clipPath id="ai-porte">
+        <rect x="230" y="560" width="620" height="1000" />
+      </clipPath>
+    </defs>
+    <g clipPath="url(#ai-porte)">{dehors}</g>
+    <path d="M-400,-200 L1480,-200 L1480,2120 L-400,2120 Z M230,560 L230,1560 L850,1560 L850,560 Z" fill="#dfe6ee" fillRule="evenodd" />
+    <path d="M-400,-200 L230,560 L230,1560 L-400,2120 Z" fill="#c8d2de" />
+    <path d="M1480,-200 L850,560 L850,1560 L1480,2120 Z" fill="#b8c2d0" />
+    <path d="M-400,-200 L1480,-200 L850,560 L230,560 Z" fill="#eef4fa" />
+    <path d="M-400,2120 L1480,2120 L850,1560 L230,1560 Z" fill="#8a94a6" />
+    <rect x="380" y="100" width="320" height="40" rx="18" fill="#ffffff" />
+    <ellipse cx="540" cy="200" rx="400" ry="160" fill="#ffffff" opacity="0.4" filter="url(#hp-flou)" />
+    <path d="M1100,300 L1480,140 L1480,700 L1100,780 Z" fill="#d8e0ea" stroke="#a8b2c2" strokeWidth="6" />
+    <path d="M-60,1700 L360,1500 L360,1580 L-60,1820 Z" fill="#ffffff" />
+    <path d="M-60,1820 L360,1580 L360,1640 L-60,1900 Z" fill="#8a92a2" />
+    <rect x="1180" y="900" width="70" height="300" rx="30" fill="#3ab86a" transform="rotate(-8 1215 1050)" />
+    {devant}
+  </g>
+);
+const Courent = scene('courent', ({f, fg, i, t, k, d, R}) => {
+  const ORANGE = ['#ffb070', 0.22];
+  if (i === 0) {
+    // de côté : elle saute dans la cabine
+    const saute = ease(f, R('saute', 17) - 6, R('volant', 24) + 2, Easing.out(Easing.cubic));
+    return (
+      <Ecran fg={fg} teinte={ORANGE}>
+        <Vue x={1000} y={1350} z={1.3 * punchZ(t)}>
+          <GarageMonde fg={fg}>
+            <g transform="translate(560 1640) scale(1.05)">
+              <Ambulance fg={fg} gyro={1} phares={1}
+                cabine={saute > 0.6 && <g transform="translate(350 -190) scale(0.22)"><Rond {...INF} profil={0.8} bouche="serre" sourcils={-0.5} assis brasG={[100, -60]} brasD={[90, -50]} /></g>} />
+            </g>
+            {saute < 0.6 && (
+              <g transform={`translate(${lerp(1300, 920, saute)} ${lerp(1720, 1420, saute)}) scale(${lerp(0.85, 0.6, saute)}) rotate(${-20 * saute})`}>
+                <Rond {...INF} profil={-0.6} bouche="serre" sourcils={-0.5} {...course(fg / 2)} />
+              </g>
+            )}
+          </GarageMonde>
+        </Vue>
+      </Ecran>
+    );
+  }
+  const dehors = (zs, vite = false) => (
+    <g transform="translate(540 1500) scale(0.42) translate(-540 -1640)">
+      <GarageMonde fg={fg}>
+        {zs.map(([x, y, s], j) => (
+          <g key={j} transform={`translate(${x} ${y}) scale(${s})`}>
+            <Rond {...ZOMBIE(fg / (vite ? 1.6 : 8), j)} jambes={Math.sin(fg / (vite ? 1.6 : 8) + j)} brasG={vite ? [60 + 40 * Math.sin(fg / 1.6 + j), -60] : [90, -10]} brasD={vite ? [60 - 40 * Math.sin(fg / 1.6 + j), -60] : [92, -10]} />
+          </g>
+        ))}
+      </GarageMonde>
+    </g>
+  );
+  if (i === 1) {
+    // tu plonges à l'arrière (vu de l'intérieur)
+    const pl = ease(f, R('plonges', 48) - 8, R('larrière', 61) + 4, Easing.out(Easing.cubic));
+    return (
+      <Ecran fg={fg} teinte={ORANGE}>
+        <Vue x={540} y={1000} z={punchZ(f - R('plonges', 48) + 4, 0.08)}>
+          <AmbuInterieur fg={fg} dehors={dehors([])}
+            devant={
+              <g transform={`translate(${lerp(540, 600, pl)} ${lerp(1500, 2350, pl)}) scale(${lerp(0.7, 1.8, pl)}) rotate(${lerp(0, -70, pl)})`}>
+                <Rond yeux={1.3} bouche="cri" sourcils={1} brasG={[150, -20]} brasD={[150, -20]} jambes={0.8} />
+              </g>
+            } />
+        </Vue>
+      </Ecran>
+    );
+  }
+  if (i === 2) {
+    const av = t * 4;
+    return (
+      <Ecran fg={fg} teinte={ORANGE}>
+        <Vue x={540} y={1050} z={lerp(1.0, 1.1, k)}>
+          <AmbuInterieur fg={fg} dehors={dehors([[100 + av, 1640, 0.7], [500, 1660 + av * 0.2, 0.75], [900 - av, 1640, 0.7], [300, 1700 + av * 0.4, 0.8], [700, 1720, 0.8]])} />
+        </Vue>
+      </Ecran>
+    );
+  }
+  if (i === 3) {
+    // « attends… »
+    return (
+      <Ecran fg={fg} teinte={ORANGE}>
+        <Vue x={540} y={lerp(1000, 980, k)} z={lerp(1.0, 1.08, k)}>
+          <g filter="url(#flou8)">
+            <AmbuInterieur fg={fg} dehors={dehors([[300, 1660, 0.75], [700, 1680, 0.78]])} />
+          </g>
+          <g transform="translate(560 2180) scale(1.6)">
+            <Rond cou={16} profil={0.3} yeux={0.55} pupX={20} bouche="serre" sourcils={-0.6} sueur={0.4} brasG={[10, 0]} brasD={[10, 0]} />
+          </g>
+        </Vue>
+      </Ecran>
+    );
+  }
+  // ils courent !
+  const u = t / Math.max(1, d);
+  return (
+    <Ecran fg={fg} teinte={ORANGE} flou={[0, 3]}>
+      <Vue x={540 + tremble(fg, 16, 'cr')} y={1050} z={punchZ(f - R('courent', 167), 0.14)}>
+        <AmbuInterieur fg={fg} dehors={dehors([[300, 1640 + 900 * u, 0.9 + 1.6 * u], [760, 1660 + 800 * u, 0.85 + 1.5 * u], [540, 1700 + 1000 * u, 1 + 2 * u]], true)} />
+        {[...Array(10)].map((_, j) => <path key={j} d={`M${540 + Math.cos(j) * 400},${1060 + Math.sin(j) * 600} L${540 + Math.cos(j) * 900},${1060 + Math.sin(j) * 1300}`} stroke="#ffffff" strokeWidth="6" opacity="0.4" />)}
+      </Vue>
+    </Ecran>
+  );
+});
+
+// ===================== 15. La barrière explose, l'hôpital rétrécit derrière =====================
+const BLEU_NUIT = ['#6a8aff', 0.3];
+const Rue = ({fg, vit = 1}) => {
+  const off = (fg * 38 * vit) % 600;
+  return (
+    <g>
+      <defs>
+        <linearGradient id="ru-ciel" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#060a20" />
+          <stop offset="1" stopColor="#1e2a50" />
+        </linearGradient>
+      </defs>
+      <rect x="-1200" y="-400" width="3600" height="2100" fill="url(#ru-ciel)" />
+      <g transform={`translate(${off * 0.3} 0)`}>
+        {[...Array(10)].map((_, j) => <rect key={j} x={-1400 + j * 360} y={700 + random(`b${j}`) * 400} width="300" height="1200" fill="#10162e" />)}
+      </g>
+      <g transform={`translate(${off} 0)`}>
+        {[...Array(8)].map((_, j) => (
+          <g key={j}>
+            <rect x={-1600 + j * 600} y="900" width="16" height="800" fill="#2a2e3a" />
+            <circle cx={-1592 + j * 600} cy="900" r="22" fill="#ffd890" />
+            <ellipse cx={-1592 + j * 600} cy="1700" rx="200" ry="40" fill="#ffd890" opacity="0.25" />
+          </g>
+        ))}
+      </g>
+      <rect x="-1200" y="1700" width="3600" height="700" fill="#22262e" />
+      <g transform={`translate(${off * 1.6 % 400} 0)`}>
+        {[...Array(12)].map((_, j) => <rect key={j} x={-1600 + j * 400} y="1880" width="200" height="16" fill="#e8e8e8" opacity="0.7" />)}
+      </g>
+    </g>
+  );
+};
+const Evasion = scene('evasion', ({f, fg, i, t, k, R}) => {
+  if (i === 0) {
+    const b = R('barrière', 31);
+    const x = lerp(-300, 520, ease(t, 0, b, Easing.in(Easing.quad))) + Math.max(0, f - b) * 14;
+    const casse = f >= b;
+    const choc = casse && f < b + 8 ? tremble(fg, 26, 'ba') : 0;
+    return (
+      <Ecran fg={fg} teinte={BLEU_NUIT} flou={[4, 0]}>
+        <Vue x={540 + choc} y={1300} z={0.9 * (casse ? punchZ(f - b, 0.12) : 1)}>
+          <Rue fg={fg} />
+          {/* la barrière */}
+          {!casse ? (
+            <g>
+              <rect x="1040" y="1420" width="60" height="300" fill="#c8ccd6" />
+              <rect x="560" y="1440" width="480" height="40" fill="#ffffff" />
+              {[0, 1, 2, 3].map((j) => <rect key={j} x={580 + j * 120} y="1440" width="60" height="40" fill="#e83a3a" />)}
+            </g>
+          ) : (
+            <g>
+              <rect x="1040" y="1420" width="60" height="300" fill="#c8ccd6" />
+              {[0, 1, 2, 3].map((j) => {
+                const u = (f - b) / 10;
+                return <rect key={j} x={600 + j * 120 + u * (200 + j * 120)} y={1440 - u * (300 - j * 60) + u * u * 200} width="110" height="40" fill={j % 2 ? '#ffffff' : '#e83a3a'} transform={`rotate(${u * 200 * (j % 2 ? 1 : -1)} ${640 + j * 120} 1460)`} />;
+              })}
+            </g>
+          )}
+          <g transform={`translate(${x} 1720) scale(0.75)`}>
+            <Ambulance fg={fg} gyro={1} phares={1} roule={fg * 30} />
+          </g>
+        </Vue>
+      </Ecran>
+    );
+  }
+  if (i === 1) {
+    // derrière l'ambulance : ton visage colle à la vitre
+    return (
+      <Ecran fg={fg} teinte={BLEU_NUIT}>
+        <Vue x={540} y={lerp(960, 920, k) + Math.sin(fg / 2) * 6} z={lerp(1.45, 1.6, k)}>
+          <rect x="-400" y="-200" width="1880" height="2320" fill="#0a1020" />
+          <AmbuArriere fg={fg} ouvre={0} gyro={1} x={540} y={1800} s={1.15}
+            dedans={null} />
+          <g transform="translate(540 1800) scale(1.15)">
+            <clipPath id="ev-vitre">
+              <rect x={-340 + 330 * 0.15} y="-740" width={330 * 0.7} height="200" />
+            </clipPath>
+            <g clipPath="url(#ev-vitre)">
+              <g transform="translate(-170 -440) scale(0.38)">
+                <Rond yeux={1.3} bouche="o" sourcils={0.9} brasG={[150, -60]} brasD={[10, 0]} />
+              </g>
+            </g>
+          </g>
+        </Vue>
+      </Ecran>
+    );
+  }
+  // POV : l'hôpital qui rétrécit, la route qui défile
+  const s = lerp(1, 0.35, ease(t, 0, 45, Easing.out(Easing.quad)));
+  return (
+    <Ecran fg={fg} teinte={BLEU_NUIT}>
+      <Vue x={540} y={960} z={1}>
+        <rect x="-400" y="-200" width="1880" height="2320" fill="#0a1030" />
+        <path d="M540,1000 L-400,2120 L1480,2120 Z" fill="#22262e" />
+        {[...Array(6)].map((_, j) => {
+          const u = ((fg / 8 + j / 6) % 1);
+          return <rect key={j} x={540 - 6 - 30 * u} y={1000 + 1100 * u * u} width={12 + 60 * u} height={20 + 120 * u} fill="#e8e8e8" opacity="0.7" />;
+        })}
+        <g transform={`translate(540 1000) scale(${s}) translate(-540 -1000)`}>
+          <rect x="140" y="200" width="800" height="800" fill="#3a4466" />
+          {[...Array(15)].map((_, j) => <rect key={j} x={190 + (j % 5) * 150} y={260 + Math.floor(j / 5) * 240} width="100" height="160" fill={random(`hw${j}`) < 0.5 ? '#ff3a2a' : '#ffd88a'} opacity={0.6 + 0.4 * Math.sin(fg / 3 + j)} />)}
+          <rect x="440" y="110" width="200" height="90" fill="#e8ecf4" />
+          <rect x="515" y="120" width="50" height="70" fill="#e83a3a" />
+          <rect x="490" y="140" width="100" height="30" fill="#e83a3a" />
+          <ellipse cx="540" cy="600" rx="600" ry="500" fill="#ff3a2a" opacity="0.2" filter="url(#hp-flou2)" />
+        </g>
+        {/* le cadre des vitres arrière */}
+        <path d="M-400,-200 L1480,-200 L1480,2120 L-400,2120 Z M120,380 L120,1250 L520,1250 L520,380 Z M560,380 L560,1250 L960,1250 L960,380 Z" fill="#dfe4ec" fillRule="evenodd" />
+        <rect x="120" y="380" width="840" height="870" fill="#ffffff" opacity="0.06" />
+        <path d="M150,420 L300,420 L150,700 Z" fill="#ffffff" opacity="0.1" />
+      </Vue>
+    </Ecran>
+  );
+});
+
+// ===================== 16. « T'as été mordu ? » Toi non. Mais elle… =====================
+const Cabine = ({fg, children}) => (
+  <g>
+    <rect x="-400" y="-200" width="1880" height="2320" fill="#0c1430" />
+    <g transform={`translate(${-((fg * 30) % 400)} 0)`}>
+      {[...Array(8)].map((_, j) => <circle key={j} cx={j * 400} cy="500" r="30" fill="#ffd890" opacity="0.6" filter="url(#hp-flou)" />)}
+    </g>
+    {children}
+  </g>
+);
+const Twist = scene('twist', ({f, fg, i, t, k, R}) => {
+  if (i === 0) {
+    // le rétroviseur : ses yeux
+    return (
+      <Ecran fg={fg} teinte={BLEU_NUIT}>
+        <Vue x={540} y={900} z={lerp(1.0, 1.1, k) * punchZ(f - R('rétro', 29), 0.06)}>
+          <Cabine fg={fg}>
+            <rect x="-400" y="-200" width="1880" height="300" fill="#1a1e28" />
+            <rect x="530" y="80" width="20" height="440" fill="#2a2e38" />
+            <rect x="100" y="500" width="880" height="320" rx="60" fill="#1a1e28" />
+            <clipPath id="tw-retro">
+              <rect x="130" y="530" width="820" height="260" rx="44" />
+            </clipPath>
+            <g clipPath="url(#tw-retro)">
+              <rect x="130" y="530" width="820" height="260" fill="#3a4258" />
+              <g transform="translate(540 2050) scale(1.85)">
+                <Rond {...INF} yeux={1} pupX={-14} sourcils={0.3} />
+              </g>
+              <path d="M200,540 L420,540 L200,780 Z" fill="#ffffff" opacity="0.08" />
+            </g>
+          </Cabine>
+        </Vue>
+      </Ecran>
+    );
+  }
+  if (i === 1) {
+    return (
+      <Ecran fg={fg} teinte={BLEU_NUIT}>
+        <Vue x={540} y={980} z={punchZ(t, 0.06)}>
+          <Cabine fg={fg}>
+            <g transform="translate(560 2150) scale(1.6)">
+              <Rond {...INF} cou={16} profil={-0.5} pupX={-24} yeux={1.1} sourcils={0.5} bouche={f >= R('tas', 51) && f < R('mordu', 57) + 10 ? 'o' : 'neutre'} brasG={[30, -40]} brasD={[30, -40]} />
+            </g>
+            <ellipse cx="980" cy="1900" rx="420" ry="420" fill="none" stroke="#1a1c22" strokeWidth="60" />
+          </Cabine>
+        </Vue>
+      </Ecran>
+    );
+  }
+  if (i === 2) {
+    const non = Math.sin(f / 2.2) * 0.35 * (f >= R('non', 99) - 6 ? 1 : 0.3);
+    return (
+      <Ecran fg={fg} teinte={BLEU_NUIT}>
+        <Vue x={540} y={980} z={lerp(1.0, 1.06, k)}>
+          <g filter="url(#flou8)">
+            <AmbuInterieur fg={fg} dehors={<rect x="0" y="0" width="1080" height="1920" fill="#0a1020" />} />
+          </g>
+          <g transform="translate(540 2170) scale(1.6)">
+            <Rond brasDevant cou={16} profil={non} yeux={1.2} bouche="o" sourcils={0.8} brasG={ikBras(-1, [-200, -760])} brasD={ikBras(1, [200, -760])} />
+          </g>
+        </Vue>
+      </Ecran>
+    );
+  }
+  // son bras sur le volant : la morsure
+  const mo = R('morsure', 161);
+  const rev = ease(f, mo - 8, mo + 2);
+  const veines = 0.5 + 0.5 * Math.sin(fg / 3);
+  const oeil = f >= R('bras', 183) - 2;
+  return (
+    <Ecran fg={fg} teinte={BLEU_NUIT}>
+      <Vue x={lerp(300, 620, ease(t, 0, 40))} y={lerp(1100, 1000, k)} z={lerp(1.4, 1.7, k) * punchZ(f - mo, 0.1)}>
+        <Cabine fg={fg}>
+          <ellipse cx="540" cy="1250" rx="620" ry="620" fill="none" stroke="#1a1c22" strokeWidth="90" />
+          <path d="M-400,1000 Q300,900 760,1000 L760,1180 Q300,1100 -400,1220 Z" fill={INF.peau} />
+          <path d="M-400,1000 Q-100,960 100,980 L100,1210 Q-100,1200 -400,1220 Z" fill="#2a4a8a" />
+          <ellipse cx="830" cy="1080" rx="120" ry="100" fill={INF.peau} />
+          <g opacity={rev}>
+            {[...Array(7)].map((_, j) => <ellipse key={j} cx={440 + j * 22} cy={1040 + Math.abs(j - 3) * 6} rx="9" ry="12" fill="#5a0a10" />)}
+            {[...Array(7)].map((_, j) => <ellipse key={`b${j}`} cx={440 + j * 22} cy={1130 - Math.abs(j - 3) * 6} rx="9" ry="12" fill="#5a0a10" />)}
+            <ellipse cx="506" cy="1085" rx="110" ry="80" fill="#5a1a3a" opacity="0.35" filter="url(#hp-ombre)" />
+            {[[-1, -1], [1, -1], [-1, 1], [1, 1], [0, -1.3]].map(([a, b], j) => <path key={j} d={`M506,1085 q${a * 60},${b * 20} ${a * 140},${b * 40} t${a * 80},${b * 30}`} stroke="#2a0a3a" strokeWidth="6" fill="none" opacity={0.3 + 0.5 * veines} />)}
+          </g>
+        </Cabine>
+      </Vue>
+      {oeil && (
+        <g opacity={ease(f, R('bras', 183) - 2, R('bras', 183) + 3)}>
+          <rect width="1080" height="1920" fill="#000" opacity="0.75" />
+          {[-1, 1].map((s) => (
+            <g key={s}>
+              <circle cx={540 + s * 150} cy="760" r="140" fill="#ffffff" opacity="0.4" filter="url(#hp-flou2)" />
+              <circle cx={540 + s * 150} cy="760" r="40" fill="#ffffff" />
+            </g>
+          ))}
+        </g>
+      )}
+    </Ecran>
+  );
+});
+
+// ===================== 17. Tu sautes, ou tu lui fais confiance ? =====================
+const Choix = scene('choix', ({f, fg, i, t, k, R}) => {
+  if (i === 0) {
+    return (
+      <Ecran fg={fg} teinte={BLEU_NUIT} flou={[4, 0]}>
+        <Vue x={540} y={1300} z={lerp(0.95, 1.05, k)}>
+          <Rue fg={fg} />
+          <g transform={`translate(${520 + Math.sin(fg / 6) * 10} ${1720 + Math.sin(fg / 2) * 3}) scale(0.8)`}>
+            <Ambulance fg={fg} gyro={1} phares={1} roule={fg * 30}
+              cabine={<g transform="translate(350 -190) scale(0.22)"><Rond {...INF} profil={0.8} assis brasG={[100, -60]} brasD={[90, -50]} /></g>} />
+          </g>
+        </Vue>
+      </Ecran>
+    );
+  }
+  const dis = R('dis-le', 122);
+  return (
+    <Ecran fg={fg} teinte={BLEU_NUIT}
+      dessus={
+        <g>
+          <ChoixBoite f={f} debut={Math.max(62, R('sautes', 39))} x={540} y={420} texte="SAUTER EN MARCHE" emoji="1f3c3" couleur="#ff5a3a" />
+          <ChoixBoite f={f} debut={Math.max(70, R('confiance', 99))} x={540} y={600} texte="LUI FAIRE CONFIANCE" emoji="1f91d" couleur="#3ad86a" />
+          <BulleCommentaire f={f} t0={dis - 2} y={1700} />
+        </g>
+      }>
+      <Vue x={540} y={lerp(1000, 980, k) + Math.sin(fg / 2) * 5} z={lerp(1.0, 1.06, k)}>
+        <AmbuInterieur fg={fg} dehors={<g><rect x="0" y="0" width="1080" height="1920" fill="#0a1020" />{[0, 1, 2].map((j) => <circle key={j} cx={540} cy={1000} r={30 + ((fg * 6 + j * 200) % 600)} fill="none" stroke="#ffd890" strokeWidth="4" opacity="0.15" />)}</g>}
+          devant={
+            <g>
+              <g transform="translate(280 1880) scale(1.1)">
+                <Rond profil={0.6} yeux={1.2} pupX={24} bouche="serre" sourcils={0.9} sueur={(f / 20) % 1} brasG={[15, 0]} brasD={[15, 0]} souffle={Math.sin(fg / 3) * 8} />
+              </g>
+              <rect x="700" y="560" width="300" height="200" rx="20" fill="#22304a" />
+              <g transform="translate(850 900) scale(0.35)">
+                <clipPath id="ch-cab"><rect x="-430" y="-1000" width="860" height="580" /></clipPath>
+                <g clipPath="url(#ch-cab)"><Rond {...INF} dos /></g>
+              </g>
+            </g>
+          } />
+      </Vue>
+    </Ecran>
+  );
+});
+
+const COMPOSANTS = {bloc: Bloc, chambre: Chambre, alarme: Alarme, couloir: Couloir, plan: Plan, infirmiere: Infirmiere, porte: Porte, fuite: Fuite, ascenseur: Ascenseur, escalier: Escalier, rez: Rez, morgue: Morgue, garage: Garage, courent: Courent, evasion: Evasion, twist: Twist, choix: Choix};
 export const Hopital = () => (
   <Series>
     {SCENES.map(([nom, d]) => {

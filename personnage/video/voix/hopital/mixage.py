@@ -158,12 +158,57 @@ pose(filtre(bruit(0.4), "lowpass", 800) * np.exp(-ts(0.4) * 10), rep("fuite", "s
 coup_porte(rep("fuite", "sors"), 0.22)
 pose(note(1568, 0.3, 8), rep("fuite", "oui") - 0.05, 0.04)
 for j in range(5): grogne(b[2] + j * 0.4, 1.0, 0.06, 80)
-# 9. dilemme : ding de l'ascenseur, grognements derrière, bulle
-pose(note(1318, 0.8, 3) + note(1046, 0.8, 3), rep("dilemme", "lascenseur") + 0.1, 0.05)
-coup_porte(rep("dilemme", "lescalier") + 0.1, 0.1)
-for j in range(4): grogne(bornes("dilemme")[0] + 1 + j * 0.9, 1.4, 0.05, 70)
-coeur(bornes("dilemme")[0], D, 0.55, 0.08)
-pop(rep("dilemme", "dis-le") - 0.07, 0.08)
+# 9. ascenseur : ding, portes, grognements, porte de l'escalier
+pose(note(1318, 0.8, 3) + note(1046, 0.8, 3), rep("ascenseur", "lascenseur") + 0.1, 0.06)
+pose(filtre(bruit(1.2), "bandpass", [200, 1200]) * np.sin(np.pi * ts(1.2) / 1.2), rep("ascenseur", "souvrent") - 0.3, 0.06)
+for j in range(6): grogne(rep("ascenseur", "plein") - 0.1 + j * 0.1, 1.4, 0.07, 60 + 12 * j)
+pose(filtre(bruit(0.6), "highpass", 2500) * np.exp(-ts(0.6) * 5), rep("ascenseur", "plein") - 0.1, 0.08)
+coup_porte(rep("ascenseur", "escalier"), 0.25)
+coeur(bornes("ascenseur")[0], bornes("rez")[-1], 0.42, 0.08)
+# 10. escalier : pas pieds nus rapides, souffle
+b = bornes("escalier")
+pas(b[0], b[-1], 0.16, 0.06)
+for j in range(int((b[-1] - b[0]) / 0.7)): pose(filtre(bruit(0.3), "bandpass", [400, 2500]) * np.sin(np.pi * ts(0.3) / 0.3), b[0] + j * 0.7, 0.03)
+# 11. rez : la porte qui cogne, les coups derrière, grésillement
+b = bornes("rez")
+for j in range(5): coup_porte(b[0] + 0.5 + j * 0.22, 0.15)
+for j in range(10): coup_porte(b[1] + j * 0.25 + rng.uniform(0, 0.06), 0.14)
+for j in range(4): grogne(b[1] + j * 0.3, 1.2, 0.05, 70)
+for j in range(10): pose(filtre(bruit(0.05), "highpass", 3000), b[2] + rng.uniform(0, b[3] - b[2]), 0.03)
+# 12. morgue : bourdonnement du néon, vent froid, tiroirs qui glissent
+b = bornes("morgue")
+pose(np.sin(2 * np.pi * 120 * ts(b[-1] - b[0])) * 0.3 + filtre(bruit(b[-1] - b[0]), "lowpass", 400) * 0.5, b[0], 0.05)
+for j in range(12):
+    t0 = rep("morgue", "ouverts") - 0.3 + ((j * 7) % 12) / 30
+    pose(filtre(bruit(0.35), "bandpass", [800, 4000]) * np.sin(np.pi * ts(0.35) / 0.35), t0, 0.04)
+    coup_porte(t0 + 0.3, 0.04)
+pose(note(110, 1.5, 1.5), rep("morgue", "vides") - 0.05, 0.12)
+# 13. garage : moteur, sirène
+b = bornes("garage")
+tt = ts(bornes("evasion")[-1] - rep("garage", "moteur"))
+pose(filtre(np.sign(np.sin(2 * np.pi * 38 * tt)) * 0.5 + bruit(len(tt) / SR) * 0.3, "lowpass", 300), rep("garage", "moteur"), 0.07)
+sirene(rep("garage", "allumé"), bornes("choix")[-1], 0.035)
+coup_porte(rep("garage", "ouvertes") - 0.1, 0.12)
+# 14. courent : portière, plongeon, grognements, cavalcade
+coup_porte(rep("courent", "volant"), 0.18)
+coup_porte(rep("courent", "larrière"), 0.22)
+for j in range(4): grogne(bornes("courent")[2] + j * 0.5, 1.2, 0.05, 70)
+pas(bornes("courent")[4], bornes("courent")[-1], 0.09, 0.09)
+for j in range(4): cri(bornes("courent")[4] + j * 0.12, 0.7, 0.05)
+# 15. évasion : la barrière explose, la route
+pose(filtre(bruit(0.8), "lowpass", 1500) * np.exp(-ts(0.8) * 5), rep("evasion", "barrière") - 0.05, 0.3)
+for j in range(6): pose(filtre(bruit(0.1), "bandpass", [2000, 6000]) * np.exp(-ts(0.1) * 30), rep("evasion", "barrière") + 0.1 + j * 0.09, 0.06)
+pose(filtre(bruit(bornes("choix")[-1] - bornes("evasion")[0]), "lowpass", 250), bornes("evasion")[0], 0.06)
+# 16. twist : silence tendu, cœur, révélation
+coeur(bornes("twist")[0], bornes("choix")[-1], 0.6, 0.08)
+drone(rep("twist", "mais"), 4, 0.06)
+pose(note(73, 2.0, 1.2), rep("twist", "morsure") - 0.05, 0.12)
+pose(filtre(bruit(0.5), "highpass", 3000) * np.exp(-ts(0.5) * 6), rep("twist", "morsure") - 0.05, 0.12)
+pose(filtre(bruit(0.6), "highpass", 3000) * np.sin(np.pi * ts(0.6) / 0.6), rep("twist", "bras") - 0.1, 0.06)
+# 17. choix
+pop(rep("choix", "sautes") - 0.05, 0.06)
+pop(rep("choix", "confiance") - 0.05, 0.06)
+pop(rep("choix", "dis-le") - 0.07, 0.08)
 mix = out[: int(D * SR)]
 if "--voix" in sys.argv and os.path.exists(f"{ici}/voix_finale.wav"):
     a, sr = sf.read(f"{ici}/voix_finale.wav"); a = resample_poly(a, SR, sr) if sr != SR else a
