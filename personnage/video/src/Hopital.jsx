@@ -17,25 +17,25 @@ SCENES.reduce((t, [nom, d]) => {
   START[nom] = t;
   return t + d;
 }, 0);
-const clamp = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'};
-const ease = (f, a, b, e = Easing.inOut(Easing.cubic)) => interpolate(f, [a, b], [0, 1], {...clamp, easing: e});
-const lisse = (t, d) => Easing.inOut(Easing.sin)(Math.min(1, t / Math.max(1, d)));
-const lerp = (a, b, u) => a + (b - a) * u;
-const tremble = (f, k, c) => k * (random(`${c}${f}`) - 0.5);
-const pop = (f, t0) => (f < t0 ? 0 : spring({frame: f - t0, fps: 30, config: {damping: 11, stiffness: 170}}));
-const punchZ = (t, fort = 0.1) => interpolate(t, [0, 7], [1 + fort, 1], {...clamp, easing: Easing.out(Easing.cubic)});
-const POLICE = "'AntonB', 'DejaVu Sans', sans-serif";
-const TXT = "'DejaVu Sans', sans-serif";
+export const clamp = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'};
+export const ease = (f, a, b, e = Easing.inOut(Easing.cubic)) => interpolate(f, [a, b], [0, 1], {...clamp, easing: e});
+export const lisse = (t, d) => Easing.inOut(Easing.sin)(Math.min(1, t / Math.max(1, d)));
+export const lerp = (a, b, u) => a + (b - a) * u;
+export const tremble = (f, k, c) => k * (random(`${c}${f}`) - 0.5);
+export const pop = (f, t0) => (f < t0 ? 0 : spring({frame: f - t0, fps: 30, config: {damping: 11, stiffness: 170}}));
+export const punchZ = (t, fort = 0.1) => interpolate(t, [0, 7], [1 + fort, 1], {...clamp, easing: Easing.out(Easing.cubic)});
+export const POLICE = "'AntonB', 'DejaVu Sans', sans-serif";
+export const TXT = "'DejaVu Sans', sans-serif";
 
 // ===================== caméra 2D : centre visé, zoom, roulis + calques en parallaxe =====================
 const CtxV = createContext({x: 540, y: 960, z: 1});
-const Vue = ({x = 540, y = 960, z = 1, r = 0, children}) => (
+export const Vue = ({x = 540, y = 960, z = 1, r = 0, children}) => (
   <CtxV.Provider value={{x, y, z}}>
     <g transform={`translate(540 960) rotate(${r}) scale(${z}) translate(${-x} ${-y})`}>{children}</g>
   </CtxV.Provider>
 );
 // p < 1 : arrière-plan (bouge moins), p > 1 : premier plan (bouge plus)
-const Calque = ({p = 1, children}) => {
+export const Calque = ({p = 1, children}) => {
   const c = useContext(CtxV);
   return <g transform={`translate(${(c.x - 540) * (1 - p)} ${(c.y - 960) * (1 - p)})`}>{children}</g>;
 };
@@ -59,7 +59,7 @@ const DefsHop = ({flou}) => (
   </defs>
 );
 // image finale : décor + étalonnage rouge (alarme) + habillage + grain/vignette
-const Ecran = ({fg, children, dessus = null, rouge = 0, teinte = null, vignette = 0.6, flou = null, fond = '#000'}) => {
+export const Ecran = ({fg, children, dessus = null, rouge = 0, teinte = null, vignette = 0.6, flou = null, fond = '#000'}) => {
   const pulse = 0.5 + 0.5 * Math.sin(fg / 4.5);
   return (
     <AbsoluteFill style={{background: fond}}>
@@ -93,7 +93,7 @@ const scene = (nom, rendu) => {
 
 // ---------- habillage ----------
 // carte d'identité du perso (en haut à gauche), comme dans les vidéos « What if »
-const Carte = ({f, t0, nom, sous, x = 60, y = 230}) => {
+export const Carte = ({f, t0, nom, sous, x = 60, y = 230}) => {
   const u = ease(f, t0, t0 + 9, Easing.out(Easing.back(1.4)));
   if (f < t0) return null;
   return (
@@ -106,7 +106,7 @@ const Carte = ({f, t0, nom, sous, x = 60, y = 230}) => {
     </g>
   );
 };
-const Puce = ({f, t0, txt, x = 540, y = 250, fond = '#141218', coul = '#ffffff', taille = 54}) => {
+export const Puce = ({f, t0, txt, x = 540, y = 250, fond = '#141218', coul = '#ffffff', taille = 54}) => {
   const u = pop(f, t0);
   if (f < t0) return null;
   const w = txt.length * taille * 0.5 + 80;
@@ -331,7 +331,7 @@ const PersoC = ({cam, X, Z, s = 0.62, ...p}) => {
     </g>
   );
 };
-const ZOMBIE = (ph, k = 0) => ({zombie: true, brasG: [72 + 8 * Math.sin(ph + k), -12], brasD: [72 + 8 * Math.sin(ph + k + 1), -12], jambes: Math.sin(ph * 0.8 + k)});
+export const ZOMBIE = (ph, k = 0) => ({zombie: true, brasG: [72 + 8 * Math.sin(ph + k), -12], brasD: [72 + 8 * Math.sin(ph + k + 1), -12], jambes: Math.sin(ph * 0.8 + k)});
 // cam : {x, y, z, vx, vy}. o.persos : [{X, Z, ...props}], o.rouge, o.gresille, o.envers (on regarde vers l'entrée), o.asc / o.sortie (fond éclairé)
 const CouloirMonde = ({cam, fg, rouge = 0, gresille = false, persos = [], envers = false, asc = 0, sortie = 0.5}) => {
   const zn = cam.z + 0.1;
@@ -1135,7 +1135,7 @@ const Porte = scene('porte', ({f, fg, i, t, k, R}) => {
   );
 });
 
-const course = (ph) => ({jambes: Math.sin(ph), brasG: [40 + 32 * Math.sin(ph), -40], brasD: [40 - 32 * Math.sin(ph), -40]});
+export const course = (ph) => ({jambes: Math.sin(ph), brasG: [40 + 32 * Math.sin(ph), -40], brasD: [40 - 32 * Math.sin(ph), -40]});
 
 // ===================== 8. La salle de bain, la 414, tu cours… et oui, ta blouse est ouverte derrière =====================
 const Fuite = scene('fuite', ({f, fg, i, t, k, d: dd, R}) => {
@@ -1631,7 +1631,7 @@ const MorgueMonde = ({fg, f, ouvert = () => 0, flick = 1, porte = 0}) => (
     {porte > 0 && <rect x="-560" y="400" width="420" height="1100" fill="#1ac85a" opacity={0.25 * porte} filter="url(#hp-flou)" />}
   </g>
 );
-const Vapeur = ({fg, x, y, s = 1}) => (
+export const Vapeur = ({fg, x, y, s = 1}) => (
   <g>
     {[0, 1, 2].map((j) => {
       const u = ((fg / 24 + j / 3) % 1);
