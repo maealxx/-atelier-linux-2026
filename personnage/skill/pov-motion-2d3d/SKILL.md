@@ -1,15 +1,18 @@
 ---
 name: pov-motion-2d3d
-description: Moteur de motion design 2,5D / 3D de Maé pour ses vidéos TikTok verticales (9:16) en POV : le bonhomme 2D (t-shirt corail, jean bleu), les personnages et monstres en vraie 3D (dont l'alien), les décors déjà construits (rue, ruelle, métro, lycée, manoir, appart, palier, quartier vu d'en haut, casino et roulette 3D, vaisseau alien, station de métro avec escalators et métro 3D, forêt de nuit et tente, chambre d'enfant, forêt au crépuscule en contre-jour), la grande créature maigre articulée, le téléphone réaliste avec messages, la vue judas, et le montage dynamique en plans courts avec zooms, roulis et sous-titres. Utilise ce skill dès que Maé veut une nouvelle vidéo animée « dans le même style » que ses vidéos POV (Le dernier bus, Salle zéro, La soirée, Le livreur, La roulette, Le vaisseau, Le dernier train, La tente, Le babyphone, Rentrez chez vous), quel que soit le thème : horreur, humour, histoire vraie, quotidien, faits divers, motivation, explication… Aussi pour réutiliser le bonhomme ou un décor, poser sa voix ElevenLabs sur une animation, refaire une partie 2, ou quand elle dit « fais comme d'hab », même si elle ne cite ni Remotion ni le skill.
+description: Moteur de motion design de Maé pour ses vidéos TikTok verticales (9:16). Style par défaut : « What if » (« Et si… ? »), 2D illustrée à dégradés lisses, persos à grosse tête ronde vus de 3/4, zombies-silhouettes aux yeux qui brillent, coupes toutes les 1-1,5 s, carte d'identité du perso, voix ElevenLabs calée par Whisper (modèle : « Apocalypse zombie à l'hôpital »). Contient aussi l'ancien moteur 2,5D / 3D POV : le bonhomme 2D (t-shirt corail, jean bleu), les personnages et monstres en vraie 3D (dont l'alien), les décors déjà construits (rue, ruelle, métro, lycée, manoir, appart, palier, quartier vu d'en haut, casino et roulette 3D, vaisseau alien, station de métro avec escalators et métro 3D, forêt de nuit et tente, chambre d'enfant, forêt au crépuscule en contre-jour), la grande créature maigre articulée, le téléphone réaliste avec messages, la vue judas, et le montage dynamique en plans courts avec zooms, roulis et sous-titres. Utilise ce skill dès que Maé veut une nouvelle vidéo animée « dans le même style » que ses vidéos POV (Le dernier bus, Salle zéro, La soirée, Le livreur, La roulette, Le vaisseau, Le dernier train, La tente, Le babyphone, Rentrez chez vous), quel que soit le thème : horreur, humour, histoire vraie, quotidien, faits divers, motivation, explication… Aussi pour réutiliser le bonhomme ou un décor, poser sa voix ElevenLabs sur une animation, refaire une partie 2, ou quand elle dit « fais comme d'hab », même si elle ne cite ni Remotion ni le skill.
 ---
 
 # Motion 2D/3D POV : le moteur des vidéos de Maé
 
 Maé fait des vidéos TikTok en POV (« Imagine… ») animées en 2,5D, avec **son** bonhomme, **ses** décors et **son** montage. Ce skill contient tout le moteur graphique prêt à l'emploi dans `assets/projet/`, un projet Remotion complet. On **réutilise** au lieu de redessiner. Le moteur n'est pas réservé à l'horreur : tous les décors et persos marchent pour n'importe quel thème (on change la lumière, la teinte, l'histoire).
 
-**Style par défaut (validé le 27/10) : celui de « Rentrez chez vous »** (`RentrezChezVous.jsx`) : scènes POV caméra portée + plans extérieurs dynamiques sur le bonhomme, monstre façon `Rodeur` (silhouette maigre au liseré blanc), lumière en contre-jour avec halo, brume, palette sombre gris-violet, passe shader. Pars de ce fichier pour toute nouvelle vidéo (détails en haut de `references/preferences.md`).
+**⭐ Style par défaut (validé le 30/10) : le style « What if » d'« Apocalypse zombie à l'hôpital »** (`src/Hopital.jsx` + `src/Rond.jsx` + `src/WhatIf.jsx`). Décors 2D illustrés à dégradés lisses (plus de 3D à facettes), persos `Rond` de 3/4, une coupe toutes les 1-1,5 s (large / gros plan visage / insert / subjective / contre-plongée), actions calées sur les mots, étalonnage par lieu (rouge alarme, bleu morgue, orange garage…), carte « TOI · 19 ANS », dilemme final. **Lis `references/style-whatif.md` en premier** : tout y est (script, prompt ElevenLabs, persos, moteur `Vue`/`Calque`/`Ecran`, catalogue de décors, montage, habillage, son, sous-titres Anton jaunes, photo de profil). Pour une nouvelle vidéo : copie `Hopital.jsx` en `src/<MaVideo>.jsx`, garde le moteur et l'habillage, redessine les décors dans le même esprit, réutilise ceux qui collent.
+
+Ancien style (seulement si Maé le demande) : « Rentrez chez vous » (`RentrezChezVous.jsx`) — POV caméra portée, bonhomme 2D, `Rodeur`, contre-jour violet.
 
 À lire avant d'écrire du code :
+- `references/style-whatif.md` contient **le style par défaut** et toutes ses spécialités.
 - `references/preferences.md` contient **tout ce que Maé a demandé ou corrigé** : style, rythme, caméra, décor, son, textes. C'est la référence n° 1 ; relis-la avant chaque vidéo.
 - `references/moteur.md` décrit l'API : caméra 3D, polygones, plaques, boîtes, montage, `Plan`, finitions.
 - `references/personnages.md` présente le bonhomme 2D, la version livreur et les persos/monstres 3D avec toutes leurs options.
@@ -26,6 +29,8 @@ Travaille en français, ton jeune et direct. Fais valider le script avant de lan
 3. Pour une nouvelle vidéo, copie `src/Gabarit.jsx` en `src/<MaVideo>.jsx` et ajoute une `<Composition>` dans `src/Root.jsx`. Crée aussi `src/<projet>/plans.json` et `voix/<projet>/scenes.json`. Les vidéos d'exemple (`DernierBus`, `SalleZero`, `Soiree`, `Livreur`, `Roulette1000`, `LeVaisseau`, `DernierTrain`) servent de modèles complets : copie leurs plans plutôt que de repartir de zéro.
 
 ## Étape 1 : le script
+
+Style « What if » : suis la section 1 de `references/style-whatif.md` (titre « Et si… ? », on ouvre directement sur le choc, carte d'identité, phrases courtes et chiffrées, humour léger, escalade, twist, dilemme). Maé demande souvent : le script audio d'abord (bloc code, indications de ton), puis « fais pour ElevenLabs » (texte avec balises v3). Les règles ci-dessous datent de l'ancien style POV (« Imagine… ») et restent valables pour lui.
 
 - Si Maé n'a pas d'idée, propose 3 pitchs de 2 lignes. Sinon, écris directement.
 - La **première phrase commence par « Imagine »**, et on entre **tout de suite** dans l'intrigue (Maé a fait raccourcir les débuts trop lents).
@@ -64,6 +69,8 @@ Règles de mise en scène, que Maé a toutes demandées :
 Contrôle avec `node apercu.mjs <Composition> out/planche.png <images…>` (25 images max par appel, `ECH=0.6` pour zoomer). Prends l'image du milieu de chaque plan, regarde la planche et corrige avant le rendu complet.
 
 ## Étape 4 : voix, bruitages, sous-titres
+
+Style « What if » : voix ElevenLabs → `voix/transcrire.py` (Whisper, installé par `scripts/whisper.sh`) → `voix/aligner_asr.py` → `voix/<projet>/assembler.sh <outils>/st <sortie> --voix` (copié de `voix/hopital/`). Détails : section 7 de `style-whatif.md`.
 
 Voir `references/son-voix.md`. En résumé :
 1. `python3 voix/caler_voix.py <voix.mp3> 1.05 <projet> 0.24 0` : coupe les blancs, accélère de 5 %, **ne remonte pas les chuchotements** (dernier argument à 0), normalise, aligne les phrases sur les pauses. Le script écrit `src/<projet>/timeline.json` (avec les repères de mots) et `voix/<projet>/mots.json`.

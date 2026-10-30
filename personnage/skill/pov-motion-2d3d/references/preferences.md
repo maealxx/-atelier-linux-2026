@@ -1,6 +1,14 @@
 # Les préférences de Maé (tout ce qu'elle a demandé, validé ou corrigé)
 
-## ⭐ STYLE PAR DÉFAUT DES VIDÉOS (validé le 27/10 sur « Rentrez chez vous » : « garde ce nouveau style »)
+## ⭐⭐ NOUVEAU STYLE PAR DÉFAUT (30/10) : « What if » — voir `style-whatif.md`
+Validé sur « Apocalypse zombie à l'hôpital » (« là c'est vraiment bien », « enregistre toutes les spécialités… tu remplaces avec ce style-là »). Retours qui ont mené à ce style :
+- « le début la scène prend trop de temps » → on ouvre sur le choc en 3-5 s.
+- « pas assez de plans dynamiques » → coupe toutes les 1-1,5 s, jamais deux plans du même type.
+- « la 3D est mal gérée » → décors 2D illustrés à dégradés lisses, détaillés (comme l'image de référence « LEO · 19 / APPENDIX OUT LAST NIGHT » : perso de 3/4 dans son lit, bracelet, oxymètre, perfusion, moniteur ECG, carte d'identité).
+- Photo de profil : sans effet sang.
+- Version longue : environ le double (~1 min 30), on continue l'histoire au lieu de s'arrêter au premier dilemme ; script audio d'abord, puis version ElevenLabs.
+
+## Ancien style par défaut (27/10, « Rentrez chez vous » : « garde ce nouveau style ») — à utiliser seulement si Maé le redemande
 Modèle à suivre : `RentrezChezVous.jsx` + `ForetNuit.jsx` + `Rodeur.jsx` + `TelReel.jsx`. Elle aime surtout :
 - **Les scènes POV** : caméra portée (`main(f)`), marche/course (`pas`), demi-tour avec flou de bougé, téléphone tenu en main en vraie perspective, fond flouté derrière, main qui cache la bouche, branches qui fouettent l'objectif, regard vers le haut le long d'un tronc.
 - **Mélangées avec des plans extérieurs dynamiques sur le bonhomme** : travelling de dos en contre-jour, plan de face éclairé par l'écran, orbite en contre-plongée, gros plan visage figé, par-dessus l'épaule avec le monstre au loin, travelling de face pendant la course avec le monstre derrière, plan large caché (accroupi dans les fougères). Surtout au début, pour ne pas montrer que le décor.

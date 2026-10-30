@@ -1,4 +1,6 @@
 import {Composition} from 'remotion';
+import {DUREE_HOPITAL, Hopital} from './Hopital';
+import {PP} from './PP';
 import {DernierBus, DUREE_BUS} from './DernierBus';
 import {Metro} from './Metro';
 import {Personnage} from './Personnage';
@@ -17,6 +19,8 @@ import {DUREE_RENTREZ, RentrezChezVous} from './RentrezChezVous';
 
 export const Root = () => (
   <>
+    <Composition id="Hopital" component={Hopital} durationInFrames={DUREE_HOPITAL} fps={30} width={1080} height={1920} />
+    <Composition id="PP" component={PP} durationInFrames={1} fps={30} width={1080} height={1080} />
     <Composition id="Rentrez" component={RentrezChezVous} durationInFrames={DUREE_RENTREZ} fps={30} width={1080} height={1920} />
     <Composition id="Babyphone" component={LeBabyphone} durationInFrames={DUREE_BABYPHONE} fps={30} width={1080} height={1920} />
     <Composition

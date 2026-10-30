@@ -87,3 +87,12 @@
 - Décors 3D « plats / gris » : la cause était l'absence de brume et d'atténuation de la lumière. Un éclairage par face (Lambert + 1/(1+(d/r)²)) + brume colorée selon la distance + reflets miroir flous au sol donnent le rendu « réaliste » de la forêt. Trop de brume grise = image délavée : garder une brume sombre bleu-violet.
 - La gêne du spectateur vient surtout des formes simplistes posées sur fond plat ; une créature/un objet doit être éclairé par la même lumière que la scène (teinte calculée à sa position).
 - Gouttes « noir, épais » : une goutte en forme de larme + reflet, puis une tache qui coule vers le bas (sinon ça ressemble à une pastille).
+
+## Style « What if » (29-30/10)
+- **Emoji manquant = image cassée dans la vidéo** (🤝 `1f91d` absent de `public/emoji`) : avant le rendu, vérifie chaque `emoji="…"` contre `public/emoji/`.
+- La police Anton (`AntonB`) doit être chargée par le fichier lui-même : `WhatIf.jsx` le fait. Sans import de ce kit, les titres retombent en police système.
+- `Rond` dessine les bras **derrière** le corps : pour des mains visibles devant (sur le ventre, à la bouche, sur la tête), mets `brasDevant`.
+- Un décor composé (ex. `MurPorte` translaté dans `AscenseurMonde`) a son propre fond plein : dessine-le **avant** les autres éléments sinon il les recouvre.
+- Un perso dans la cabine d'un véhicule : clippe-le à la vitre (`clipPath`), sinon il dépasse sur la carrosserie.
+- En python, ne mets jamais du JSX (`width="72"`) dans une chaîne entre guillemets doubles : utilise des triples guillemets ou l'outil Edit.
+- faster-whisper : passe un tableau numpy 16 kHz (pas le chemin), sans `initial_prompt` (hallucinations), `condition_on_previous_text=False`.

@@ -26,8 +26,12 @@ for f in kokoro-v1.0.int8.onnx voices-v1.0.bin; do
   [ -s "$OUTILS/tts/$f" ] || curl -sSL -o "$OUTILS/tts/$f" "https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/$f"
 done
 
-echo "== Police Montserrat Black + emojis Twemoji (pour les sous-titres incrustés)"
+echo "== Whisper (calage des sous-titres sur la vraie voix)"
+bash "$ICI/scripts/whisper.sh" "$OUTILS" || echo "Whisper non installé (on peut relancer scripts/whisper.sh)"
+
+echo "== Polices Montserrat Black / Anton + emojis Twemoji (pour les sous-titres incrustés)"
 cp -n "$ICI/assets/projet/public/fonts/Montserrat-Black.ttf" "$OUTILS/st/fonts/" 2>/dev/null || true
+cp -n "$ICI/assets/projet/public/fonts/Anton-Regular.ttf" "$OUTILS/st/fonts/" 2>/dev/null || true
 if [ ! -d "$OUTILS/st/emo/package" ]; then
   (cd "$OUTILS/st/emo" && npm pack @twemoji/svg@15.0.0 >/dev/null 2>&1 && tar xzf twemoji-svg-15.0.0.tgz)
 fi
