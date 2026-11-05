@@ -1,0 +1,17 @@
+# Exécutables et fichiers objets C
+*.o
+*.out
+a.out
+labyrinthe/labyrinthe
+
+# Python
+__pycache__/
+*.pyc
+
+# Fichiers d'éditeur et système
+.vorg.db
+*~
+\#*\#
+.DS_Store
+.vscode/
+.idea/
